@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react'
-import { Droplets, Plus, Clock } from 'lucide-react'
+import { Droplets, Plus, Clock, RotateCcw } from 'lucide-react'
 import Card from '../ui/Card'
 import Button from '../ui/Button'
 import ProgressBar from '../ui/ProgressBar'
@@ -15,7 +15,7 @@ function getCurrentTime() {
 }
 
 export default function HydrationTracker() {
-  const { getTodayHydration, addHydrationEntry, trainingLogs, settings } = useApp()
+  const { getTodayHydration, addHydrationEntry, resetTodayHydration, trainingLogs, settings } = useApp()
   const [customAmount, setCustomAmount] = useState('')
 
   const todayLog = getTodayHydration()
@@ -67,9 +67,17 @@ export default function HydrationTracker() {
             </span>
           </div>
           <ProgressBar value={totalMl} max={targetMl} label="Daily Progress" showValue={false} />
-          <p className="text-xs text-surface-500 dark:text-surface-400 mt-1.5">
-            {percent}% of daily target
-          </p>
+          <div className="flex items-center justify-center gap-3 mt-1.5">
+            <p className="text-xs text-surface-500 dark:text-surface-400">
+              {percent}% of daily target
+            </p>
+            {todayLog.entries.length > 0 && (
+              <Button variant="ghost" size="sm" onClick={resetTodayHydration} className="!px-2 !py-1 text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20">
+                <RotateCcw className="h-3.5 w-3.5" />
+                Reset
+              </Button>
+            )}
+          </div>
         </div>
 
         {/* Quick-add buttons */}

@@ -115,6 +115,11 @@ export function AppProvider({ children }) {
     );
   }, [hydrationLogs]);
 
+  const resetTodayHydration = useCallback(() => {
+    const today = new Date().toISOString().slice(0, 10);
+    setHydrationLogs((prev) => prev.filter((d) => d.date !== today));
+  }, [setHydrationLogs]);
+
   // ── Settings ────────────────────────────────────────────────────
 
   const updateSettings = useCallback(
@@ -141,6 +146,7 @@ export function AppProvider({ children }) {
       deleteTrainingLog,
       addHydrationEntry,
       getTodayHydration,
+      resetTodayHydration,
       updateSettings,
     }),
     [
@@ -154,6 +160,7 @@ export function AppProvider({ children }) {
       deleteTrainingLog,
       addHydrationEntry,
       getTodayHydration,
+      resetTodayHydration,
       updateSettings,
     ],
   );
