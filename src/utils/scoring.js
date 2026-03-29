@@ -199,11 +199,11 @@ export function calculateHydrationTarget(bodyWeightKg, todayTrainingMinutes) {
 
 /**
  * Calculate overall recovery score 0-100.
- * @param {{ sleepScore: number, fatigueScore: number, hydrationPercent: number, sorenessLevel: number }} params
- *   - sleepScore: 0-100
- *   - fatigueScore: 0-100 (higher = more fatigued)
- *   - hydrationPercent: 0-100 (percent of target met)
- *   - sorenessLevel: 1-5 (1 = no soreness, 5 = very sore)
+ * Weights adjust dynamically based on available data — ACWR only counts
+ * when there is enough training history (>= 14 days with a non-zero
+ * chronic load) to make the ratio meaningful.
+ *
+ * @param {{ sleepScore: number, fatigueScore: number, hydrationPercent: number, sorenessLevel: number, hasReliableACWR: boolean }} params
  * @returns {number} 0-100
  */
 export function calculateRecoveryScore({
@@ -211,20 +211,29 @@ export function calculateRecoveryScore({
   fatigueScore,
   hydrationPercent,
   sorenessLevel,
+  hasReliableACWR,
 }) {
-  // Sleep: 35% weight
-  const sleepComponent = (sleepScore / 100) * 35;
+  // Dynamic weights: redistribute fatigue weight when ACWR isn't reliable
+  let wSleep, wFatigue, wHydration, wSoreness;
+  if (hasReliableACWR) {
+    wSleep = 35;
+    wFatigue = 30;
+    wHydration = 15;
+    wSoreness = 20;
+  } else {
+    // No reliable ACWR — drop fatigue, redistribute to sleep and soreness
+    wSleep = 45;
+    wFatigue = 0;
+    wHydration = 20;
+    wSoreness = 35;
+  }
 
-  // Fatigue (inverted - low fatigue = high recovery): 30% weight
-  const fatigueComponent = ((100 - fatigueScore) / 100) * 30;
-
-  // Hydration: 15% weight (cap at 100%)
+  const sleepComponent = (sleepScore / 100) * wSleep;
+  const fatigueComponent = wFatigue > 0 ? ((100 - fatigueScore) / 100) * wFatigue : 0;
   const cappedHydration = Math.min(100, hydrationPercent);
-  const hydrationComponent = (cappedHydration / 100) * 15;
-
-  // Soreness (inverted, 1-5 scale): 20% weight
+  const hydrationComponent = (cappedHydration / 100) * wHydration;
   const sorenessNormalized = (5 - sorenessLevel) / 4; // 1->1.0, 5->0.0
-  const sorenessComponent = sorenessNormalized * 20;
+  const sorenessComponent = sorenessNormalized * wSoreness;
 
   return Math.round(
     Math.min(

@@ -64,13 +64,21 @@ export default function useRecoveryScore() {
         ? Math.min(100, Math.round((totalMl / hydrationTarget) * 100))
         : 0;
 
-    // Overall recovery – use default soreness of 1 (no soreness) when not tracked
-    const latestSoreness = latestSleep?.sorenessLevel ?? 1;
+    // Soreness — comes from training logs, not sleep logs
+    const sortedTraining = [...trainingLogs].sort(
+      (a, b) => new Date(b.date) - new Date(a.date),
+    );
+    const latestSoreness = sortedTraining[0]?.sorenessLevel ?? 1;
+
+    // ACWR is only reliable with enough training history (>= 14 days, non-zero chronic)
+    const hasReliableACWR = chronicLoad > 0 && trainingLogs.length >= 4;
+
     const recoveryScore = calculateRecoveryScore({
       sleepScore,
       fatigueScore,
       hydrationPercent,
       sorenessLevel: latestSoreness,
+      hasReliableACWR,
     });
 
     return {
