@@ -25,7 +25,7 @@ export default function RecoveryScoreCard() {
           <div className="grid grid-cols-3 gap-3">
             {[
               { label: 'Sleep', value: Math.round(sleepScore), unit: '/100' },
-              { label: 'Fatigue', value: Math.round(100 - fatigueScore), unit: '/100' },
+              { label: 'Freshness', value: Math.round(100 - fatigueScore), unit: '/100' },
               { label: 'Hydration', value: Math.round(hydrationPercent), unit: '%' },
             ].map(({ label, value, unit }) => (
               <div key={label} className="bg-surface-50 dark:bg-surface-700/50 rounded-lg p-2.5 text-center">
