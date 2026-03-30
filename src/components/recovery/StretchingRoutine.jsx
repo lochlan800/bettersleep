@@ -4,6 +4,13 @@ import { useApp } from '../../context/AppContext'
 import stretches from '../../data/stretches'
 
 const typeMap = {
+  easy_long: 'long',
+  short_intervals: 'interval',
+  long_intervals: 'interval',
+  park_run: 'tempo',
+  sprints: 'interval',
+  strength: 'hill',
+  // legacy
   easy: 'easy',
   tempo: 'tempo',
   interval: 'interval',

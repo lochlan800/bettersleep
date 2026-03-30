@@ -9,6 +9,13 @@ import { useApp } from '../../context/AppContext'
 import { formatDate } from '../../utils/dateHelpers'
 
 const TYPE_CONFIG = {
+  easy_long: { label: 'Easy Long Run', color: 'green' },
+  short_intervals: { label: 'Short Intervals', color: 'red' },
+  long_intervals: { label: 'Long Intervals', color: 'yellow' },
+  park_run: { label: 'Park Run', color: 'blue' },
+  sprints: { label: 'Sprints', color: 'purple' },
+  strength: { label: 'Strength', color: 'gray' },
+  // legacy types
   easy: { label: 'Easy', color: 'green' },
   tempo: { label: 'Tempo', color: 'yellow' },
   interval: { label: 'Interval', color: 'red' },

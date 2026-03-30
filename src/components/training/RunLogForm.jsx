@@ -6,11 +6,12 @@ import { useApp } from '../../context/AppContext'
 import { getToday } from '../../utils/dateHelpers'
 
 const RUN_TYPES = [
-  { value: 'easy', label: 'Easy' },
-  { value: 'tempo', label: 'Tempo' },
-  { value: 'interval', label: 'Interval' },
-  { value: 'long_run', label: 'Long Run' },
-  { value: 'race', label: 'Race' },
+  { value: 'easy_long', label: 'Easy Long Run' },
+  { value: 'short_intervals', label: 'Short Intervals' },
+  { value: 'long_intervals', label: 'Long Intervals' },
+  { value: 'park_run', label: 'Park Run' },
+  { value: 'sprints', label: 'Sprints' },
+  { value: 'strength', label: 'Strength Training' },
 ]
 
 const CR10_SCALE = [
@@ -29,7 +30,7 @@ const CR10_SCALE = [
 
 const initialForm = () => ({
   date: getToday(),
-  type: 'easy',
+  type: 'easy_long',
   distanceKm: '',
   durationMinutes: '',
   intensity: 3,
