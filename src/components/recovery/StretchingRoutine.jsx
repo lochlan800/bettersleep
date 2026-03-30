@@ -10,6 +10,7 @@ const typeMap = {
   park_run: 'tempo',
   sprints: 'interval',
   strength: 'hill',
+  cycling: 'easy',
   // legacy
   easy: 'easy',
   tempo: 'tempo',

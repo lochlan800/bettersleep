@@ -15,6 +15,7 @@ const TYPE_CONFIG = {
   park_run: { label: 'Park Run', color: 'blue' },
   sprints: { label: 'Sprints', color: 'purple' },
   strength: { label: 'Strength', color: 'gray' },
+  cycling: { label: 'Cycling', color: 'blue' },
   // legacy types
   easy: { label: 'Easy', color: 'green' },
   tempo: { label: 'Tempo', color: 'yellow' },

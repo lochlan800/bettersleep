@@ -10,6 +10,7 @@ const TYPE_LABELS = {
   park_run: 'Park Run',
   sprints: 'Sprints',
   strength: 'Strength',
+  cycling: 'Cycling',
   // legacy
   easy: 'Easy',
   tempo: 'Tempo',
