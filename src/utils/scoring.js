@@ -203,7 +203,7 @@ export function calculateHydrationTarget(bodyWeightKg, todayTrainingMinutes) {
  * when there is enough training history (>= 14 days with a non-zero
  * chronic load) to make the ratio meaningful.
  *
- * @param {{ sleepScore: number, fatigueScore: number, hydrationPercent: number, sorenessLevel: number, hasReliableACWR: boolean }} params
+ * @param {{ sleepScore: number, fatigueScore: number, hydrationPercent: number, sorenessLevel: number, hasReliableACWR: boolean, mindfulnessCount: number }} params
  * @returns {number} 0-100
  */
 export function calculateRecoveryScore({
@@ -212,20 +212,24 @@ export function calculateRecoveryScore({
   hydrationPercent,
   sorenessLevel,
   hasReliableACWR,
+  mindfulnessCount = 0,
 }) {
   // Dynamic weights: redistribute fatigue weight when ACWR isn't reliable
-  let wSleep, wFatigue, wHydration, wSoreness;
+  // Mindfulness contributes 10% to recovery score
+  let wSleep, wFatigue, wHydration, wSoreness, wMindfulness;
   if (hasReliableACWR) {
-    wSleep = 35;
-    wFatigue = 30;
+    wSleep = 30;
+    wFatigue = 25;
     wHydration = 15;
     wSoreness = 20;
+    wMindfulness = 10;
   } else {
     // No reliable ACWR — drop fatigue, redistribute to sleep and soreness
-    wSleep = 45;
+    wSleep = 40;
     wFatigue = 0;
-    wHydration = 20;
+    wHydration = 15;
     wSoreness = 35;
+    wMindfulness = 10;
   }
 
   const sleepComponent = (sleepScore / 100) * wSleep;
@@ -234,13 +238,16 @@ export function calculateRecoveryScore({
   const hydrationComponent = (cappedHydration / 100) * wHydration;
   const sorenessNormalized = (5 - sorenessLevel) / 4; // 1->1.0, 5->0.0
   const sorenessComponent = sorenessNormalized * wSoreness;
+  // Mindfulness: 1 activity = 60%, 2 = 80%, 3+ = 100%
+  const mindfulnessNormalized = mindfulnessCount >= 3 ? 1 : mindfulnessCount === 2 ? 0.8 : mindfulnessCount === 1 ? 0.6 : 0;
+  const mindfulnessComponent = mindfulnessNormalized * wMindfulness;
 
   return Math.round(
     Math.min(
       100,
       Math.max(
         0,
-        sleepComponent + fatigueComponent + hydrationComponent + sorenessComponent
+        sleepComponent + fatigueComponent + hydrationComponent + sorenessComponent + mindfulnessComponent
       )
     )
   );

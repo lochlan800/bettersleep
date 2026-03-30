@@ -1,5 +1,5 @@
 import { NavLink } from 'react-router-dom'
-import { LayoutDashboard, Moon, Utensils, Heart, Timer, BookOpen } from 'lucide-react'
+import { LayoutDashboard, Moon, Utensils, Heart, Timer, Brain, BookOpen } from 'lucide-react'
 
 const links = [
   { to: '/', icon: LayoutDashboard, label: 'Home' },
@@ -7,6 +7,7 @@ const links = [
   { to: '/sleep', icon: Moon, label: 'Sleep' },
   { to: '/nutrition', icon: Utensils, label: 'Water' },
   { to: '/recovery', icon: Heart, label: 'Recovery' },
+  { to: '/mindfulness', icon: Brain, label: 'Mind' },
   { to: '/guide', icon: BookOpen, label: 'Guide' },
 ]
 

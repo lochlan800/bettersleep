@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useCallback, useEffect, useMemo } from 'react';
 import useLocalStorage from '../hooks/useLocalStorage';
 import { calculateTrainingLoad } from '../utils/scoring';
+import { getToday } from '../utils/dateHelpers';
 
 // ── Context ─────────────────────────────────────────────────────────
 
@@ -21,6 +22,7 @@ export function AppProvider({ children }) {
   const [sleepLogs, setSleepLogs] = useLocalStorage('bs_sleep_logs', []);
   const [trainingLogs, setTrainingLogs] = useLocalStorage('bs_training_logs', []);
   const [hydrationLogs, setHydrationLogs] = useLocalStorage('bs_hydration_logs', []);
+  const [mindfulnessLogs, setMindfulnessLogs] = useLocalStorage('bs_mindfulness_logs', []);
   const [settings, setSettings] = useLocalStorage('bs_settings', DEFAULT_SETTINGS);
 
   // ── Dark mode side-effect ───────────────────────────────────────
@@ -134,6 +136,35 @@ export function AppProvider({ children }) {
     setHydrationLogs((prev) => prev.filter((d) => d.date !== today));
   }, [setHydrationLogs]);
 
+  // ── Mindfulness actions ──────────────────────────────────────────
+
+  const toggleMindfulnessActivity = useCallback(
+    (date, activityId) => {
+      const dateStr = typeof date === 'string' ? date : date.toISOString().slice(0, 10);
+      setMindfulnessLogs((prev) => {
+        const existing = prev.find((d) => d.date === dateStr);
+        if (existing) {
+          const activities = existing.activities.includes(activityId)
+            ? existing.activities.filter((id) => id !== activityId)
+            : [...existing.activities, activityId];
+          return prev.map((d) => (d.date === dateStr ? { ...d, activities } : d));
+        }
+        return [...prev, { date: dateStr, activities: [activityId] }];
+      });
+    },
+    [setMindfulnessLogs],
+  );
+
+  const getTodayMindfulness = useCallback(() => {
+    const today = getToday();
+    return (
+      mindfulnessLogs.find((d) => d.date === today) ?? {
+        date: today,
+        activities: [],
+      }
+    );
+  }, [mindfulnessLogs]);
+
   // ── Settings ────────────────────────────────────────────────────
 
   const updateSettings = useCallback(
@@ -151,6 +182,7 @@ export function AppProvider({ children }) {
       sleepLogs,
       trainingLogs,
       hydrationLogs,
+      mindfulnessLogs,
       settings,
 
       // Actions
@@ -162,12 +194,15 @@ export function AppProvider({ children }) {
       addHydrationEntry,
       getTodayHydration,
       resetTodayHydration,
+      toggleMindfulnessActivity,
+      getTodayMindfulness,
       updateSettings,
     }),
     [
       sleepLogs,
       trainingLogs,
       hydrationLogs,
+      mindfulnessLogs,
       settings,
       addSleepLog,
       deleteSleepLog,
@@ -177,6 +212,8 @@ export function AppProvider({ children }) {
       addHydrationEntry,
       getTodayHydration,
       resetTodayHydration,
+      toggleMindfulnessActivity,
+      getTodayMindfulness,
       updateSettings,
     ],
   );

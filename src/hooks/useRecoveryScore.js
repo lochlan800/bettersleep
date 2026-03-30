@@ -24,7 +24,7 @@ import {
  * }}
  */
 export default function useRecoveryScore() {
-  const { sleepLogs, trainingLogs, hydrationLogs, settings } = useApp();
+  const { sleepLogs, trainingLogs, hydrationLogs, mindfulnessLogs, settings } = useApp();
 
   return useMemo(() => {
     // Sleep – score the most recent log using the last 7 as context for consistency
@@ -73,12 +73,17 @@ export default function useRecoveryScore() {
     // ACWR is only reliable with enough training history (>= 14 days, non-zero chronic)
     const hasReliableACWR = chronicLoad > 0 && trainingLogs.length >= 4;
 
+    // Mindfulness — today's completed activities
+    const todayMindfulness = mindfulnessLogs.find((d) => d.date === today);
+    const mindfulnessCount = todayMindfulness ? todayMindfulness.activities.length : 0;
+
     const recoveryScore = calculateRecoveryScore({
       sleepScore,
       fatigueScore,
       hydrationPercent,
       sorenessLevel: latestSoreness,
       hasReliableACWR,
+      mindfulnessCount,
     });
 
     return {
@@ -90,5 +95,5 @@ export default function useRecoveryScore() {
       acwr: Math.round(acwr * 100) / 100,
       hydrationPercent,
     };
-  }, [sleepLogs, trainingLogs, hydrationLogs, settings.bodyWeightKg]);
+  }, [sleepLogs, trainingLogs, hydrationLogs, mindfulnessLogs, settings.bodyWeightKg]);
 }
