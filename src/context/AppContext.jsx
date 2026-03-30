@@ -70,6 +70,20 @@ export function AppProvider({ children }) {
     [setTrainingLogs],
   );
 
+  const updateTrainingLog = useCallback(
+    (id, updates) => {
+      setTrainingLogs((prev) =>
+        prev.map((log) => {
+          if (log.id !== id) return log;
+          const merged = { ...log, ...updates };
+          merged.trainingLoad = calculateTrainingLoad(merged.durationMinutes, merged.intensity);
+          return merged;
+        }),
+      );
+    },
+    [setTrainingLogs],
+  );
+
   const deleteTrainingLog = useCallback(
     (id) => {
       setTrainingLogs((prev) => prev.filter((log) => log.id !== id));
@@ -143,6 +157,7 @@ export function AppProvider({ children }) {
       addSleepLog,
       deleteSleepLog,
       addTrainingLog,
+      updateTrainingLog,
       deleteTrainingLog,
       addHydrationEntry,
       getTodayHydration,
@@ -157,6 +172,7 @@ export function AppProvider({ children }) {
       addSleepLog,
       deleteSleepLog,
       addTrainingLog,
+      updateTrainingLog,
       deleteTrainingLog,
       addHydrationEntry,
       getTodayHydration,

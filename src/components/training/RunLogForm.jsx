@@ -37,9 +37,21 @@ const initialForm = () => ({
   notes: '',
 })
 
-export default function RunLogForm({ onSuccess } = {}) {
+export default function RunLogForm({ onSuccess, initialData, editMode, onSave } = {}) {
   const { addTrainingLog } = useApp()
-  const [form, setForm] = useState(initialForm)
+  const [form, setForm] = useState(() =>
+    initialData
+      ? {
+          date: initialData.date,
+          type: initialData.type,
+          distanceKm: String(initialData.distanceKm),
+          durationMinutes: String(initialData.durationMinutes),
+          intensity: initialData.intensity,
+          sorenessLevel: initialData.sorenessLevel,
+          notes: initialData.notes || '',
+        }
+      : initialForm()
+  )
   const [showSuccess, setShowSuccess] = useState(false)
   const [showCR10Info, setShowCR10Info] = useState(false)
 
@@ -50,7 +62,7 @@ export default function RunLogForm({ onSuccess } = {}) {
   const handleSubmit = (e) => {
     e.preventDefault()
 
-    addTrainingLog({
+    const data = {
       date: form.date,
       type: form.type,
       distanceKm: parseFloat(form.distanceKm),
@@ -58,7 +70,14 @@ export default function RunLogForm({ onSuccess } = {}) {
       intensity: form.intensity,
       sorenessLevel: form.sorenessLevel,
       notes: form.notes.trim(),
-    })
+    }
+
+    if (editMode && onSave) {
+      onSave(data)
+      return
+    }
+
+    addTrainingLog(data)
 
     setShowSuccess(true)
     setForm(initialForm())
@@ -265,7 +284,7 @@ export default function RunLogForm({ onSuccess } = {}) {
         </div>
 
         <Button type="submit" className="w-full">
-          Log Training
+          {editMode ? 'Save Changes' : 'Log Training'}
         </Button>
       </form>
     </Card>
