@@ -5,7 +5,7 @@ const links = [
   { to: '/', icon: LayoutDashboard, label: 'Dashboard' },
   { to: '/training', icon: Timer, label: 'Training' },
   { to: '/sleep', icon: Moon, label: 'Sleep' },
-  { to: '/nutrition', icon: Utensils, label: 'Nutrition' },
+  { to: '/nutrition', icon: Utensils, label: 'Water' },
   { to: '/recovery', icon: Heart, label: 'Recovery' },
 ]
 
