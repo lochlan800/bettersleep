@@ -1,6 +1,7 @@
 import FatigueScoreDisplay from './FatigueScoreDisplay'
 import RunLogForm from './RunLogForm'
 import TrainingLoadChart from './TrainingLoadChart'
+import TrainingBreakdown from './TrainingBreakdown'
 import TrainingHistory from './TrainingHistory'
 
 export default function TrainingPage() {
@@ -19,6 +20,8 @@ export default function TrainingPage() {
         <RunLogForm />
         <TrainingLoadChart />
       </div>
+
+      <TrainingBreakdown />
 
       <TrainingHistory />
     </div>
