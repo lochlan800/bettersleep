@@ -1,11 +1,10 @@
-import { useState, useMemo } from 'react'
+import { useState } from 'react'
 import { Droplets, Plus, Clock, RotateCcw } from 'lucide-react'
 import Card from '../ui/Card'
 import Button from '../ui/Button'
 import ProgressBar from '../ui/ProgressBar'
 import { useApp } from '../../context/AppContext'
 import { getToday, formatTime } from '../../utils/dateHelpers'
-import { calculateHydrationTarget } from '../../utils/scoring'
 import { format } from 'date-fns'
 
 const QUICK_AMOUNTS = [250, 500, 750]
@@ -15,20 +14,13 @@ function getCurrentTime() {
 }
 
 export default function HydrationTracker() {
-  const { getTodayHydration, addHydrationEntry, resetTodayHydration, trainingLogs, settings } = useApp()
+  const { getTodayHydration, addHydrationEntry, resetTodayHydration } = useApp()
   const [customAmount, setCustomAmount] = useState('')
 
   const todayLog = getTodayHydration()
   const totalMl = todayLog.entries.reduce((sum, e) => sum + e.amountMl, 0)
 
-  const todayTrainingMinutes = useMemo(() => {
-    const today = getToday()
-    return trainingLogs
-      .filter((log) => log.date === today)
-      .reduce((sum, log) => sum + (log.durationMinutes || 0), 0)
-  }, [trainingLogs])
-
-  const targetMl = calculateHydrationTarget(settings.bodyWeightKg, todayTrainingMinutes)
+  const targetMl = 2000
   const percent = Math.min(Math.round((totalMl / targetMl) * 100), 100)
 
   const handleAdd = (amountMl) => {
