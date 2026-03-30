@@ -6,6 +6,7 @@ import TrainingPage from './components/training/TrainingPage'
 import SleepPage from './components/sleep/SleepPage'
 import NutritionPage from './components/nutrition/NutritionPage'
 import RecoveryPage from './components/recovery/RecoveryPage'
+import GuidePage from './components/guide/GuidePage'
 
 export default function App() {
   return (
@@ -17,6 +18,7 @@ export default function App() {
           <Route path="/sleep" element={<SleepPage />} />
           <Route path="/nutrition" element={<NutritionPage />} />
           <Route path="/recovery" element={<RecoveryPage />} />
+          <Route path="/guide" element={<GuidePage />} />
         </Routes>
       </AppShell>
     </AppProvider>
