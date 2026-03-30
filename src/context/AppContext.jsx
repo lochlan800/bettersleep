@@ -23,6 +23,7 @@ export function AppProvider({ children }) {
   const [trainingLogs, setTrainingLogs] = useLocalStorage('bs_training_logs', []);
   const [hydrationLogs, setHydrationLogs] = useLocalStorage('bs_hydration_logs', []);
   const [mindfulnessLogs, setMindfulnessLogs] = useLocalStorage('bs_mindfulness_logs', []);
+  const [mealPlans, setMealPlans] = useLocalStorage('bs_meal_plans', []);
   const [settings, setSettings] = useLocalStorage('bs_settings', DEFAULT_SETTINGS);
 
   // ── Dark mode side-effect ───────────────────────────────────────
@@ -165,6 +166,15 @@ export function AppProvider({ children }) {
     );
   }, [mindfulnessLogs]);
 
+  // ── Meal Plan actions ────────────────────────────────────────────
+
+  const updateMealPlan = useCallback(
+    (plan) => {
+      setMealPlans(plan);
+    },
+    [setMealPlans],
+  );
+
   // ── Settings ────────────────────────────────────────────────────
 
   const updateSettings = useCallback(
@@ -183,6 +193,7 @@ export function AppProvider({ children }) {
       trainingLogs,
       hydrationLogs,
       mindfulnessLogs,
+      mealPlans,
       settings,
 
       // Actions
@@ -196,6 +207,7 @@ export function AppProvider({ children }) {
       resetTodayHydration,
       toggleMindfulnessActivity,
       getTodayMindfulness,
+      updateMealPlan,
       updateSettings,
     }),
     [
@@ -203,6 +215,7 @@ export function AppProvider({ children }) {
       trainingLogs,
       hydrationLogs,
       mindfulnessLogs,
+      mealPlans,
       settings,
       addSleepLog,
       deleteSleepLog,
@@ -214,6 +227,7 @@ export function AppProvider({ children }) {
       resetTodayHydration,
       toggleMindfulnessActivity,
       getTodayMindfulness,
+      updateMealPlan,
       updateSettings,
     ],
   );

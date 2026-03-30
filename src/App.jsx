@@ -8,6 +8,7 @@ import NutritionPage from './components/nutrition/NutritionPage'
 import RecoveryPage from './components/recovery/RecoveryPage'
 import GuidePage from './components/guide/GuidePage'
 import MindfulnessPage from './components/mindfulness/MindfulnessPage'
+import MealPlannerPage from './components/nutrition/MealPlannerPage'
 
 export default function App() {
   return (
@@ -18,6 +19,7 @@ export default function App() {
           <Route path="/training" element={<TrainingPage />} />
           <Route path="/sleep" element={<SleepPage />} />
           <Route path="/nutrition" element={<NutritionPage />} />
+          <Route path="/meals" element={<MealPlannerPage />} />
           <Route path="/recovery" element={<RecoveryPage />} />
           <Route path="/mindfulness" element={<MindfulnessPage />} />
           <Route path="/guide" element={<GuidePage />} />
