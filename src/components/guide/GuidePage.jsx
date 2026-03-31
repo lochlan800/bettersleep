@@ -1,5 +1,6 @@
 import { useState } from 'react'
-import { BookOpen, ChevronDown, ChevronRight } from 'lucide-react'
+import { BookOpen, ChevronDown, ChevronRight, Download, Upload } from 'lucide-react'
+import { useApp } from '../../context/AppContext'
 import Card from '../ui/Card'
 
 const sections = [
@@ -307,6 +308,87 @@ function Section({ title, content }) {
   )
 }
 
+const DATA_KEYS = [
+  'bs_sleep_logs',
+  'bs_training_logs',
+  'bs_hydration_logs',
+  'bs_mindfulness_logs',
+  'bs_stretching_logs',
+  'bs_meal_plans',
+  'bs_competition_logs',
+  'bs_settings',
+];
+
+function DataBackup() {
+  const [importStatus, setImportStatus] = useState(null)
+
+  const handleExport = () => {
+    const data = {}
+    DATA_KEYS.forEach((key) => {
+      const val = localStorage.getItem(key)
+      if (val) data[key] = JSON.parse(val)
+    })
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `myrunningdiary-backup-${new Date().toISOString().slice(0, 10)}.json`
+    a.click()
+    URL.revokeObjectURL(url)
+  }
+
+  const handleImport = (e) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    const reader = new FileReader()
+    reader.onload = (event) => {
+      try {
+        const data = JSON.parse(event.target.result)
+        let count = 0
+        DATA_KEYS.forEach((key) => {
+          if (data[key] !== undefined) {
+            localStorage.setItem(key, JSON.stringify(data[key]))
+            count++
+          }
+        })
+        setImportStatus({ success: true, message: `Imported ${count} data sections. Reload the page to see your data.` })
+      } catch {
+        setImportStatus({ success: false, message: 'Invalid file. Please select a valid MyRunningDiary backup file.' })
+      }
+    }
+    reader.readAsText(file)
+    e.target.value = ''
+  }
+
+  return (
+    <div className="p-4 bg-white dark:bg-surface-800 rounded-lg border border-surface-200 dark:border-surface-700">
+      <h3 className="font-bold text-surface-900 dark:text-surface-50 mb-2">Backup & Restore</h3>
+      <p className="text-sm text-surface-500 dark:text-surface-400 mb-4">
+        Your data is stored in this browser only. Export a backup to keep it safe, or import a previous backup to restore your data.
+      </p>
+      <div className="flex flex-wrap gap-3">
+        <button
+          onClick={handleExport}
+          className="flex items-center gap-2 bg-primary-500 hover:bg-primary-600 text-white px-4 py-2 rounded-lg transition-colors"
+        >
+          <Download size={18} />
+          Export Backup
+        </button>
+        <label className="flex items-center gap-2 bg-surface-200 dark:bg-surface-700 hover:bg-surface-300 dark:hover:bg-surface-600 text-surface-700 dark:text-surface-300 px-4 py-2 rounded-lg transition-colors cursor-pointer">
+          <Upload size={18} />
+          Import Backup
+          <input type="file" accept=".json" onChange={handleImport} className="hidden" />
+        </label>
+      </div>
+      {importStatus && (
+        <p className={`text-sm mt-3 ${importStatus.success ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
+          {importStatus.message}
+        </p>
+      )}
+    </div>
+  )
+}
+
 export default function GuidePage() {
   return (
     <div className="space-y-6">
@@ -319,6 +401,8 @@ export default function GuidePage() {
           </p>
         </div>
       </div>
+
+      <DataBackup />
 
       <div className="space-y-2">
         {sections.map((s) => (
