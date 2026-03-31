@@ -21,7 +21,13 @@ The goal is simple: train smarter, recover better, and reduce your injury risk. 
 
 • **Check Dashboard** — Your Recovery Score updates automatically. Check the recommendations for personalised advice.
 
-• **Recovery tab** — Use the stretching routines and foam rolling protocols, especially after hard sessions.`,
+• **Recovery tab** — Use the stretching routines and tick them off as you go. This boosts your recovery score.
+
+• **Mindfulness tab** — Do at least one mindfulness activity daily — bilateral tapping, dark bath, journaling, whatever helps. This counts toward your recovery score too.
+
+• **Meals tab** — Generate a weekly meal plan with iron-rich, whole-food breakfasts and snacks optimised for runners.
+
+• **Competitions tab** — After a race, log your result and rate your performance across 7 areas to track your progress over time.`,
   },
   {
     title: 'Recovery Score (0-100)',
@@ -31,12 +37,12 @@ The goal is simple: train smarter, recover better, and reduce your injury risk. 
 The weights adjust based on how much data you have:
 
 • **With enough training history (4+ sessions):**
-  Sleep = 35% | Freshness (ACWR) = 30% | Hydration = 15% | Soreness = 20%
+  Sleep = 25% | Freshness (ACWR) = 25% | Hydration = 10% | Soreness = 20% | Mindfulness = 10% | Stretching = 10%
 
 • **Without enough training history:**
-  Sleep = 45% | Hydration = 20% | Soreness = 35% | Freshness = 0%
+  Sleep = 35% | Hydration = 10% | Soreness = 30% | Mindfulness = 10% | Stretching = 15% | Freshness = 0%
 
-ACWR is excluded when there isn't enough data to make it meaningful.
+ACWR is excluded when there isn't enough data to make it meaningful. Mindfulness and stretching always count — even on your first day.
 
 **What the scores mean:**
 • **80-100 (Excellent)** — You're fully recovered. Go hard — intervals, tempo, sprints.
@@ -117,7 +123,7 @@ This tells you whether you're training more or less than your body is adapted to
 • **30-49** — Significant fatigue. Consider an easy day or rest.
 • **0-29** — Very fatigued. Rest strongly recommended.
 
-If you have no training logged, freshness will show 100 — because there's nothing to be fatigued from.`,
+If you have fewer than 4 training sessions logged or haven't built up enough chronic load yet, freshness will show 100. Once you have about 4 weeks of consistent data, the score becomes meaningful.`,
   },
   {
     title: 'Hydration',
@@ -177,16 +183,97 @@ Soreness peaking 24-48 hours after training (DOMS) is normal. Soreness that does
   },
   {
     title: 'Stretching & Foam Rolling',
-    content: `The Recovery tab shows stretching routines and foam rolling protocols targeted to your most recent training type.
+    content: `The Recovery tab shows stretching routines targeted to your most recent training type. Each stretch has a checkbox — tick it off when you've done it.
 
-**Stretching:** Best done after training or in the evening. Hold each stretch for 30-60 seconds. Never bounce. The app shows 10 stretches covering calves, hamstrings, quads, hip flexors, IT band, glutes, piriformis, achilles, plantar fascia, and lower back.
+**Stretching contributes to your recovery score.** The more stretches you complete, the higher your score. You can see your progress (e.g. "4/10 done") at the top of the stretching section.
 
-**Foam rolling:** Apply moderate pressure and roll slowly (about 1 inch per second). When you find a tender spot, hold for 20-30 seconds. The app covers IT band, quads, calves, hamstrings, glutes, hip flexors, upper back, and shins.
+**Stretching:** Best done after training or in the evening. Hold each stretch for 30-60 seconds. Never bounce. The app shows stretches covering calves, hamstrings, quads, hip flexors, IT band, glutes, piriformis, achilles, plantar fascia, and lower back.
+
+**Foam rolling:** Apply moderate pressure and roll slowly (about 1 inch per second). When you find a tender spot, hold for 20-30 seconds.
 
 **When to foam roll vs stretch:**
 • Before a run: foam roll only (dynamic warm-up)
 • After a run: foam roll first, then stretch
 • Rest days: both, focusing on tight areas`,
+  },
+  {
+    title: 'Mindfulness',
+    content: `The Mindfulness tab helps you recover your mind as well as your body. It shows 12 activities across different categories — tick off the ones you've done today.
+
+**Your 4 core activities:**
+• **Bilateral Tapping** — Close your eyes, put on bilateral music, gently tap yourself, and breathe slowly in and out. Great for calming the nervous system.
+• **Dark Bath** — Have a bath in a dark room with candles and bilateral music. Deeply relaxing for both body and mind.
+• **Terrarium Building** — A creative, meditative activity that focuses your attention and calms racing thoughts.
+• **Mindful Running** — An easy run where you focus on breathing, foot contact, and surroundings instead of pace or performance.
+
+**Additional activities:** Box breathing, body scan meditation, journaling, cold exposure, nature sitting, stretching with breathwork, music listening, and gratitude practice.
+
+**How it affects recovery:**
+Mindfulness contributes 10% to your recovery score.
+• 1 activity = 60% of the mindfulness points
+• 2 activities = 80%
+• 3 or more = 100%
+
+Even 5 minutes of one activity makes a difference. The dashboard will nudge you if you haven't done any.`,
+  },
+  {
+    title: 'Meal Planner',
+    content: `The Meals tab generates a weekly meal plan optimised for runners. All meals use whole, unprocessed ingredients — no preservatives, no emulsifiers.
+
+**What it includes:**
+• 7 breakfast options (porridge, toast, smoothie bowls, overnight oats, pancakes)
+• 7 morning snack options (fruit & nuts, hummus, energy bites, trail mix)
+• 7 afternoon snack options (yoghurt pots, smoothies, energy bars)
+
+**Nutritional focus:**
+• **Iron-rich meals** — Runners need 18mg of iron per day. Each meal shows its iron content and you can track your daily total with the iron progress bar.
+• **Macro balance** — Carb-focused for sustained energy, with balanced protein and fats. The macro bar chart shows your daily percentages.
+• **7-a-day tracker** — Counts your unique fruit and veg portions from breakfast and snacks.
+
+**Features:**
+• **Generate** creates a new randomised weekly plan with no meal repeats
+• **Shuffle** regenerates a single day while keeping the rest of the week
+• **Shopping list** aggregates all ingredients across the week by category, with checkboxes to tick off what you've bought`,
+  },
+  {
+    title: 'Competitions',
+    content: `The Competitions tab lets you log race results and reflect on your performance.
+
+**Events:** 50m, 100m, 200m, 400m, 800m, 1500m, and Park Run (5K).
+
+**What you log:**
+• Date, event type, and competition name
+• Your finishing time (minutes and seconds)
+• Placement (1st, 2nd, 3rd, top 10, top 25%, top 50%, finished, or DNF)
+• Whether it was a Personal Best (PB)
+
+**Self-assessment — 7 reflection questions (rated 1-5):**
+• Overall performance
+• Pacing throughout the race
+• Start/reaction
+• Mental game
+• How your body felt
+• Running form and technique
+• How well your training prepared you
+
+**Why reflect?** Rating yourself honestly after each race helps you spot patterns. Maybe your starts are always weak, or your pacing falls apart in the second half. Over time, these ratings show you exactly what to work on in training.
+
+You can also add free-text notes for anything else — what went well, what to improve, how conditions affected you. Every logged competition can be edited or deleted.`,
+  },
+  {
+    title: 'Dashboard Recommendations',
+    content: `The "Today's Recommendations" section on the Dashboard gives you personalised advice that changes every day based on your actual data.
+
+**What drives the recommendations:**
+• **Sleep** — Warns if you slept too little or too much last night, flags inconsistent bedtimes, suggests extra sleep after hard sessions.
+• **Water** — Shows your exact progress toward 2,000ml with how much you have left to drink.
+• **Training load** — Warns about consecutive training days, ACWR approaching danger zones, and suggests when to back off or when you can push.
+• **Soreness** — Gives specific recovery advice based on your logged soreness level (stretching, foam rolling, ice, rest).
+• **Mindfulness** — Nudges you if you haven't done any today, congratulates you when you've done 3+.
+• **Stretching** — Reminds you to tick off stretches after training, encourages you to do more if you've only done a few.
+• **Post-training nutrition** — Suggests meals based on your session intensity and how long ago you trained.
+
+Recommendations are colour-coded by priority: **red** (high — act on this now), **yellow** (medium — worth doing), **blue** (low — nice to know).`,
   },
 ]
 
