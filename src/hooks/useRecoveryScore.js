@@ -74,6 +74,10 @@ export default function useRecoveryScore() {
     // ACWR is only reliable with enough training history (>= 14 days, non-zero chronic)
     const hasReliableACWR = chronicLoad > 0 && trainingLogs.length >= 4;
 
+    // Only use fatigue score when ACWR is reliable — otherwise it spikes
+    // misleadingly (e.g. first week of logging gives ACWR of 7+)
+    const displayFatigueScore = hasReliableACWR ? fatigueScore : 0;
+
     // Mindfulness — today's completed activities
     const todayMindfulness = mindfulnessLogs.find((d) => d.date === today);
     const mindfulnessCount = todayMindfulness ? todayMindfulness.activities.length : 0;
@@ -99,7 +103,7 @@ export default function useRecoveryScore() {
     return {
       recoveryScore,
       sleepScore,
-      fatigueScore,
+      fatigueScore: displayFatigueScore,
       acuteLoad,
       chronicLoad,
       acwr: Math.round(acwr * 100) / 100,
