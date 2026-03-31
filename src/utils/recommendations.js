@@ -1,11 +1,10 @@
 import { parseISO, differenceInCalendarDays, differenceInHours } from 'date-fns';
 import { getSleepDurationHours, calculateACWR } from './scoring';
 
+const HYDRATION_TARGET = 2000;
+
 /**
  * Get sleep-related recommendations.
- * @param {Array<{ date: string, bedtime: string, wakeTime: string, qualityRating: number }>} sleepLogs
- * @param {Array<{ date: string, durationMinutes: number, intensity: number, runType?: string }>} trainingLogs
- * @returns {Array<{ category: string, priority: string, text: string }>}
  */
 export function getSleepRecommendations(sleepLogs, trainingLogs) {
   const recommendations = [];
@@ -19,19 +18,33 @@ export function getSleepRecommendations(sleepLogs, trainingLogs) {
     return recommendations;
   }
 
-  // Check average duration over recent logs
-  const recentSleep = sleepLogs.slice(-7);
+  const sorted = [...sleepLogs].sort((a, b) => new Date(b.date) - new Date(a.date));
+  const recentSleep = sorted.slice(0, 7);
   const avgDuration =
     recentSleep.reduce(
       (sum, log) => sum + getSleepDurationHours(log.bedtime, log.wakeTime),
       0
     ) / recentSleep.length;
 
-  if (avgDuration < 7) {
+  const latestDuration = getSleepDurationHours(recentSleep[0].bedtime, recentSleep[0].wakeTime);
+
+  if (latestDuration > 9) {
+    recommendations.push({
+      category: 'sleep',
+      priority: 'medium',
+      text: `You slept ${latestDuration.toFixed(1)} hours last night. Oversleeping can leave you feeling groggy — aim for 7-9 hours for optimal recovery.`,
+    });
+  } else if (latestDuration < 6) {
     recommendations.push({
       category: 'sleep',
       priority: 'high',
-      text: `Your average sleep is ${avgDuration.toFixed(1)} hours. Aim for 7-9 hours per night to optimize recovery and performance.`,
+      text: `You only got ${latestDuration.toFixed(1)} hours of sleep last night. Try to get to bed earlier tonight — your body needs 7-9 hours to recover properly.`,
+    });
+  } else if (avgDuration < 7) {
+    recommendations.push({
+      category: 'sleep',
+      priority: 'high',
+      text: `Your average sleep is ${avgDuration.toFixed(1)} hours over the last ${recentSleep.length} nights. Aim for 7-9 hours per night to optimize recovery.`,
     });
   }
 
@@ -54,28 +67,27 @@ export function getSleepRecommendations(sleepLogs, trainingLogs) {
       recommendations.push({
         category: 'sleep',
         priority: 'medium',
-        text: 'Your bedtime varies by over 45 minutes. Try to go to bed within a 30-minute window each night to improve sleep quality and circadian rhythm.',
+        text: 'Your bedtime varies by over 45 minutes. Try to go to bed within a 30-minute window each night to improve sleep quality.',
       });
     }
   }
 
-  // Check if heavy training yesterday
+  // Heavy training yesterday
   const today = new Date();
   const yesterdayLogs = trainingLogs.filter((log) => {
     const daysAgo = differenceInCalendarDays(today, parseISO(log.date));
     return daysAgo === 1;
   });
 
-  const hadHeavyTraining = yesterdayLogs.some((log) => log.intensity >= 7);
-  if (hadHeavyTraining) {
+  if (yesterdayLogs.some((log) => log.intensity >= 7)) {
     recommendations.push({
       category: 'sleep',
       priority: 'high',
-      text: 'You had a high-intensity training session yesterday. Try to get an extra 30 minutes of sleep tonight to support muscle repair and adaptation.',
+      text: 'You had a high-intensity session yesterday. Try to get an extra 30 minutes of sleep tonight to support muscle repair.',
     });
   }
 
-  // Quality-based recommendation
+  // Quality
   const avgQuality =
     recentSleep.reduce((sum, log) => sum + log.qualityRating, 0) /
     recentSleep.length;
@@ -84,43 +96,50 @@ export function getSleepRecommendations(sleepLogs, trainingLogs) {
     recommendations.push({
       category: 'sleep',
       priority: 'medium',
-      text: 'Your sleep quality has been low. Consider limiting screen time 1 hour before bed, keeping your room cool (65-68F), and avoiding caffeine after 2 PM.',
+      text: 'Your sleep quality has been low recently. Limit screen time 1 hour before bed, keep your room cool, and avoid caffeine after 2 PM.',
+    });
+  } else if (avgQuality >= 4 && recentSleep.length >= 3) {
+    recommendations.push({
+      category: 'sleep',
+      priority: 'low',
+      text: 'Your sleep quality has been good — keep up your current routine!',
     });
   }
 
-  return recommendations.slice(0, 4);
+  return recommendations;
 }
 
 /**
- * Get nutrition-related recommendations.
- * @param {{ date: string, durationMinutes: number, intensity: number } | null} lastTraining
- * @param {number} todayHydration - ml consumed today
- * @param {number} hydrationTarget - ml target for today
- * @returns {Array<{ category: string, priority: string, text: string }>}
+ * Get nutrition/hydration recommendations.
  */
-export function getNutritionRecommendations(
-  lastTraining,
-  todayHydration,
-  hydrationTarget
-) {
+export function getNutritionRecommendations(lastTraining, todayHydrationMl) {
   const recommendations = [];
 
-  // Hydration deficit
-  const hydrationPercent = hydrationTarget > 0
-    ? (todayHydration / hydrationTarget) * 100
-    : 100;
+  const hydrationPercent = (todayHydrationMl / HYDRATION_TARGET) * 100;
 
-  if (hydrationPercent < 50) {
+  if (hydrationPercent === 0) {
     recommendations.push({
       category: 'nutrition',
       priority: 'high',
-      text: `You have consumed only ${Math.round(hydrationPercent)}% of your hydration target. Drink ${Math.round((hydrationTarget - todayHydration) / 1000 * 10) / 10}L more today to stay properly hydrated.`,
+      text: "You haven't logged any water today. Start hydrating — aim for 2,000ml throughout the day.",
+    });
+  } else if (hydrationPercent < 50) {
+    recommendations.push({
+      category: 'nutrition',
+      priority: 'high',
+      text: `You've only had ${todayHydrationMl}ml of water (${Math.round(hydrationPercent)}%). Drink ${HYDRATION_TARGET - todayHydrationMl}ml more to hit your 2,000ml target.`,
     });
   } else if (hydrationPercent < 80) {
     recommendations.push({
       category: 'nutrition',
       priority: 'medium',
-      text: `You are at ${Math.round(hydrationPercent)}% of your hydration goal. Keep sipping water throughout the day to reach your target of ${(hydrationTarget / 1000).toFixed(1)}L.`,
+      text: `You're at ${Math.round(hydrationPercent)}% of your water target. Keep sipping — ${HYDRATION_TARGET - todayHydrationMl}ml to go.`,
+    });
+  } else if (hydrationPercent >= 100) {
+    recommendations.push({
+      category: 'nutrition',
+      priority: 'low',
+      text: 'Great job hitting your water target today! Stay topped up if you have training later.',
     });
   }
 
@@ -128,82 +147,92 @@ export function getNutritionRecommendations(
     recommendations.push({
       category: 'nutrition',
       priority: 'low',
-      text: 'On rest days, focus on whole foods rich in antioxidants and anti-inflammatory nutrients to support recovery.',
+      text: 'Rest day — focus on whole foods rich in antioxidants and anti-inflammatory nutrients to support recovery.',
     });
-    return recommendations.slice(0, 4);
+    return recommendations;
   }
 
-  // Training intensity-based meal suggestions
-  const hoursSinceTraining = differenceInHours(
-    new Date(),
-    parseISO(lastTraining.date)
-  );
+  // Post-training meal guidance based on intensity
+  const hoursSinceTraining = differenceInHours(new Date(), parseISO(lastTraining.date));
 
-  if (lastTraining.intensity >= 7) {
-    recommendations.push({
-      category: 'nutrition',
-      priority: 'high',
-      text: 'After your high-intensity session, prioritize a meal with 30-40g protein and 60-80g carbs within 2 hours. Try grilled chicken with rice and vegetables.',
-    });
-  } else if (lastTraining.intensity >= 4) {
+  if (hoursSinceTraining <= 2 && hoursSinceTraining >= 0) {
+    if (lastTraining.intensity >= 7) {
+      recommendations.push({
+        category: 'nutrition',
+        priority: 'high',
+        text: "You're in the protein synthesis window after a hard session. Have 30-40g protein and 60-80g carbs now — try chicken with rice and veg.",
+      });
+    } else if (lastTraining.intensity >= 4) {
+      recommendations.push({
+        category: 'nutrition',
+        priority: 'medium',
+        text: "Good time for a recovery meal — 20-30g protein and 40-60g carbs. A salmon bowl with quinoa and greens works well.",
+      });
+    }
+  } else if (lastTraining.intensity >= 7) {
     recommendations.push({
       category: 'nutrition',
       priority: 'medium',
-      text: 'After your moderate session, have a balanced meal with 20-30g protein and 40-60g carbs. A salmon bowl with quinoa and greens is a great option.',
-    });
-  } else {
-    recommendations.push({
-      category: 'nutrition',
-      priority: 'low',
-      text: 'After your easy session, a light snack with 15-20g protein is sufficient. Try Greek yogurt with berries and a handful of nuts.',
+      text: 'After your high-intensity session, make sure your next meal includes quality protein and carbs to support recovery.',
     });
   }
 
-  // Protein window
-  if (hoursSinceTraining <= 2 && hoursSinceTraining >= 0) {
-    recommendations.push({
-      category: 'nutrition',
-      priority: 'high',
-      text: 'You are within the optimal protein synthesis window. Consume 20-40g of quality protein now to maximize muscle repair and adaptation.',
-    });
-  }
-
-  return recommendations.slice(0, 4);
+  return recommendations;
 }
+
+const TYPE_LABELS = {
+  easy_long: 'easy long run',
+  short_intervals: 'short intervals',
+  long_intervals: 'long intervals',
+  park_run: 'park run',
+  sprints: 'sprints',
+  strength: 'strength session',
+  cycling: 'cycling session',
+};
+
+const TYPE_RECOVERY_TIPS = {
+  easy_long: 'After your long run, focus on hip flexor, IT band, and glute recovery. Consider foam rolling and gentle stretching.',
+  short_intervals: 'Short intervals tax your calves and achilles. Do targeted stretching and consider compression socks for recovery.',
+  long_intervals: 'Long intervals are demanding — prioritize hamstring and quad recovery with foam rolling and stretching.',
+  park_run: 'After your park run, a mix of calf stretches and hamstring work will help you recover well.',
+  sprints: 'Sprint sessions heavily load your hamstrings and hip flexors. Spend extra time stretching these areas.',
+  strength: 'After strength training, focus on the muscle groups you worked. Light stretching and adequate protein will speed recovery.',
+  cycling: 'After cycling, stretch your quads, hip flexors, and lower back to counter the flexed riding position.',
+};
 
 /**
  * Get recovery-related recommendations.
- * @param {{ date: string, durationMinutes: number, intensity: number, sorenessLevel?: number, runType?: string } | null} lastTraining
- * @param {Array} trainingLogs
- * @param {number} acwr - Acute:Chronic Workload Ratio
- * @returns {Array<{ category: string, priority: string, text: string }>}
  */
-export function getRecoveryRecommendations(lastTraining, trainingLogs, acwr) {
+export function getRecoveryRecommendations(lastTraining, trainingLogs, acwr, mindfulnessCount, stretchingCount) {
   const recommendations = [];
 
-  // ACWR-based warning
+  // ACWR warnings
   if (acwr > 1.5) {
     recommendations.push({
       category: 'recovery',
       priority: 'high',
-      text: `Your training load ratio is ${acwr.toFixed(2)}, which is in the danger zone (>1.5). Take a rest day or do very light activity to reduce injury risk.`,
+      text: `Your ACWR is ${acwr.toFixed(2)} — danger zone (>1.5). Take a rest day or do very light activity to reduce injury risk.`,
     });
   } else if (acwr > 1.3) {
     recommendations.push({
       category: 'recovery',
       priority: 'medium',
-      text: `Your training load ratio is ${acwr.toFixed(2)}. You are approaching the danger zone. Consider reducing intensity over the next few days.`,
+      text: `Your ACWR is ${acwr.toFixed(2)} — approaching the danger zone. Consider reducing intensity over the next few days.`,
+    });
+  } else if (acwr > 0 && acwr < 0.8) {
+    recommendations.push({
+      category: 'recovery',
+      priority: 'low',
+      text: `Your ACWR is ${acwr.toFixed(2)} — you're under-training relative to your baseline. You can safely increase load this week.`,
     });
   }
 
-  // Days since rest
+  // Consecutive training days
   if (trainingLogs.length > 0) {
     const today = new Date();
     const sortedLogs = [...trainingLogs]
       .filter((log) => differenceInCalendarDays(today, parseISO(log.date)) >= 0)
-      .sort(
-        (a, b) => parseISO(b.date).getTime() - parseISO(a.date).getTime()
-      );
+      .sort((a, b) => parseISO(b.date).getTime() - parseISO(a.date).getTime());
 
     let consecutiveDays = 0;
     for (let i = 0; i < sortedLogs.length; i++) {
@@ -219,47 +248,38 @@ export function getRecoveryRecommendations(lastTraining, trainingLogs, acwr) {
       recommendations.push({
         category: 'recovery',
         priority: 'high',
-        text: `You have trained ${consecutiveDays} days in a row. Schedule a rest day to allow your body to recover and adapt to the training stimulus.`,
+        text: `You've trained ${consecutiveDays} days in a row. Schedule a rest day to let your body recover and adapt.`,
+      });
+    } else if (consecutiveDays === 3) {
+      recommendations.push({
+        category: 'recovery',
+        priority: 'medium',
+        text: "You've trained 3 days in a row. Consider an easy day or rest day tomorrow.",
       });
     }
   }
 
-  // Soreness-based recommendations
+  // Soreness
   if (lastTraining && lastTraining.sorenessLevel) {
     const soreness = lastTraining.sorenessLevel;
-    if (soreness <= 2) {
+    if (soreness >= 4) {
       recommendations.push({
         category: 'recovery',
-        priority: 'low',
-        text: 'Light soreness detected. A gentle 10-15 minute stretching routine will help maintain flexibility and promote blood flow.',
+        priority: 'high',
+        text: 'High soreness detected. Use ice for 15 minutes on sore areas, rest, and avoid intense training until it drops.',
       });
     } else if (soreness === 3) {
       recommendations.push({
         category: 'recovery',
         priority: 'medium',
-        text: 'Moderate soreness detected. Spend 15-20 minutes foam rolling the affected areas followed by light stretching to speed up recovery.',
-      });
-    } else {
-      recommendations.push({
-        category: 'recovery',
-        priority: 'high',
-        text: 'High soreness detected. Use ice for 15 minutes on sore areas, followed by heat therapy after 24 hours. Prioritize rest and avoid intense training.',
+        text: 'Moderate soreness — spend 15-20 minutes foam rolling followed by light stretching to speed up recovery.',
       });
     }
   }
 
-  // Run type-specific muscle focus
-  if (lastTraining && lastTraining.runType) {
-    const muscleMap = {
-      easy: 'Focus on calf and hip flexor stretches after your easy run.',
-      tempo: 'After your tempo run, prioritize hamstring and quad recovery with foam rolling and stretching.',
-      interval: 'Interval sessions tax your calves and achilles. Do targeted stretching and consider compression socks.',
-      long: 'After your long run, focus on IT band, glutes, and hip flexor recovery. An ice bath can help reduce inflammation.',
-      hill: 'Hill repeats heavily load your calves and glutes. Spend extra time foam rolling these areas.',
-      recovery: 'Great job taking it easy. Light stretching is all you need after a recovery run.',
-    };
-
-    const tip = muscleMap[lastTraining.runType];
+  // Training type specific tips
+  if (lastTraining && lastTraining.type) {
+    const tip = TYPE_RECOVERY_TIPS[lastTraining.type];
     if (tip) {
       recommendations.push({
         category: 'recovery',
@@ -269,23 +289,49 @@ export function getRecoveryRecommendations(lastTraining, trainingLogs, acwr) {
     }
   }
 
-  return recommendations.slice(0, 4);
+  // Mindfulness nudge
+  if (mindfulnessCount === 0) {
+    recommendations.push({
+      category: 'recovery',
+      priority: 'medium',
+      text: "You haven't done any mindfulness today. Even 5 minutes of breathing or journaling helps your mind recover too.",
+    });
+  } else if (mindfulnessCount >= 3) {
+    recommendations.push({
+      category: 'recovery',
+      priority: 'low',
+      text: `Great work — you've completed ${mindfulnessCount} mindfulness activities today. Your mental recovery is on track.`,
+    });
+  }
+
+  // Stretching nudge
+  if (stretchingCount === 0 && lastTraining) {
+    recommendations.push({
+      category: 'recovery',
+      priority: 'medium',
+      text: "You haven't done any stretches today. Head to Recovery and tick off some stretches to boost your recovery score.",
+    });
+  } else if (stretchingCount > 0 && stretchingCount < 5 && lastTraining) {
+    recommendations.push({
+      category: 'recovery',
+      priority: 'low',
+      text: `You've done ${stretchingCount} stretches today. Try to complete a few more for best results.`,
+    });
+  }
+
+  return recommendations;
 }
 
 /**
- * Get all recommendations combined.
- * @param {Array} sleepLogs
- * @param {Array} trainingLogs
- * @param {number} todayHydration
- * @param {number} hydrationTarget
- * @returns {Array<{ category: string, priority: string, text: string }>}
+ * Get all recommendations combined and sorted by priority.
  */
-export function getAllRecommendations(
+export function getAllRecommendations({
   sleepLogs,
   trainingLogs,
-  todayHydration,
-  hydrationTarget
-) {
+  todayHydrationMl,
+  mindfulnessCount,
+  stretchingCount,
+}) {
   const today = new Date();
   const sortedTraining = [...trainingLogs].sort(
     (a, b) => parseISO(b.date).getTime() - parseISO(a.date).getTime()
@@ -294,14 +340,9 @@ export function getAllRecommendations(
   const acwr = calculateACWR(trainingLogs);
 
   const sleep = getSleepRecommendations(sleepLogs, trainingLogs);
-  const nutrition = getNutritionRecommendations(
-    lastTraining,
-    todayHydration,
-    hydrationTarget
-  );
-  const recovery = getRecoveryRecommendations(lastTraining, trainingLogs, acwr);
+  const nutrition = getNutritionRecommendations(lastTraining, todayHydrationMl);
+  const recovery = getRecoveryRecommendations(lastTraining, trainingLogs, acwr, mindfulnessCount, stretchingCount);
 
-  // Sort by priority: high first, then medium, then low
   const priorityOrder = { high: 0, medium: 1, low: 2 };
   const all = [...sleep, ...nutrition, ...recovery];
   all.sort(

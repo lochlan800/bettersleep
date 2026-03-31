@@ -1,7 +1,6 @@
 import { Moon, Utensils, Heart, Timer, Info } from 'lucide-react'
 import { useApp } from '../../context/AppContext'
 import { getAllRecommendations } from '../../utils/recommendations'
-import { calculateHydrationTarget } from '../../utils/scoring'
 import Card from '../ui/Card'
 import Badge from '../ui/Badge'
 
@@ -9,13 +8,24 @@ const icons = { sleep: Moon, nutrition: Utensils, recovery: Heart, training: Tim
 const priorityColor = { high: 'red', medium: 'yellow', low: 'blue' }
 
 export default function TodayRecommendations() {
-  const { sleepLogs, trainingLogs, settings, getTodayHydration } = useApp()
+  const { sleepLogs, trainingLogs, getTodayHydration, getTodayMindfulness, getTodayStretching } = useApp()
+
   const todayHydration = getTodayHydration()
+  const todayHydrationMl = todayHydration.entries.reduce((sum, e) => sum + (e.amountMl ?? 0), 0)
 
-  const todayTraining = trainingLogs.find(l => l.date === new Date().toISOString().slice(0,10))
-  const hydrationTarget = calculateHydrationTarget(settings.bodyWeightKg, todayTraining?.durationMinutes ?? 0)
+  const todayMindfulness = getTodayMindfulness()
+  const mindfulnessCount = todayMindfulness.activities.length
 
-  const recs = getAllRecommendations(sleepLogs, trainingLogs, todayHydration, hydrationTarget).slice(0, 5)
+  const todayStretching = getTodayStretching()
+  const stretchingCount = todayStretching.completed.length
+
+  const recs = getAllRecommendations({
+    sleepLogs,
+    trainingLogs,
+    todayHydrationMl,
+    mindfulnessCount,
+    stretchingCount,
+  }).slice(0, 5)
 
   if (recs.length === 0) {
     return (
