@@ -25,6 +25,7 @@ export function AppProvider({ children }) {
   const [mindfulnessLogs, setMindfulnessLogs] = useLocalStorage('bs_mindfulness_logs', []);
   const [mealPlans, setMealPlans] = useLocalStorage('bs_meal_plans', []);
   const [competitionLogs, setCompetitionLogs] = useLocalStorage('bs_competition_logs', []);
+  const [stretchingLogs, setStretchingLogs] = useLocalStorage('bs_stretching_logs', []);
   const [settings, setSettings] = useLocalStorage('bs_settings', DEFAULT_SETTINGS);
 
   // ── Dark mode side-effect ───────────────────────────────────────
@@ -176,6 +177,35 @@ export function AppProvider({ children }) {
     [setMealPlans],
   );
 
+  // ── Stretching actions ────────────────────────────────────────────
+
+  const toggleStretch = useCallback(
+    (date, stretchId) => {
+      const dateStr = typeof date === 'string' ? date : date.toISOString().slice(0, 10);
+      setStretchingLogs((prev) => {
+        const existing = prev.find((d) => d.date === dateStr);
+        if (existing) {
+          const completed = existing.completed.includes(stretchId)
+            ? existing.completed.filter((id) => id !== stretchId)
+            : [...existing.completed, stretchId];
+          return prev.map((d) => (d.date === dateStr ? { ...d, completed } : d));
+        }
+        return [...prev, { date: dateStr, completed: [stretchId] }];
+      });
+    },
+    [setStretchingLogs],
+  );
+
+  const getTodayStretching = useCallback(() => {
+    const today = getToday();
+    return (
+      stretchingLogs.find((d) => d.date === today) ?? {
+        date: today,
+        completed: [],
+      }
+    );
+  }, [stretchingLogs]);
+
   // ── Competition actions ───────────────────────────────────────────
 
   const addCompetitionLog = useCallback(
@@ -226,6 +256,7 @@ export function AppProvider({ children }) {
       mindfulnessLogs,
       mealPlans,
       competitionLogs,
+      stretchingLogs,
       settings,
 
       // Actions
@@ -240,6 +271,8 @@ export function AppProvider({ children }) {
       toggleMindfulnessActivity,
       getTodayMindfulness,
       updateMealPlan,
+      toggleStretch,
+      getTodayStretching,
       addCompetitionLog,
       updateCompetitionLog,
       deleteCompetitionLog,
@@ -252,6 +285,7 @@ export function AppProvider({ children }) {
       mindfulnessLogs,
       mealPlans,
       competitionLogs,
+      stretchingLogs,
       settings,
       addSleepLog,
       deleteSleepLog,
@@ -264,6 +298,8 @@ export function AppProvider({ children }) {
       toggleMindfulnessActivity,
       getTodayMindfulness,
       updateMealPlan,
+      toggleStretch,
+      getTodayStretching,
       addCompetitionLog,
       updateCompetitionLog,
       deleteCompetitionLog,

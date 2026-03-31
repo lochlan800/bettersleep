@@ -9,6 +9,7 @@ import {
   calculateHydrationTarget,
   calculateRecoveryScore,
 } from '../utils/scoring';
+import stretches from '../data/stretches';
 
 /**
  * Computes the current recovery dashboard metrics from app state.
@@ -24,7 +25,7 @@ import {
  * }}
  */
 export default function useRecoveryScore() {
-  const { sleepLogs, trainingLogs, hydrationLogs, mindfulnessLogs, settings } = useApp();
+  const { sleepLogs, trainingLogs, hydrationLogs, mindfulnessLogs, stretchingLogs, settings } = useApp();
 
   return useMemo(() => {
     // Sleep – score the most recent log using the last 7 as context for consistency
@@ -77,6 +78,14 @@ export default function useRecoveryScore() {
     const todayMindfulness = mindfulnessLogs.find((d) => d.date === today);
     const mindfulnessCount = todayMindfulness ? todayMindfulness.activities.length : 0;
 
+    // Stretching — percentage of relevant stretches completed today
+    const todayStretching = stretchingLogs.find((d) => d.date === today);
+    const stretchingDone = todayStretching ? todayStretching.completed.length : 0;
+    const totalStretches = stretches.length;
+    const stretchingPercent = totalStretches > 0
+      ? Math.round((stretchingDone / totalStretches) * 100)
+      : 0;
+
     const recoveryScore = calculateRecoveryScore({
       sleepScore,
       fatigueScore,
@@ -84,6 +93,7 @@ export default function useRecoveryScore() {
       sorenessLevel: latestSoreness,
       hasReliableACWR,
       mindfulnessCount,
+      stretchingPercent,
     });
 
     return {
@@ -94,6 +104,7 @@ export default function useRecoveryScore() {
       chronicLoad,
       acwr: Math.round(acwr * 100) / 100,
       hydrationPercent,
+      stretchingPercent,
     };
-  }, [sleepLogs, trainingLogs, hydrationLogs, mindfulnessLogs, settings.bodyWeightKg]);
+  }, [sleepLogs, trainingLogs, hydrationLogs, mindfulnessLogs, stretchingLogs, settings.bodyWeightKg]);
 }

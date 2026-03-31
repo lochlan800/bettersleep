@@ -203,7 +203,7 @@ export function calculateHydrationTarget(bodyWeightKg, todayTrainingMinutes) {
  * when there is enough training history (>= 14 days with a non-zero
  * chronic load) to make the ratio meaningful.
  *
- * @param {{ sleepScore: number, fatigueScore: number, hydrationPercent: number, sorenessLevel: number, hasReliableACWR: boolean, mindfulnessCount: number }} params
+ * @param {{ sleepScore: number, fatigueScore: number, hydrationPercent: number, sorenessLevel: number, hasReliableACWR: boolean, mindfulnessCount: number, stretchingPercent: number }} params
  * @returns {number} 0-100
  */
 export function calculateRecoveryScore({
@@ -213,23 +213,25 @@ export function calculateRecoveryScore({
   sorenessLevel,
   hasReliableACWR,
   mindfulnessCount = 0,
+  stretchingPercent = 0,
 }) {
   // Dynamic weights: redistribute fatigue weight when ACWR isn't reliable
-  // Mindfulness contributes 10% to recovery score
-  let wSleep, wFatigue, wHydration, wSoreness, wMindfulness;
+  let wSleep, wFatigue, wHydration, wSoreness, wMindfulness, wStretching;
   if (hasReliableACWR) {
-    wSleep = 30;
+    wSleep = 25;
     wFatigue = 25;
-    wHydration = 15;
+    wHydration = 10;
     wSoreness = 20;
     wMindfulness = 10;
+    wStretching = 10;
   } else {
     // No reliable ACWR — drop fatigue, redistribute to sleep and soreness
-    wSleep = 40;
+    wSleep = 35;
     wFatigue = 0;
-    wHydration = 15;
-    wSoreness = 35;
+    wHydration = 10;
+    wSoreness = 30;
     wMindfulness = 10;
+    wStretching = 15;
   }
 
   const sleepComponent = (sleepScore / 100) * wSleep;
@@ -241,13 +243,15 @@ export function calculateRecoveryScore({
   // Mindfulness: 1 activity = 60%, 2 = 80%, 3+ = 100%
   const mindfulnessNormalized = mindfulnessCount >= 3 ? 1 : mindfulnessCount === 2 ? 0.8 : mindfulnessCount === 1 ? 0.6 : 0;
   const mindfulnessComponent = mindfulnessNormalized * wMindfulness;
+  // Stretching: percentage of recommended stretches completed
+  const stretchingComponent = (Math.min(100, stretchingPercent) / 100) * wStretching;
 
   return Math.round(
     Math.min(
       100,
       Math.max(
         0,
-        sleepComponent + fatigueComponent + hydrationComponent + sorenessComponent + mindfulnessComponent
+        sleepComponent + fatigueComponent + hydrationComponent + sorenessComponent + mindfulnessComponent + stretchingComponent
       )
     )
   );
