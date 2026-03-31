@@ -190,6 +190,15 @@ export function AppProvider({ children }) {
     [setCompetitionLogs],
   );
 
+  const updateCompetitionLog = useCallback(
+    (id, updates) => {
+      setCompetitionLogs((prev) =>
+        prev.map((log) => (log.id === id ? { ...log, ...updates } : log)),
+      );
+    },
+    [setCompetitionLogs],
+  );
+
   const deleteCompetitionLog = useCallback(
     (id) => {
       setCompetitionLogs((prev) => prev.filter((log) => log.id !== id));
@@ -232,6 +241,7 @@ export function AppProvider({ children }) {
       getTodayMindfulness,
       updateMealPlan,
       addCompetitionLog,
+      updateCompetitionLog,
       deleteCompetitionLog,
       updateSettings,
     }),
@@ -255,6 +265,7 @@ export function AppProvider({ children }) {
       getTodayMindfulness,
       updateMealPlan,
       addCompetitionLog,
+      updateCompetitionLog,
       deleteCompetitionLog,
       updateSettings,
     ],

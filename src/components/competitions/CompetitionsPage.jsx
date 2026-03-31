@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useApp } from '../../context/AppContext'
-import { Trophy, Plus, Trash2, ChevronDown, ChevronUp } from 'lucide-react'
+import { Trophy, Plus, Trash2, Pencil, ChevronDown, ChevronUp } from 'lucide-react'
 import { getToday } from '../../utils/dateHelpers'
 
 const EVENTS = [
@@ -46,8 +46,9 @@ function formatTime(seconds) {
 }
 
 export default function CompetitionsPage() {
-  const { competitionLogs, addCompetitionLog, deleteCompetitionLog } = useApp()
+  const { competitionLogs, addCompetitionLog, updateCompetitionLog, deleteCompetitionLog } = useApp()
   const [showForm, setShowForm] = useState(false)
+  const [editingId, setEditingId] = useState(null)
   const [expandedId, setExpandedId] = useState(null)
 
   // Form state
@@ -75,10 +76,28 @@ export default function CompetitionsPage() {
     setNotes('')
   }
 
+  const handleEdit = (log) => {
+    setEditingId(log.id)
+    setDate(log.date)
+    setEvent(log.event)
+    setCompetitionName(log.competitionName || '')
+    const mins = log.timeSeconds ? Math.floor(log.timeSeconds / 60) : ''
+    const secs = log.timeSeconds ? (log.timeSeconds % 60) : ''
+    setTimeMinutes(mins === 0 && secs ? '' : String(mins))
+    setTimeSeconds(secs ? String(secs) : '')
+    setPlacement(log.placement)
+    setPersonalBest(log.personalBest)
+    setRatings({ ...log.ratings })
+    setNotes(log.notes || '')
+    setShowForm(true)
+    setExpandedId(null)
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
+
   const handleSubmit = (e) => {
     e.preventDefault()
     const totalSeconds = (parseFloat(timeMinutes || 0) * 60) + parseFloat(timeSeconds || 0)
-    addCompetitionLog({
+    const data = {
       date,
       event,
       competitionName: competitionName.trim() || null,
@@ -87,7 +106,13 @@ export default function CompetitionsPage() {
       personalBest,
       ratings: { ...ratings },
       notes: notes.trim() || null,
-    })
+    }
+    if (editingId) {
+      updateCompetitionLog(editingId, data)
+      setEditingId(null)
+    } else {
+      addCompetitionLog(data)
+    }
     resetForm()
     setShowForm(false)
   }
@@ -121,7 +146,7 @@ export default function CompetitionsPage() {
         {/* Log Form */}
         {showForm && (
           <form onSubmit={handleSubmit} className="mb-6 p-4 bg-white dark:bg-surface-800 rounded-lg border border-surface-200 dark:border-surface-700">
-            <h3 className="font-bold text-surface-900 dark:text-surface-50 mb-4">Log a Competition</h3>
+            <h3 className="font-bold text-surface-900 dark:text-surface-50 mb-4">{editingId ? 'Edit Competition' : 'Log a Competition'}</h3>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
               {/* Date */}
@@ -259,11 +284,11 @@ export default function CompetitionsPage() {
                 type="submit"
                 className="bg-primary-500 hover:bg-primary-600 text-white px-6 py-2 rounded-lg transition-colors"
               >
-                Save Competition
+                {editingId ? 'Update Competition' : 'Save Competition'}
               </button>
               <button
                 type="button"
-                onClick={() => { resetForm(); setShowForm(false) }}
+                onClick={() => { resetForm(); setEditingId(null); setShowForm(false) }}
                 className="px-6 py-2 rounded-lg border border-surface-300 dark:border-surface-600 text-surface-700 dark:text-surface-300 hover:bg-surface-100 dark:hover:bg-surface-700 transition-colors"
               >
                 Cancel
@@ -362,13 +387,22 @@ export default function CompetitionsPage() {
                           <p className="text-sm text-surface-600 dark:text-surface-400 bg-surface-50 dark:bg-surface-900 p-3 rounded-lg">{log.notes}</p>
                         </div>
                       )}
-                      <button
-                        onClick={() => deleteCompetitionLog(log.id)}
-                        className="flex items-center gap-1 text-sm text-red-500 hover:text-red-600 transition-colors"
-                      >
-                        <Trash2 size={14} />
-                        Delete
-                      </button>
+                      <div className="flex items-center gap-4">
+                        <button
+                          onClick={() => handleEdit(log)}
+                          className="flex items-center gap-1 text-sm text-primary-500 hover:text-primary-600 transition-colors"
+                        >
+                          <Pencil size={14} />
+                          Edit
+                        </button>
+                        <button
+                          onClick={() => deleteCompetitionLog(log.id)}
+                          className="flex items-center gap-1 text-sm text-red-500 hover:text-red-600 transition-colors"
+                        >
+                          <Trash2 size={14} />
+                          Delete
+                        </button>
+                      </div>
                     </div>
                   )}
                 </div>
