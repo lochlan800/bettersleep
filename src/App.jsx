@@ -9,6 +9,7 @@ import RecoveryPage from './components/recovery/RecoveryPage'
 import GuidePage from './components/guide/GuidePage'
 import MindfulnessPage from './components/mindfulness/MindfulnessPage'
 import MealPlannerPage from './components/nutrition/MealPlannerPage'
+import CompetitionsPage from './components/competitions/CompetitionsPage'
 
 export default function App() {
   return (
@@ -22,6 +23,7 @@ export default function App() {
           <Route path="/meals" element={<MealPlannerPage />} />
           <Route path="/recovery" element={<RecoveryPage />} />
           <Route path="/mindfulness" element={<MindfulnessPage />} />
+          <Route path="/competitions" element={<CompetitionsPage />} />
           <Route path="/guide" element={<GuidePage />} />
         </Routes>
       </AppShell>

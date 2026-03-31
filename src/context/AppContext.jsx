@@ -24,6 +24,7 @@ export function AppProvider({ children }) {
   const [hydrationLogs, setHydrationLogs] = useLocalStorage('bs_hydration_logs', []);
   const [mindfulnessLogs, setMindfulnessLogs] = useLocalStorage('bs_mindfulness_logs', []);
   const [mealPlans, setMealPlans] = useLocalStorage('bs_meal_plans', []);
+  const [competitionLogs, setCompetitionLogs] = useLocalStorage('bs_competition_logs', []);
   const [settings, setSettings] = useLocalStorage('bs_settings', DEFAULT_SETTINGS);
 
   // ── Dark mode side-effect ───────────────────────────────────────
@@ -175,6 +176,27 @@ export function AppProvider({ children }) {
     [setMealPlans],
   );
 
+  // ── Competition actions ───────────────────────────────────────────
+
+  const addCompetitionLog = useCallback(
+    (log) => {
+      const entry = {
+        ...log,
+        id: crypto.randomUUID(),
+        createdAt: new Date().toISOString(),
+      };
+      setCompetitionLogs((prev) => [...prev, entry]);
+    },
+    [setCompetitionLogs],
+  );
+
+  const deleteCompetitionLog = useCallback(
+    (id) => {
+      setCompetitionLogs((prev) => prev.filter((log) => log.id !== id));
+    },
+    [setCompetitionLogs],
+  );
+
   // ── Settings ────────────────────────────────────────────────────
 
   const updateSettings = useCallback(
@@ -194,6 +216,7 @@ export function AppProvider({ children }) {
       hydrationLogs,
       mindfulnessLogs,
       mealPlans,
+      competitionLogs,
       settings,
 
       // Actions
@@ -208,6 +231,8 @@ export function AppProvider({ children }) {
       toggleMindfulnessActivity,
       getTodayMindfulness,
       updateMealPlan,
+      addCompetitionLog,
+      deleteCompetitionLog,
       updateSettings,
     }),
     [
@@ -216,6 +241,7 @@ export function AppProvider({ children }) {
       hydrationLogs,
       mindfulnessLogs,
       mealPlans,
+      competitionLogs,
       settings,
       addSleepLog,
       deleteSleepLog,
@@ -228,6 +254,8 @@ export function AppProvider({ children }) {
       toggleMindfulnessActivity,
       getTodayMindfulness,
       updateMealPlan,
+      addCompetitionLog,
+      deleteCompetitionLog,
       updateSettings,
     ],
   );
