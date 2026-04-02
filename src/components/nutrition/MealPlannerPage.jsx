@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useApp } from '../../context/AppContext'
-import { ChevronDown, RotateCw } from 'lucide-react'
+import { ChevronDown, RotateCw, Check } from 'lucide-react'
+import { getToday } from '../../utils/dateHelpers'
 
 // Meal data
 const breakfasts = [
@@ -234,7 +235,8 @@ function generateWeek() {
 }
 
 export default function MealPlannerPage() {
-  const { mealPlans, updateMealPlan } = useApp()
+  const { mealPlans, updateMealPlan, toggleMealCompletion, getTodayMealCompletions } = useApp()
+  const todayMeals = getTodayMealCompletions()
   const [weekPlan, setWeekPlan] = useState(mealPlans || generateWeek())
   const [activeDay, setActiveDay] = useState(0)
   const [shoppingOpen, setShoppingOpen] = useState(false)
@@ -335,18 +337,49 @@ export default function MealPlannerPage() {
           Shuffle {plan.day}'s meals
         </button>
 
+        {/* Meals eaten counter */}
+        {(() => {
+          const mealsEaten = ['breakfast', 'morningSnack', 'afternoonSnack'].filter(k => todayMeals.completed.includes(k)).length
+          return (
+            <div className={`mb-6 p-3 rounded-lg text-sm font-medium text-center ${
+              mealsEaten === 3
+                ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400'
+                : mealsEaten > 0
+                  ? 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400'
+                  : 'bg-surface-100 dark:bg-surface-700 text-surface-500 dark:text-surface-400'
+            }`}>
+              {mealsEaten}/3 meals eaten today {mealsEaten === 3 ? '— full nutrition points!' : ''}
+            </div>
+          )
+        })()}
+
         {/* Meals */}
         {[
-          { icon: '☀️', title: 'Breakfast', meal: plan.breakfast },
-          { icon: '🍎', title: 'Morning Snack', meal: plan.morningSnack },
-          { icon: '🍪', title: 'Afternoon Snack', meal: plan.afternoonSnack },
-        ].map(({ icon, title, meal }) => (
-          <div key={meal.id} className="mb-6 p-4 bg-white dark:bg-surface-800 rounded-lg border border-surface-200 dark:border-surface-700">
-            <div className="flex gap-3 mb-3">
-              <span className="text-2xl">{icon}</span>
-              <h2 className="text-xl font-bold text-surface-900 dark:text-surface-50">{title}</h2>
+          { icon: '☀️', title: 'Breakfast', meal: plan.breakfast, key: 'breakfast' },
+          { icon: '🍎', title: 'Morning Snack', meal: plan.morningSnack, key: 'morningSnack' },
+          { icon: '🍪', title: 'Afternoon Snack', meal: plan.afternoonSnack, key: 'afternoonSnack' },
+        ].map(({ icon, title, meal, key }) => {
+          const isDone = todayMeals.completed.includes(key)
+          return (
+          <div key={meal.id} className={`mb-6 p-4 rounded-lg border ${isDone ? 'bg-green-50/50 dark:bg-green-900/10 border-green-300 dark:border-green-800' : 'bg-white dark:bg-surface-800 border-surface-200 dark:border-surface-700'}`}>
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex gap-3">
+                <span className="text-2xl">{icon}</span>
+                <h2 className="text-xl font-bold text-surface-900 dark:text-surface-50">{title}</h2>
+              </div>
+              <button
+                onClick={() => toggleMealCompletion(getToday(), key)}
+                className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
+                  isDone
+                    ? 'bg-green-500 text-white'
+                    : 'bg-surface-200 dark:bg-surface-700 text-surface-600 dark:text-surface-400 hover:bg-surface-300 dark:hover:bg-surface-600'
+                }`}
+              >
+                {isDone && <Check size={14} />}
+                {isDone ? 'Eaten' : 'I ate this'}
+              </button>
             </div>
-            <h3 className="text-lg font-semibold text-primary-600 dark:text-primary-400 mb-3">{meal.name}</h3>
+            <h3 className={`text-lg font-semibold mb-3 ${isDone ? 'text-green-600 dark:text-green-400' : 'text-primary-600 dark:text-primary-400'}`}>{meal.name}</h3>
             {meal.fruitVeg.length > 0 && (
               <div className="mb-3 flex flex-wrap gap-2">
                 {meal.fruitVeg.map(fv => (
@@ -366,7 +399,8 @@ export default function MealPlannerPage() {
             </div>
             <p className="text-sm text-surface-600 dark:text-surface-400 italic">{meal.prep}</p>
           </div>
-        ))}
+          )
+        })}
 
         {/* 7-a-day tracker */}
         <div className="mb-6 p-4 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-900">

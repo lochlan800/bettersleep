@@ -25,7 +25,7 @@ import stretches from '../data/stretches';
  * }}
  */
 export default function useRecoveryScore() {
-  const { sleepLogs, trainingLogs, hydrationLogs, mindfulnessLogs, stretchingLogs, mealPlans, settings } = useApp();
+  const { sleepLogs, trainingLogs, hydrationLogs, mindfulnessLogs, stretchingLogs, mealCompletions, settings } = useApp();
 
   return useMemo(() => {
     // Sleep – score the most recent log using the last 7 as context for consistency
@@ -90,8 +90,9 @@ export default function useRecoveryScore() {
       ? Math.round((stretchingDone / totalStretches) * 100)
       : 0;
 
-    // Meal plan — having a generated plan shows you're fuelling recovery
-    const hasMealPlan = Array.isArray(mealPlans) && mealPlans.length > 0;
+    // Meals — how many planned meals eaten today
+    const todayMealLog = mealCompletions.find((d) => d.date === today);
+    const mealsEatenCount = todayMealLog ? todayMealLog.completed.length : 0;
 
     const recoveryScore = calculateRecoveryScore({
       sleepScore,
@@ -101,7 +102,7 @@ export default function useRecoveryScore() {
       hasReliableACWR,
       mindfulnessCount,
       stretchingPercent,
-      hasMealPlan,
+      mealsEatenCount,
     });
 
     return {
@@ -114,5 +115,5 @@ export default function useRecoveryScore() {
       hydrationPercent,
       stretchingPercent,
     };
-  }, [sleepLogs, trainingLogs, hydrationLogs, mindfulnessLogs, stretchingLogs, mealPlans, settings.bodyWeightKg]);
+  }, [sleepLogs, trainingLogs, hydrationLogs, mindfulnessLogs, stretchingLogs, mealCompletions, settings.bodyWeightKg]);
 }

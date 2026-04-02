@@ -214,7 +214,7 @@ export function calculateRecoveryScore({
   hasReliableACWR,
   mindfulnessCount = 0,
   stretchingPercent = 0,
-  hasMealPlan = false,
+  mealsEatenCount = 0,
 }) {
   // Dynamic weights: redistribute fatigue weight when ACWR isn't reliable
   let wSleep, wFatigue, wHydration, wSoreness, wMindfulness, wStretching, wNutrition;
@@ -247,8 +247,10 @@ export function calculateRecoveryScore({
   const mindfulnessComponent = mindfulnessNormalized * wMindfulness;
   // Stretching: percentage of recommended stretches completed
   const stretchingComponent = (Math.min(100, stretchingPercent) / 100) * wStretching;
-  // Nutrition: having an active meal plan shows you're fuelling recovery
-  const nutritionComponent = hasMealPlan ? wNutrition : 0;
+  // Nutrition: eating planned meals shows you're fuelling recovery
+  // 1 meal = 40%, 2 meals = 70%, 3 meals = 100%
+  const nutritionNormalized = mealsEatenCount >= 3 ? 1 : mealsEatenCount === 2 ? 0.7 : mealsEatenCount === 1 ? 0.4 : 0;
+  const nutritionComponent = nutritionNormalized * wNutrition;
 
   return Math.round(
     Math.min(

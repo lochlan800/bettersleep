@@ -24,6 +24,7 @@ export function AppProvider({ children }) {
   const [hydrationLogs, setHydrationLogs] = useLocalStorage('bs_hydration_logs', []);
   const [mindfulnessLogs, setMindfulnessLogs] = useLocalStorage('bs_mindfulness_logs', []);
   const [mealPlans, setMealPlans] = useLocalStorage('bs_meal_plans', []);
+  const [mealCompletions, setMealCompletions] = useLocalStorage('bs_meal_completions', []);
   const [competitionLogs, setCompetitionLogs] = useLocalStorage('bs_competition_logs', []);
   const [stretchingLogs, setStretchingLogs] = useLocalStorage('bs_stretching_logs', []);
   const [settings, setSettings] = useLocalStorage('bs_settings', DEFAULT_SETTINGS);
@@ -186,6 +187,35 @@ export function AppProvider({ children }) {
     [setMealPlans],
   );
 
+  // ── Meal completion actions ───────────────────────────────────────
+
+  const toggleMealCompletion = useCallback(
+    (date, mealKey) => {
+      const dateStr = typeof date === 'string' ? date : date.toISOString().slice(0, 10);
+      setMealCompletions((prev) => {
+        const existing = prev.find((d) => d.date === dateStr);
+        if (existing) {
+          const completed = existing.completed.includes(mealKey)
+            ? existing.completed.filter((k) => k !== mealKey)
+            : [...existing.completed, mealKey];
+          return prev.map((d) => (d.date === dateStr ? { ...d, completed } : d));
+        }
+        return [...prev, { date: dateStr, completed: [mealKey] }];
+      });
+    },
+    [setMealCompletions],
+  );
+
+  const getTodayMealCompletions = useCallback(() => {
+    const today = getToday();
+    return (
+      mealCompletions.find((d) => d.date === today) ?? {
+        date: today,
+        completed: [],
+      }
+    );
+  }, [mealCompletions]);
+
   // ── Stretching actions ────────────────────────────────────────────
 
   const toggleStretch = useCallback(
@@ -264,6 +294,7 @@ export function AppProvider({ children }) {
       hydrationLogs,
       mindfulnessLogs,
       mealPlans,
+      mealCompletions,
       competitionLogs,
       stretchingLogs,
       settings,
@@ -281,6 +312,8 @@ export function AppProvider({ children }) {
       toggleMindfulnessActivity,
       getTodayMindfulness,
       updateMealPlan,
+      toggleMealCompletion,
+      getTodayMealCompletions,
       toggleStretch,
       getTodayStretching,
       addCompetitionLog,
@@ -294,6 +327,7 @@ export function AppProvider({ children }) {
       hydrationLogs,
       mindfulnessLogs,
       mealPlans,
+      mealCompletions,
       competitionLogs,
       stretchingLogs,
       settings,
@@ -309,6 +343,8 @@ export function AppProvider({ children }) {
       toggleMindfulnessActivity,
       getTodayMindfulness,
       updateMealPlan,
+      toggleMealCompletion,
+      getTodayMealCompletions,
       toggleStretch,
       getTodayStretching,
       addCompetitionLog,
