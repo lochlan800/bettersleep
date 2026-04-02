@@ -13,6 +13,7 @@ const RUN_TYPES = [
   { value: 'sprints', label: 'Sprints' },
   { value: 'strength', label: 'Strength Training' },
   { value: 'cycling', label: 'Cycling' },
+  { value: 'other', label: 'Other' },
 ]
 
 const CR10_SCALE = [

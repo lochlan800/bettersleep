@@ -16,6 +16,7 @@ const TYPE_CONFIG = {
   sprints: { label: 'Sprints', color: 'purple' },
   strength: { label: 'Strength', color: 'gray' },
   cycling: { label: 'Cycling', color: 'blue' },
+  other: { label: 'Other', color: 'gray' },
   // legacy types
   easy: { label: 'Easy', color: 'green' },
   tempo: { label: 'Tempo', color: 'yellow' },

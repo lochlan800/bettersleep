@@ -12,6 +12,7 @@ const typeMap = {
   sprints: 'interval',
   strength: 'hill',
   cycling: 'easy',
+  other: 'easy',
   // legacy
   easy: 'easy',
   tempo: 'tempo',

@@ -11,6 +11,7 @@ const TYPE_LABELS = {
   sprints: 'Sprints',
   strength: 'Strength',
   cycling: 'Cycling',
+  other: 'Other',
   // legacy
   easy: 'Easy',
   tempo: 'Tempo',
