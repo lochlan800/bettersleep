@@ -1,4 +1,5 @@
 import RecoveryScoreCard from './RecoveryScoreCard'
+import RecoveryScoreChart from './RecoveryScoreChart'
 import TodayRecommendations from './TodayRecommendations'
 import QuickLogWidgets from './QuickLogWidgets'
 import { formatDate, getToday } from '../../utils/dateHelpers'
@@ -15,6 +16,7 @@ export default function DashboardPage() {
       <RecoveryScoreCard />
       <QuickLogWidgets />
       <TodayRecommendations />
+      <RecoveryScoreChart />
     </div>
   )
 }
