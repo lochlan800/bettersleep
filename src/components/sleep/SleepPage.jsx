@@ -2,6 +2,7 @@ import SleepScoreDisplay from './SleepScoreDisplay';
 import SleepLogForm from './SleepLogForm';
 import SleepRecommendations from './SleepRecommendations';
 import SleepHistoryChart from './SleepHistoryChart';
+import SleepHistory from './SleepHistory';
 import SleepTips from './SleepTips';
 
 export default function SleepPage() {
@@ -18,6 +19,7 @@ export default function SleepPage() {
 
       <SleepRecommendations />
       <SleepHistoryChart />
+      <SleepHistory />
       <SleepTips />
     </div>
   );

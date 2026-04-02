@@ -52,6 +52,15 @@ export function AppProvider({ children }) {
     [setSleepLogs],
   );
 
+  const updateSleepLog = useCallback(
+    (id, updates) => {
+      setSleepLogs((prev) =>
+        prev.map((log) => (log.id === id ? { ...log, ...updates } : log)),
+      );
+    },
+    [setSleepLogs],
+  );
+
   const deleteSleepLog = useCallback(
     (id) => {
       setSleepLogs((prev) => prev.filter((log) => log.id !== id));
@@ -261,6 +270,7 @@ export function AppProvider({ children }) {
 
       // Actions
       addSleepLog,
+      updateSleepLog,
       deleteSleepLog,
       addTrainingLog,
       updateTrainingLog,
@@ -288,6 +298,7 @@ export function AppProvider({ children }) {
       stretchingLogs,
       settings,
       addSleepLog,
+      updateSleepLog,
       deleteSleepLog,
       addTrainingLog,
       updateTrainingLog,
