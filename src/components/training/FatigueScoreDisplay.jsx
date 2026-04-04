@@ -79,6 +79,29 @@ export default function FatigueScoreDisplay() {
       <p className="mt-2 text-sm text-surface-500 dark:text-surface-400">
         {metrics.zone.description}
       </p>
+
+      {/* What the numbers mean */}
+      <div className="mt-4 pt-4 border-t border-surface-200 dark:border-surface-700">
+        <p className="text-xs font-semibold text-surface-600 dark:text-surface-400 mb-2">What do the numbers mean?</p>
+        <div className="space-y-1.5 text-[12px] text-surface-500 dark:text-surface-400">
+          <div className="flex items-start gap-2">
+            <span className="inline-block w-2 h-2 mt-1 rounded-full bg-blue-400 shrink-0" />
+            <span><strong>Below 0.8</strong> — You're training less than usual. Your body is resting but your fitness might drop if this goes on too long.</span>
+          </div>
+          <div className="flex items-start gap-2">
+            <span className="inline-block w-2 h-2 mt-1 rounded-full bg-green-500 shrink-0" />
+            <span><strong>0.8 – 1.3</strong> — The sweet spot! You're training about the right amount compared to what your body is used to.</span>
+          </div>
+          <div className="flex items-start gap-2">
+            <span className="inline-block w-2 h-2 mt-1 rounded-full bg-yellow-500 shrink-0" />
+            <span><strong>1.3 – 1.5</strong> — You're pushing harder than normal. Be careful and make sure you're recovering properly.</span>
+          </div>
+          <div className="flex items-start gap-2">
+            <span className="inline-block w-2 h-2 mt-1 rounded-full bg-red-500 shrink-0" />
+            <span><strong>Above 1.5</strong> �� You're doing way more than your body is used to. High risk of injury — take it easy!</span>
+          </div>
+        </div>
+      </div>
     </Card>
   )
 }
