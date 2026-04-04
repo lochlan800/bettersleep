@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useApp } from '../../context/AppContext'
 import { Target, Plus, Trash2, Pencil, ChevronDown, ChevronUp, Check, ArrowRight, ArrowLeft, HelpCircle, CalendarCheck } from 'lucide-react'
 import { getToday } from '../../utils/dateHelpers'
+import { vibrate } from '../../utils/vibrate'
 
 const CATEGORIES = [
   { id: 'recovery', label: 'Recovery', color: 'text-green-600 dark:text-green-400', bg: 'bg-green-100 dark:bg-green-900/30', emoji: '💚' },
@@ -96,6 +97,7 @@ function GoalWizard({ onSave, onCancel, editGoal }) {
   }
 
   const handleSave = () => {
+    vibrate('success')
     onSave({
       ...form,
       completed: editGoal?.completed || false,
@@ -427,6 +429,7 @@ export default function GoalsPage() {
                   ? checkins.filter(d => d !== today)
                   : [...checkins, today]
                 updateGoal(goal.id, { dailyCheckins: updated })
+                vibrate('tap')
               }
 
               return (

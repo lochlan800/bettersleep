@@ -4,6 +4,7 @@ import { useApp } from '../../context/AppContext';
 import { getToday } from '../../utils/dateHelpers';
 import Card from '../ui/Card';
 import Button from '../ui/Button';
+import { vibrate } from '../../utils/vibrate';
 
 const DEFAULT_FORM = {
   date: getToday(),
@@ -28,6 +29,7 @@ export default function SleepLogForm({ onSuccess } = {}) {
       qualityRating: form.qualityRating,
       notes: form.notes.trim() || undefined,
     });
+    vibrate('success');
     setForm({ ...DEFAULT_FORM, date: getToday() });
     onSuccess?.();
   };
