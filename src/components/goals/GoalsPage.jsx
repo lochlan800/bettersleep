@@ -1,7 +1,31 @@
 import { useState } from 'react'
 import { useApp } from '../../context/AppContext'
-import { Target, Plus, Trash2, Pencil, ChevronDown, ChevronUp, Check, ArrowRight, ArrowLeft, HelpCircle } from 'lucide-react'
+import { Target, Plus, Trash2, Pencil, ChevronDown, ChevronUp, Check, ArrowRight, ArrowLeft, HelpCircle, CalendarCheck } from 'lucide-react'
 import { getToday } from '../../utils/dateHelpers'
+
+function getStreak(checkins) {
+  if (!checkins || checkins.length === 0) return 0
+  const sorted = [...checkins].sort().reverse()
+  const today = getToday()
+  let streak = 0
+  let expected = new Date(today)
+  // Allow today or yesterday as the start
+  if (sorted[0] !== today) {
+    expected.setDate(expected.getDate() - 1)
+    if (sorted[0] !== expected.toISOString().slice(0, 10)) return 0
+  }
+  expected = new Date(sorted[0])
+  for (const d of sorted) {
+    const exp = expected.toISOString().slice(0, 10)
+    if (d === exp) {
+      streak++
+      expected.setDate(expected.getDate() - 1)
+    } else {
+      break
+    }
+  }
+  return streak
+}
 
 const CATEGORIES = [
   { id: 'recovery', label: 'Recovery', color: 'text-green-600 dark:text-green-400', bg: 'bg-green-100 dark:bg-green-900/30', emoji: '💚' },
@@ -417,6 +441,19 @@ export default function GoalsPage() {
               const days = daysUntil(goal.deadline)
               const overdue = days !== null && days < 0 && !goal.completed
 
+              const checkins = goal.dailyCheckins || []
+              const checkedToday = checkins.includes(getToday())
+              const streak = getStreak(checkins)
+
+              const handleDailyCheckin = (e) => {
+                e.stopPropagation()
+                const today = getToday()
+                const updated = checkedToday
+                  ? checkins.filter(d => d !== today)
+                  : [...checkins, today]
+                updateGoal(goal.id, { dailyCheckins: updated })
+              }
+
               return (
                 <div
                   key={goal.id}
@@ -440,6 +477,7 @@ export default function GoalsPage() {
                             ? 'bg-green-500 border-green-500 text-white'
                             : 'border-surface-300 dark:border-surface-600 hover:border-primary-500'
                         }`}
+                        title={goal.completed ? 'Mark incomplete' : 'Mark goal complete'}
                       >
                         {goal.completed && <Check size={14} />}
                       </button>
@@ -451,6 +489,9 @@ export default function GoalsPage() {
                               {overdue ? `${Math.abs(days)}d overdue` : `${days}d left`}
                             </span>
                           )}
+                          {streak > 0 && !goal.completed && (
+                            <span className="text-xs text-amber-500 dark:text-amber-400 font-medium">🔥 {streak}d streak</span>
+                          )}
                         </div>
                         <p className={`text-sm font-medium mt-1 ${goal.completed ? 'line-through text-surface-500' : 'text-surface-900 dark:text-surface-50'}`}>
                           {goal.specific}
@@ -460,8 +501,56 @@ export default function GoalsPage() {
                     {expanded ? <ChevronUp size={18} className="shrink-0" /> : <ChevronDown size={18} className="shrink-0" />}
                   </button>
 
+                  {/* Daily check-in bar */}
+                  {!goal.completed && (
+                    <div className="px-4 pb-3 flex items-center justify-between">
+                      <button
+                        onClick={handleDailyCheckin}
+                        className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
+                          checkedToday
+                            ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400'
+                            : 'bg-surface-100 dark:bg-surface-700 text-surface-600 dark:text-surface-400 hover:bg-surface-200 dark:hover:bg-surface-600'
+                        }`}
+                      >
+                        <CalendarCheck size={16} />
+                        {checkedToday ? 'Done today ✓' : 'Did it today?'}
+                      </button>
+                      <span className="text-xs text-surface-500 dark:text-surface-400">
+                        {checkins.length} {checkins.length === 1 ? 'day' : 'days'} total
+                      </span>
+                    </div>
+                  )}
+
                   {expanded && (
                     <div className="px-4 pb-4 border-t border-surface-200 dark:border-surface-700 pt-3 space-y-2">
+                      {/* Last 7 days check-in grid */}
+                      {!goal.completed && (
+                        <div className="mb-3">
+                          <span className="text-xs font-semibold text-primary-600 dark:text-primary-400 uppercase">Last 7 days</span>
+                          <div className="flex gap-1 mt-1">
+                            {Array.from({ length: 7 }).map((_, i) => {
+                              const d = new Date()
+                              d.setDate(d.getDate() - (6 - i))
+                              const dateStr = d.toISOString().slice(0, 10)
+                              const done = checkins.includes(dateStr)
+                              const dayLabel = d.toLocaleDateString('en-GB', { weekday: 'short' }).slice(0, 2)
+                              return (
+                                <div key={dateStr} className="flex flex-col items-center gap-0.5">
+                                  <span className="text-[10px] text-surface-500 dark:text-surface-400">{dayLabel}</span>
+                                  <div className={`w-8 h-8 rounded flex items-center justify-center text-xs font-medium ${
+                                    done
+                                      ? 'bg-green-500 text-white'
+                                      : 'bg-surface-100 dark:bg-surface-700 text-surface-400'
+                                  }`}>
+                                    {done ? '✓' : '·'}
+                                  </div>
+                                </div>
+                              )
+                            })}
+                          </div>
+                        </div>
+                      )}
+
                       {[
                         { label: 'Specific', value: goal.specific },
                         { label: 'Measurable', value: goal.measurable },
