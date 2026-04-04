@@ -6,6 +6,7 @@ import Card from '../ui/Card';
 import Button from '../ui/Button';
 import { vibrate } from '../../utils/vibrate';
 import { playSound } from '../../utils/playSound';
+import { useCelebration } from '../../context/CelebrationContext';
 
 const DEFAULT_FORM = {
   date: getToday(),
@@ -17,6 +18,7 @@ const DEFAULT_FORM = {
 
 export default function SleepLogForm({ onSuccess } = {}) {
   const { addSleepLog } = useApp();
+  const { triggerCelebration } = useCelebration();
   const [form, setForm] = useState(DEFAULT_FORM);
 
   const update = (field, value) => setForm((prev) => ({ ...prev, [field]: value }));
@@ -32,6 +34,7 @@ export default function SleepLogForm({ onSuccess } = {}) {
     });
     vibrate('success');
     playSound('explosion');
+    triggerCelebration();
     setForm({ ...DEFAULT_FORM, date: getToday() });
     onSuccess?.();
   };

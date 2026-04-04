@@ -4,6 +4,7 @@ import { Target, Plus, Trash2, Pencil, ChevronDown, ChevronUp, Check, ArrowRight
 import { getToday } from '../../utils/dateHelpers'
 import { vibrate } from '../../utils/vibrate'
 import { playSound } from '../../utils/playSound'
+import { useCelebration } from '../../context/CelebrationContext'
 
 const CATEGORIES = [
   { id: 'recovery', label: 'Recovery', color: 'text-green-600 dark:text-green-400', bg: 'bg-green-100 dark:bg-green-900/30', emoji: '💚' },
@@ -97,9 +98,12 @@ function GoalWizard({ onSave, onCancel, editGoal }) {
     setStep(1)
   }
 
+  const { triggerCelebration } = useCelebration()
+
   const handleSave = () => {
     vibrate('success')
     playSound('explosion')
+    triggerCelebration()
     onSave({
       ...form,
       completed: editGoal?.completed || false,

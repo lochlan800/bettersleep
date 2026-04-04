@@ -4,6 +4,7 @@ import { Trophy, Plus, Trash2, Pencil, ChevronDown, ChevronUp } from 'lucide-rea
 import { getToday } from '../../utils/dateHelpers'
 import { vibrate } from '../../utils/vibrate'
 import { playSound } from '../../utils/playSound'
+import { useCelebration } from '../../context/CelebrationContext'
 
 const EVENTS = [
   { id: '50m', label: '50m', category: 'Sprint' },
@@ -49,6 +50,7 @@ function formatTime(seconds) {
 
 export default function CompetitionsPage() {
   const { competitionLogs, addCompetitionLog, updateCompetitionLog, deleteCompetitionLog } = useApp()
+  const { triggerCelebration } = useCelebration()
   const [showForm, setShowForm] = useState(false)
   const [editingId, setEditingId] = useState(null)
   const [expandedId, setExpandedId] = useState(null)
@@ -117,6 +119,7 @@ export default function CompetitionsPage() {
     }
     vibrate('success')
     playSound('explosion')
+    triggerCelebration()
     resetForm()
     setShowForm(false)
   }

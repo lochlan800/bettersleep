@@ -1,8 +1,10 @@
 import { useState, useCallback } from 'react'
 import { Routes, Route } from 'react-router-dom'
 import { AppProvider } from './context/AppContext'
+import { CelebrationProvider } from './context/CelebrationContext'
 import AppShell from './components/layout/AppShell'
 import SplashScreen from './components/layout/SplashScreen'
+import CelebrationOverlay from './components/ui/CelebrationOverlay'
 import DashboardPage from './components/dashboard/DashboardPage'
 import TrainingPage from './components/training/TrainingPage'
 import SleepPage from './components/sleep/SleepPage'
@@ -20,7 +22,9 @@ export default function App() {
 
   return (
     <AppProvider>
+      <CelebrationProvider>
       {showSplash && <SplashScreen onFinished={handleSplashDone} />}
+      <CelebrationOverlay />
       <AppShell>
         <Routes>
           <Route path="/" element={<DashboardPage />} />
@@ -35,6 +39,7 @@ export default function App() {
           <Route path="/guide" element={<GuidePage />} />
         </Routes>
       </AppShell>
+      </CelebrationProvider>
     </AppProvider>
   )
 }

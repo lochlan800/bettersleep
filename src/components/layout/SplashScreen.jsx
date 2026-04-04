@@ -1,9 +1,11 @@
 import { useState, useEffect } from 'react'
 import { vibrate } from '../../utils/vibrate'
 import { playSound } from '../../utils/playSound'
+import { useCelebration } from '../../context/CelebrationContext'
 
 export default function SplashScreen({ onFinished }) {
   const [phase, setPhase] = useState('enter') // enter → hold → exit → done
+  const { triggerCelebration } = useCelebration()
 
   useEffect(() => {
     // Icon flies in
@@ -14,6 +16,7 @@ export default function SplashScreen({ onFinished }) {
     const doneTimer = setTimeout(() => {
       vibrate('success')
       playSound('explosion')
+      triggerCelebration()
       onFinished()
     }, 4800)
 

@@ -6,6 +6,7 @@ import { useApp } from '../../context/AppContext'
 import { getToday } from '../../utils/dateHelpers'
 import { vibrate } from '../../utils/vibrate'
 import { playSound } from '../../utils/playSound'
+import { useCelebration } from '../../context/CelebrationContext'
 
 const RUN_TYPES = [
   { value: 'easy_long', label: 'Easy Long Run' },
@@ -44,6 +45,7 @@ const initialForm = () => ({
 
 export default function RunLogForm({ onSuccess, initialData, editMode, onSave } = {}) {
   const { addTrainingLog } = useApp()
+  const { triggerCelebration } = useCelebration()
   const [form, setForm] = useState(() =>
     initialData
       ? {
@@ -85,6 +87,7 @@ export default function RunLogForm({ onSuccess, initialData, editMode, onSave } 
     addTrainingLog(data)
     vibrate('success')
     playSound('explosion')
+    triggerCelebration()
 
     setShowSuccess(true)
     setForm(initialForm())
