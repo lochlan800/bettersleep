@@ -32,23 +32,7 @@ export default function SplashScreen({ onFinished }) {
             : 'translate-x-0 opacity-100'
         }`}
       >
-        <svg
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="white"
-          strokeWidth="1.5"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          className="w-24 h-24 drop-shadow-lg"
-        >
-          {/* Runner figure */}
-          <circle cx="13.5" cy="3.5" r="2" />
-          <path d="M7 21l3-7 2.5 2 4-5" />
-          <path d="M16.5 11L13 16l-2.5-2L8 21" />
-          <path d="M6 16l2-5 4 2" />
-          <path d="M15 6l-3.5 5" />
-          <path d="M11.5 11L17 8" />
-        </svg>
+        <span className="text-[96px] leading-none drop-shadow-lg" role="img" aria-label="runner">🏃</span>
       </div>
 
       {/* App name */}
