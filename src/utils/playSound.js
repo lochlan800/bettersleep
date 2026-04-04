@@ -1,18 +1,42 @@
+// Global audio context (reuse instead of creating new one each time)
+let audioContext = null
+
+function getAudioContext() {
+  try {
+    if (!audioContext) {
+      const AudioContextClass = window.AudioContext || window.webkitAudioContext
+      if (!AudioContextClass) return null
+      audioContext = new AudioContextClass()
+    }
+
+    // Resume if suspended (required on some browsers after user interaction)
+    if (audioContext.state === 'suspended') {
+      audioContext.resume()
+    }
+
+    return audioContext
+  } catch (e) {
+    console.warn('Audio context error:', e)
+    return null
+  }
+}
+
 /**
  * Play sound effects using Web Audio API
  * Generates sounds procedurally — no external files needed
  */
 export function playSound(type = 'twinkle') {
   try {
-    const audioContext = new (window.AudioContext || window.webkitAudioContext)()
+    const ctx = getAudioContext()
+    if (!ctx) return
 
     if (type === 'explosion') {
-      playExplosion(audioContext)
+      playExplosion(ctx)
     } else if (type === 'twinkle') {
-      playTwinkle(audioContext)
+      playTwinkle(ctx)
     }
-  } catch {
-    // Silently fail if audio not available
+  } catch (e) {
+    console.warn('Play sound error:', e)
   }
 }
 
