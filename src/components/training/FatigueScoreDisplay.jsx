@@ -47,17 +47,26 @@ export default function FatigueScoreDisplay() {
           <p className="mt-1 text-xl font-bold text-surface-900 dark:text-surface-50">
             {Math.round(metrics.acuteLoad)}
           </p>
+          <p className="mt-1 text-[11px] text-surface-400 dark:text-surface-500 leading-tight">
+            How hard you trained this week
+          </p>
         </div>
         <div>
           <p className="text-xs text-surface-500 dark:text-surface-400">Chronic (28d avg)</p>
           <p className="mt-1 text-xl font-bold text-surface-900 dark:text-surface-50">
             {Math.round(metrics.chronicLoad)}
           </p>
+          <p className="mt-1 text-[11px] text-surface-400 dark:text-surface-500 leading-tight">
+            How hard you normally train (your average)
+          </p>
         </div>
         <div>
           <p className="text-xs text-surface-500 dark:text-surface-400">ACWR</p>
           <p className="mt-1 text-xl font-bold text-surface-900 dark:text-surface-50">
             {metrics.acwr.toFixed(2)}
+          </p>
+          <p className="mt-1 text-[11px] text-surface-400 dark:text-surface-500 leading-tight">
+            This week vs your average — close to 1.0 is ideal
           </p>
         </div>
       </div>
