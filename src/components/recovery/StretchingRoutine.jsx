@@ -72,7 +72,7 @@ export default function StretchingRoutine() {
         >
           <div className="flex items-center">
             <button
-              onClick={() => { vibrate('tap'); playSound('twinkle'); triggerCelebration(); toggleStretch(getToday(), s.id) }}
+              onClick={() => { vibrate('tap'); if (!isDone) { playSound('twinkle'); triggerCelebration(); } toggleStretch(getToday(), s.id) }}
               className={`flex items-center justify-center w-10 h-10 shrink-0 ml-1 transition-colors ${
                 isDone ? 'text-green-500' : 'text-surface-300 dark:text-surface-600 hover:text-primary-500'
               }`}

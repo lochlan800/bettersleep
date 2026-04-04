@@ -403,7 +403,7 @@ export default function CompetitionsPage() {
                           Edit
                         </button>
                         <button
-                          onClick={() => { vibrate('tap'); playSound('twinkle'); triggerCelebration(); deleteCompetitionLog(log.id) }}
+                          onClick={() => { vibrate('tap'); deleteCompetitionLog(log.id) }}
                           className="flex items-center gap-1 text-sm text-red-500 hover:text-red-600 transition-colors"
                         >
                           <Trash2 size={14} />

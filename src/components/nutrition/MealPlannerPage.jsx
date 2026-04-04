@@ -379,7 +379,7 @@ export default function MealPlannerPage() {
               </div>
               {isToday && (
                 <button
-                  onClick={() => { vibrate('tap'); playSound('twinkle'); triggerCelebration(); toggleMealCompletion(getToday(), key) }}
+                  onClick={() => { vibrate('tap'); if (!isDone) { playSound('twinkle'); triggerCelebration(); } toggleMealCompletion(getToday(), key) }}
                   className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
                     isDone
                       ? 'bg-green-500 text-white'

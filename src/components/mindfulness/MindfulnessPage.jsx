@@ -163,7 +163,7 @@ export default function MindfulnessPage() {
           return (
             <button
               key={activity.id}
-              onClick={() => { vibrate('tap'); playSound('twinkle'); triggerCelebration(); toggleMindfulnessActivity(getToday(), activity.id) }}
+              onClick={() => { vibrate('tap'); if (!done) { playSound('twinkle'); triggerCelebration(); } toggleMindfulnessActivity(getToday(), activity.id) }}
               className={`text-left rounded-xl border p-4 transition-all ${
                 done
                   ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20 dark:border-primary-700'

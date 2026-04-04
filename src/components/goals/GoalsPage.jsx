@@ -437,8 +437,7 @@ export default function GoalsPage() {
                   : [...checkins, today]
                 updateGoal(goal.id, { dailyCheckins: updated })
                 vibrate('tap')
-                playSound('twinkle')
-                triggerCelebration()
+                if (!checkedToday) { playSound('twinkle'); triggerCelebration() }
               }
 
               return (

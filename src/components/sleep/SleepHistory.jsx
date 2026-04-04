@@ -157,7 +157,7 @@ export default function SleepHistory() {
                   <Pencil size={15} />
                 </button>
                 <button
-                  onClick={() => { vibrate('tap'); playSound('twinkle'); triggerCelebration(); deleteSleepLog(log.id) }}
+                  onClick={() => { vibrate('tap'); deleteSleepLog(log.id) }}
                   className="p-1.5 text-red-500 hover:text-red-600 transition-colors"
                   title="Delete"
                 >
