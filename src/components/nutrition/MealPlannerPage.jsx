@@ -275,6 +275,10 @@ export default function MealPlannerPage() {
     updateMealPlan(newPlan)
   }
 
+  // Determine which day index is "today" (0=Mon, 6=Sun)
+  const todayDayIndex = (new Date().getDay() + 6) % 7 // JS Sunday=0 → we want Mon=0
+  const isToday = activeDay === todayDayIndex
+
   const plan = weekPlan[activeDay]
   if (!plan) return null
 
@@ -320,7 +324,9 @@ export default function MealPlannerPage() {
               className={`px-4 py-2 rounded-lg font-medium whitespace-nowrap transition-colors ${
                 i === activeDay
                   ? 'bg-primary-500 text-white'
-                  : 'bg-surface-200 dark:bg-surface-700 text-surface-700 dark:text-surface-300 hover:bg-surface-300 dark:hover:bg-surface-600'
+                  : i === todayDayIndex
+                    ? 'bg-primary-100 dark:bg-primary-900/30 text-primary-700 dark:text-primary-400 hover:bg-primary-200 dark:hover:bg-primary-900/40'
+                    : 'bg-surface-200 dark:bg-surface-700 text-surface-700 dark:text-surface-300 hover:bg-surface-300 dark:hover:bg-surface-600'
               }`}
             >
               {SHORT_DAYS[i]}
@@ -337,8 +343,8 @@ export default function MealPlannerPage() {
           Shuffle {plan.day}'s meals
         </button>
 
-        {/* Meals eaten counter */}
-        {(() => {
+        {/* Meals eaten counter — only on today's tab */}
+        {isToday && (() => {
           const mealsEaten = ['breakfast', 'morningSnack', 'afternoonSnack'].filter(k => todayMeals.completed.includes(k)).length
           return (
             <div className={`mb-6 p-3 rounded-lg text-sm font-medium text-center ${
@@ -359,7 +365,7 @@ export default function MealPlannerPage() {
           { icon: '🍎', title: 'Morning Snack', meal: plan.morningSnack, key: 'morningSnack' },
           { icon: '🍪', title: 'Afternoon Snack', meal: plan.afternoonSnack, key: 'afternoonSnack' },
         ].map(({ icon, title, meal, key }) => {
-          const isDone = todayMeals.completed.includes(key)
+          const isDone = isToday && todayMeals.completed.includes(key)
           return (
           <div key={meal.id} className={`mb-6 p-4 rounded-lg border ${isDone ? 'bg-green-50/50 dark:bg-green-900/10 border-green-300 dark:border-green-800' : 'bg-white dark:bg-surface-800 border-surface-200 dark:border-surface-700'}`}>
             <div className="flex items-center justify-between mb-3">
@@ -367,17 +373,19 @@ export default function MealPlannerPage() {
                 <span className="text-2xl">{icon}</span>
                 <h2 className="text-xl font-bold text-surface-900 dark:text-surface-50">{title}</h2>
               </div>
-              <button
-                onClick={() => toggleMealCompletion(getToday(), key)}
-                className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
-                  isDone
-                    ? 'bg-green-500 text-white'
-                    : 'bg-surface-200 dark:bg-surface-700 text-surface-600 dark:text-surface-400 hover:bg-surface-300 dark:hover:bg-surface-600'
-                }`}
-              >
-                {isDone && <Check size={14} />}
-                {isDone ? 'Eaten' : 'I ate this'}
-              </button>
+              {isToday && (
+                <button
+                  onClick={() => toggleMealCompletion(getToday(), key)}
+                  className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
+                    isDone
+                      ? 'bg-green-500 text-white'
+                      : 'bg-surface-200 dark:bg-surface-700 text-surface-600 dark:text-surface-400 hover:bg-surface-300 dark:hover:bg-surface-600'
+                  }`}
+                >
+                  {isDone && <Check size={14} />}
+                  {isDone ? 'Eaten' : 'I ate this'}
+                </button>
+              )}
             </div>
             <h3 className={`text-lg font-semibold mb-3 ${isDone ? 'text-green-600 dark:text-green-400' : 'text-primary-600 dark:text-primary-400'}`}>{meal.name}</h3>
             {meal.fruitVeg.length > 0 && (
