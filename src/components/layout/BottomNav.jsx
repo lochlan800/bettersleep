@@ -1,5 +1,5 @@
 import { NavLink } from 'react-router-dom'
-import { LayoutDashboard, Moon, Heart, Timer, Brain, BookOpen, UtensilsCrossed, GlassWater, Trophy } from 'lucide-react'
+import { LayoutDashboard, Moon, Heart, Timer, Brain, BookOpen, UtensilsCrossed, GlassWater, Trophy, Target } from 'lucide-react'
 
 const links = [
   { to: '/', icon: LayoutDashboard, label: 'Home' },
@@ -10,6 +10,7 @@ const links = [
   { to: '/recovery', icon: Heart, label: 'Recovery' },
   { to: '/mindfulness', icon: Brain, label: 'Mind' },
   { to: '/competitions', icon: Trophy, label: 'Races' },
+  { to: '/goals', icon: Target, label: 'Goals' },
   { to: '/guide', icon: BookOpen, label: 'Guide' },
 ]
 

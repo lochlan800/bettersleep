@@ -27,6 +27,7 @@ export function AppProvider({ children }) {
   const [mealCompletions, setMealCompletions] = useLocalStorage('bs_meal_completions', []);
   const [competitionLogs, setCompetitionLogs] = useLocalStorage('bs_competition_logs', []);
   const [stretchingLogs, setStretchingLogs] = useLocalStorage('bs_stretching_logs', []);
+  const [goals, setGoals] = useLocalStorage('bs_goals', []);
   const [settings, setSettings] = useLocalStorage('bs_settings', DEFAULT_SETTINGS);
 
   // ── Dark mode side-effect ───────────────────────────────────────
@@ -275,6 +276,37 @@ export function AppProvider({ children }) {
     [setCompetitionLogs],
   );
 
+  // ── Goal actions ──────────────────────────────────────────────────
+
+  const addGoal = useCallback(
+    (goal) => {
+      const entry = {
+        ...goal,
+        id: crypto.randomUUID(),
+        createdAt: new Date().toISOString(),
+        completed: false,
+      };
+      setGoals((prev) => [...prev, entry]);
+    },
+    [setGoals],
+  );
+
+  const updateGoal = useCallback(
+    (id, updates) => {
+      setGoals((prev) =>
+        prev.map((g) => (g.id === id ? { ...g, ...updates } : g)),
+      );
+    },
+    [setGoals],
+  );
+
+  const deleteGoal = useCallback(
+    (id) => {
+      setGoals((prev) => prev.filter((g) => g.id !== id));
+    },
+    [setGoals],
+  );
+
   // ── Settings ────────────────────────────────────────────────────
 
   const updateSettings = useCallback(
@@ -297,6 +329,7 @@ export function AppProvider({ children }) {
       mealCompletions,
       competitionLogs,
       stretchingLogs,
+      goals,
       settings,
 
       // Actions
@@ -319,6 +352,9 @@ export function AppProvider({ children }) {
       addCompetitionLog,
       updateCompetitionLog,
       deleteCompetitionLog,
+      addGoal,
+      updateGoal,
+      deleteGoal,
       updateSettings,
     }),
     [
@@ -330,6 +366,7 @@ export function AppProvider({ children }) {
       mealCompletions,
       competitionLogs,
       stretchingLogs,
+      goals,
       settings,
       addSleepLog,
       updateSleepLog,
@@ -350,6 +387,9 @@ export function AppProvider({ children }) {
       addCompetitionLog,
       updateCompetitionLog,
       deleteCompetitionLog,
+      addGoal,
+      updateGoal,
+      deleteGoal,
       updateSettings,
     ],
   );
