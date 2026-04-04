@@ -1,4 +1,6 @@
 import { useState, useEffect } from 'react'
+import { vibrate } from '../../utils/vibrate'
+import { playSound } from '../../utils/playSound'
 
 export default function SplashScreen({ onFinished }) {
   const [phase, setPhase] = useState('enter') // enter → hold → exit → done
@@ -9,7 +11,11 @@ export default function SplashScreen({ onFinished }) {
     // Longer pause to enjoy the screen
     const exitTimer = setTimeout(() => setPhase('exit'), 4000)
     // Swoosh away
-    const doneTimer = setTimeout(() => onFinished(), 4800)
+    const doneTimer = setTimeout(() => {
+      vibrate('success')
+      playSound('explosion')
+      onFinished()
+    }, 4800)
 
     return () => {
       clearTimeout(holdTimer)
