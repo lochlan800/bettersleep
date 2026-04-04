@@ -4,6 +4,7 @@ import Card from '../ui/Card'
 import Button from '../ui/Button'
 import { useApp } from '../../context/AppContext'
 import { vibrate } from '../../utils/vibrate'
+import { playSound } from '../../utils/playSound'
 import { getToday } from '../../utils/dateHelpers'
 
 const ACTIVITIES = [
@@ -160,7 +161,7 @@ export default function MindfulnessPage() {
           return (
             <button
               key={activity.id}
-              onClick={() => { vibrate('tap'); toggleMindfulnessActivity(getToday(), activity.id) }}
+              onClick={() => { vibrate('tap'); playSound('twinkle'); toggleMindfulnessActivity(getToday(), activity.id) }}
               className={`text-left rounded-xl border p-4 transition-all ${
                 done
                   ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20 dark:border-primary-700'

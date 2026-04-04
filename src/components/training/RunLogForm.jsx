@@ -5,6 +5,7 @@ import Button from '../ui/Button'
 import { useApp } from '../../context/AppContext'
 import { getToday } from '../../utils/dateHelpers'
 import { vibrate } from '../../utils/vibrate'
+import { playSound } from '../../utils/playSound'
 
 const RUN_TYPES = [
   { value: 'easy_long', label: 'Easy Long Run' },
@@ -83,6 +84,7 @@ export default function RunLogForm({ onSuccess, initialData, editMode, onSave } 
 
     addTrainingLog(data)
     vibrate('success')
+    playSound('explosion')
 
     setShowSuccess(true)
     setForm(initialForm())

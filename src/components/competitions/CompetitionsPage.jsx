@@ -3,6 +3,7 @@ import { useApp } from '../../context/AppContext'
 import { Trophy, Plus, Trash2, Pencil, ChevronDown, ChevronUp } from 'lucide-react'
 import { getToday } from '../../utils/dateHelpers'
 import { vibrate } from '../../utils/vibrate'
+import { playSound } from '../../utils/playSound'
 
 const EVENTS = [
   { id: '50m', label: '50m', category: 'Sprint' },
@@ -115,6 +116,7 @@ export default function CompetitionsPage() {
       addCompetitionLog(data)
     }
     vibrate('success')
+    playSound('explosion')
     resetForm()
     setShowForm(false)
   }
@@ -398,7 +400,7 @@ export default function CompetitionsPage() {
                           Edit
                         </button>
                         <button
-                          onClick={() => { vibrate('tap'); deleteCompetitionLog(log.id) }}
+                          onClick={() => { vibrate('tap'); playSound('twinkle'); deleteCompetitionLog(log.id) }}
                           className="flex items-center gap-1 text-sm text-red-500 hover:text-red-600 transition-colors"
                         >
                           <Trash2 size={14} />

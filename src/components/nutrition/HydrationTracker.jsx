@@ -4,6 +4,7 @@ import Card from '../ui/Card'
 import Button from '../ui/Button'
 import ProgressBar from '../ui/ProgressBar'
 import { vibrate } from '../../utils/vibrate'
+import { playSound } from '../../utils/playSound'
 import { useApp } from '../../context/AppContext'
 import { getToday, formatTime } from '../../utils/dateHelpers'
 import { format } from 'date-fns'
@@ -26,6 +27,7 @@ export default function HydrationTracker() {
 
   const handleAdd = (amountMl) => {
     vibrate('tap')
+    playSound('twinkle')
     addHydrationEntry(getToday(), {
       time: getCurrentTime(),
       amountMl,

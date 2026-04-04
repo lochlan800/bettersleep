@@ -4,6 +4,7 @@ import { useApp } from '../../context/AppContext'
 import { getSleepDurationHours } from '../../utils/scoring'
 import { getToday } from '../../utils/dateHelpers'
 import { vibrate } from '../../utils/vibrate'
+import { playSound } from '../../utils/playSound'
 import Card from '../ui/Card'
 
 export default function SleepHistory() {
@@ -154,7 +155,7 @@ export default function SleepHistory() {
                   <Pencil size={15} />
                 </button>
                 <button
-                  onClick={() => { vibrate('tap'); deleteSleepLog(log.id) }}
+                  onClick={() => { vibrate('tap'); playSound('twinkle'); deleteSleepLog(log.id) }}
                   className="p-1.5 text-red-500 hover:text-red-600 transition-colors"
                   title="Delete"
                 >
