@@ -61,6 +61,9 @@ export default function TrainingBreakdown() {
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
       <Card title="Time Breakdown" subtitle={`${totalMinutes} minutes total`}>
+        <p className="text-[12px] text-surface-500 dark:text-surface-400 mb-2 leading-relaxed">
+          How your total training time is split across different types of session. A good mix helps you improve without overloading one area.
+        </p>
         <div className="h-64">
           <ResponsiveContainer width="100%" height="100%">
             <PieChart>
@@ -98,6 +101,9 @@ export default function TrainingBreakdown() {
       </Card>
 
       <Card title="Session Breakdown" subtitle={`${totalSessions} sessions total`}>
+        <p className="text-[12px] text-surface-500 dark:text-surface-400 mb-2 leading-relaxed">
+          How many sessions of each type you've done. This helps you see if you're doing enough variety — mixing easy runs, intervals, and other training keeps things balanced.
+        </p>
         <div className="h-64">
           <ResponsiveContainer width="100%" height="100%">
             <PieChart>

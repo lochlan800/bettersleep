@@ -76,6 +76,13 @@ export default function TrainingLoadChart() {
           </AreaChart>
         </ResponsiveContainer>
       </div>
+
+      <div className="mt-4 pt-4 border-t border-surface-200 dark:border-surface-700">
+        <p className="text-xs font-semibold text-surface-600 dark:text-surface-400 mb-2">What does this chart show?</p>
+        <p className="text-[12px] text-surface-500 dark:text-surface-400 leading-relaxed">
+          Each bar is how hard you trained that day. The number is your <strong>minutes × intensity</strong> — so a 30 minute run at intensity 7 = 210. Taller bars mean tougher days. Look for a steady pattern rather than big spikes, because sudden jumps can lead to injury.
+        </p>
+      </div>
     </Card>
   )
 }
