@@ -12,15 +12,15 @@ export function vibrate(pattern = 'tap') {
 
   switch (pattern) {
     case 'tap':
-      navigator.vibrate(30)
+      navigator.vibrate(80)
       break
     case 'success':
-      navigator.vibrate([30, 50, 60])
+      navigator.vibrate([80, 80, 120])
       break
     case 'error':
-      navigator.vibrate(200)
+      navigator.vibrate(400)
       break
     default:
-      navigator.vibrate(30)
+      navigator.vibrate(80)
   }
 }
