@@ -18,6 +18,9 @@ export function vibrate(pattern = 'tap') {
       case 'success':
         window.navigator.vibrate([150, 100, 200])
         break
+      case 'celebration':
+        window.navigator.vibrate([200, 100, 200, 100, 200, 100, 200, 100, 200, 100, 200])
+        break
       case 'error':
         window.navigator.vibrate(500)
         break

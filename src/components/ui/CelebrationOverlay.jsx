@@ -1,7 +1,16 @@
+import { useEffect } from 'react'
 import { useCelebration } from '../../context/CelebrationContext'
+import { vibrate } from '../../utils/vibrate'
 
 export default function CelebrationOverlay() {
   const { active } = useCelebration()
+
+  useEffect(() => {
+    if (active) {
+      vibrate('celebration')
+      return () => { try { window.navigator.vibrate(0) } catch {} }
+    }
+  }, [active])
 
   if (!active) return null
 
