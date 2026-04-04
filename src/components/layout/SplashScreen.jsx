@@ -5,11 +5,11 @@ export default function SplashScreen({ onFinished }) {
 
   useEffect(() => {
     // Icon flies in
-    const holdTimer = setTimeout(() => setPhase('hold'), 600)
-    // Brief pause
-    const exitTimer = setTimeout(() => setPhase('exit'), 1800)
+    const holdTimer = setTimeout(() => setPhase('hold'), 800)
+    // Longer pause to enjoy the screen
+    const exitTimer = setTimeout(() => setPhase('exit'), 4000)
     // Swoosh away
-    const doneTimer = setTimeout(() => onFinished(), 2500)
+    const doneTimer = setTimeout(() => onFinished(), 4800)
 
     return () => {
       clearTimeout(holdTimer)
