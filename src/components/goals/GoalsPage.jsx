@@ -3,30 +3,6 @@ import { useApp } from '../../context/AppContext'
 import { Target, Plus, Trash2, Pencil, ChevronDown, ChevronUp, Check, ArrowRight, ArrowLeft, HelpCircle, CalendarCheck } from 'lucide-react'
 import { getToday } from '../../utils/dateHelpers'
 
-function getStreak(checkins) {
-  if (!checkins || checkins.length === 0) return 0
-  const sorted = [...checkins].sort().reverse()
-  const today = getToday()
-  let streak = 0
-  let expected = new Date(today)
-  // Allow today or yesterday as the start
-  if (sorted[0] !== today) {
-    expected.setDate(expected.getDate() - 1)
-    if (sorted[0] !== expected.toISOString().slice(0, 10)) return 0
-  }
-  expected = new Date(sorted[0])
-  for (const d of sorted) {
-    const exp = expected.toISOString().slice(0, 10)
-    if (d === exp) {
-      streak++
-      expected.setDate(expected.getDate() - 1)
-    } else {
-      break
-    }
-  }
-  return streak
-}
-
 const CATEGORIES = [
   { id: 'recovery', label: 'Recovery', color: 'text-green-600 dark:text-green-400', bg: 'bg-green-100 dark:bg-green-900/30', emoji: '💚' },
   { id: 'training', label: 'Training', color: 'text-blue-600 dark:text-blue-400', bg: 'bg-blue-100 dark:bg-blue-900/30', emoji: '🏃' },
@@ -443,7 +419,6 @@ export default function GoalsPage() {
 
               const checkins = goal.dailyCheckins || []
               const checkedToday = checkins.includes(getToday())
-              const streak = getStreak(checkins)
 
               const handleDailyCheckin = (e) => {
                 e.stopPropagation()
@@ -488,9 +463,6 @@ export default function GoalsPage() {
                             <span className={`text-xs ${overdue ? 'text-red-500' : days <= 7 ? 'text-amber-500' : 'text-surface-500'}`}>
                               {overdue ? `${Math.abs(days)}d overdue` : `${days}d left`}
                             </span>
-                          )}
-                          {streak > 0 && !goal.completed && (
-                            <span className="text-xs text-amber-500 dark:text-amber-400 font-medium">🔥 {streak}d streak</span>
                           )}
                         </div>
                         <p className={`text-sm font-medium mt-1 ${goal.completed ? 'line-through text-surface-500' : 'text-surface-900 dark:text-surface-50'}`}>
