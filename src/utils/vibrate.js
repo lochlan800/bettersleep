@@ -8,19 +8,23 @@
  *   'error'   – long buzz (something went wrong)
  */
 export function vibrate(pattern = 'tap') {
-  if (typeof navigator === 'undefined' || !navigator.vibrate) return
+  try {
+    if (!window?.navigator?.vibrate) return
 
-  switch (pattern) {
-    case 'tap':
-      navigator.vibrate(80)
-      break
-    case 'success':
-      navigator.vibrate([80, 80, 120])
-      break
-    case 'error':
-      navigator.vibrate(400)
-      break
-    default:
-      navigator.vibrate(80)
+    switch (pattern) {
+      case 'tap':
+        window.navigator.vibrate(150)
+        break
+      case 'success':
+        window.navigator.vibrate([150, 100, 200])
+        break
+      case 'error':
+        window.navigator.vibrate(500)
+        break
+      default:
+        window.navigator.vibrate(150)
+    }
+  } catch {
+    // Silently fail if vibration not available
   }
 }

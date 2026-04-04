@@ -320,6 +320,37 @@ const DATA_KEYS = [
   'bs_settings',
 ];
 
+function VibrationTest() {
+  const [result, setResult] = useState(null)
+
+  const handleTest = () => {
+    if (!navigator.vibrate) {
+      setResult('Your browser does NOT support vibration.')
+      return
+    }
+    const ok = navigator.vibrate(500)
+    setResult(ok ? 'Vibration triggered! Did you feel it?' : 'navigator.vibrate returned false — vibration was blocked.')
+  }
+
+  return (
+    <div className="p-4 bg-white dark:bg-surface-800 rounded-lg border border-surface-200 dark:border-surface-700">
+      <h3 className="font-bold text-surface-900 dark:text-surface-50 mb-2">Vibration Test</h3>
+      <p className="text-sm text-surface-500 dark:text-surface-400 mb-4">
+        Tap the button below to test if vibration works on your device.
+      </p>
+      <button
+        onClick={handleTest}
+        className="bg-primary-500 hover:bg-primary-600 text-white px-4 py-2 rounded-lg transition-colors"
+      >
+        Test Vibration (0.5s buzz)
+      </button>
+      {result && (
+        <p className="text-sm mt-3 text-surface-700 dark:text-surface-300">{result}</p>
+      )}
+    </div>
+  )
+}
+
 function DataBackup() {
   const [importStatus, setImportStatus] = useState(null)
 
@@ -402,6 +433,8 @@ export default function GuidePage() {
           </p>
         </div>
       </div>
+
+      <VibrationTest />
 
       <DataBackup />
 
