@@ -319,6 +319,7 @@ function daysUntil(deadline) {
 
 export default function GoalsPage() {
   const { goals, addGoal, updateGoal, deleteGoal } = useApp()
+  const { triggerCelebration } = useCelebration()
   const [showWizard, setShowWizard] = useState(false)
   const [editingId, setEditingId] = useState(null)
   const [expandedId, setExpandedId] = useState(null)
@@ -437,6 +438,7 @@ export default function GoalsPage() {
                 updateGoal(goal.id, { dailyCheckins: updated })
                 vibrate('tap')
                 playSound('twinkle')
+                triggerCelebration()
               }
 
               return (

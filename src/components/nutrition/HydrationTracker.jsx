@@ -5,6 +5,7 @@ import Button from '../ui/Button'
 import ProgressBar from '../ui/ProgressBar'
 import { vibrate } from '../../utils/vibrate'
 import { playSound } from '../../utils/playSound'
+import { useCelebration } from '../../context/CelebrationContext'
 import { useApp } from '../../context/AppContext'
 import { getToday, formatTime } from '../../utils/dateHelpers'
 import { format } from 'date-fns'
@@ -17,6 +18,7 @@ function getCurrentTime() {
 
 export default function HydrationTracker() {
   const { getTodayHydration, addHydrationEntry, resetTodayHydration } = useApp()
+  const { triggerCelebration } = useCelebration()
   const [customAmount, setCustomAmount] = useState('')
 
   const todayLog = getTodayHydration()
@@ -28,6 +30,7 @@ export default function HydrationTracker() {
   const handleAdd = (amountMl) => {
     vibrate('tap')
     playSound('twinkle')
+    triggerCelebration()
     addHydrationEntry(getToday(), {
       time: getCurrentTime(),
       amountMl,

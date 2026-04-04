@@ -4,6 +4,7 @@ import { useApp } from '../../context/AppContext'
 import { getToday } from '../../utils/dateHelpers'
 import { vibrate } from '../../utils/vibrate'
 import { playSound } from '../../utils/playSound'
+import { useCelebration } from '../../context/CelebrationContext'
 import stretches from '../../data/stretches'
 
 const typeMap = {
@@ -25,6 +26,7 @@ const typeMap = {
 
 export default function StretchingRoutine() {
   const { trainingLogs, toggleStretch, getTodayStretching } = useApp()
+  const { triggerCelebration } = useCelebration()
   const [expanded, setExpanded] = useState({})
   const todayStretching = getTodayStretching()
   const lastRun = [...trainingLogs].sort((a, b) => b.date.localeCompare(a.date))[0]
@@ -70,7 +72,7 @@ export default function StretchingRoutine() {
         >
           <div className="flex items-center">
             <button
-              onClick={() => { vibrate('tap'); playSound('twinkle'); toggleStretch(getToday(), s.id) }}
+              onClick={() => { vibrate('tap'); playSound('twinkle'); triggerCelebration(); toggleStretch(getToday(), s.id) }}
               className={`flex items-center justify-center w-10 h-10 shrink-0 ml-1 transition-colors ${
                 isDone ? 'text-green-500' : 'text-surface-300 dark:text-surface-600 hover:text-primary-500'
               }`}

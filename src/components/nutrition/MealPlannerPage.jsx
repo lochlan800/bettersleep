@@ -4,6 +4,7 @@ import { ChevronDown, RotateCw, Check } from 'lucide-react'
 import { getToday } from '../../utils/dateHelpers'
 import { vibrate } from '../../utils/vibrate'
 import { playSound } from '../../utils/playSound'
+import { useCelebration } from '../../context/CelebrationContext'
 
 // Meal data
 const breakfasts = [
@@ -238,6 +239,7 @@ function generateWeek() {
 
 export default function MealPlannerPage() {
   const { mealPlans, updateMealPlan, toggleMealCompletion, getTodayMealCompletions } = useApp()
+  const { triggerCelebration } = useCelebration()
   const todayMeals = getTodayMealCompletions()
   const [weekPlan, setWeekPlan] = useState(mealPlans || generateWeek())
   const [activeDay, setActiveDay] = useState(0)
@@ -377,7 +379,7 @@ export default function MealPlannerPage() {
               </div>
               {isToday && (
                 <button
-                  onClick={() => { vibrate('tap'); playSound('twinkle'); toggleMealCompletion(getToday(), key) }}
+                  onClick={() => { vibrate('tap'); playSound('twinkle'); triggerCelebration(); toggleMealCompletion(getToday(), key) }}
                   className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
                     isDone
                       ? 'bg-green-500 text-white'

@@ -5,6 +5,7 @@ import Button from '../ui/Button'
 import { useApp } from '../../context/AppContext'
 import { vibrate } from '../../utils/vibrate'
 import { playSound } from '../../utils/playSound'
+import { useCelebration } from '../../context/CelebrationContext'
 import { getToday } from '../../utils/dateHelpers'
 
 const ACTIVITIES = [
@@ -107,6 +108,7 @@ const CATEGORY_COLORS = {
 
 export default function MindfulnessPage() {
   const { mindfulnessLogs, toggleMindfulnessActivity, getTodayMindfulness } = useApp()
+  const { triggerCelebration } = useCelebration()
 
   const todayLog = getTodayMindfulness()
   const completedToday = todayLog.activities || []
@@ -161,7 +163,7 @@ export default function MindfulnessPage() {
           return (
             <button
               key={activity.id}
-              onClick={() => { vibrate('tap'); playSound('twinkle'); toggleMindfulnessActivity(getToday(), activity.id) }}
+              onClick={() => { vibrate('tap'); playSound('twinkle'); triggerCelebration(); toggleMindfulnessActivity(getToday(), activity.id) }}
               className={`text-left rounded-xl border p-4 transition-all ${
                 done
                   ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20 dark:border-primary-700'
