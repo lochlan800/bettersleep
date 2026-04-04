@@ -2,6 +2,7 @@ import React, { createContext, useContext, useCallback, useEffect, useMemo } fro
 import useLocalStorage from '../hooks/useLocalStorage';
 import { calculateTrainingLoad } from '../utils/scoring';
 import { getToday } from '../utils/dateHelpers';
+import { vibrate } from '../utils/vibrate';
 
 // ── Context ─────────────────────────────────────────────────────────
 
@@ -50,6 +51,7 @@ export function AppProvider({ children }) {
         createdAt: new Date().toISOString(),
       };
       setSleepLogs((prev) => [...prev, entry]);
+      vibrate('success');
     },
     [setSleepLogs],
   );
@@ -66,6 +68,7 @@ export function AppProvider({ children }) {
   const deleteSleepLog = useCallback(
     (id) => {
       setSleepLogs((prev) => prev.filter((log) => log.id !== id));
+      vibrate('tap');
     },
     [setSleepLogs],
   );
@@ -82,6 +85,7 @@ export function AppProvider({ children }) {
         trainingLoad,
       };
       setTrainingLogs((prev) => [...prev, entry]);
+      vibrate('success');
     },
     [setTrainingLogs],
   );
@@ -103,6 +107,7 @@ export function AppProvider({ children }) {
   const deleteTrainingLog = useCallback(
     (id) => {
       setTrainingLogs((prev) => prev.filter((log) => log.id !== id));
+      vibrate('tap');
     },
     [setTrainingLogs],
   );
@@ -131,6 +136,7 @@ export function AppProvider({ children }) {
           },
         ];
       });
+      vibrate('tap');
     },
     [setHydrationLogs],
   );
@@ -165,6 +171,7 @@ export function AppProvider({ children }) {
         }
         return [...prev, { date: dateStr, activities: [activityId] }];
       });
+      vibrate('tap');
     },
     [setMindfulnessLogs],
   );
@@ -203,6 +210,7 @@ export function AppProvider({ children }) {
         }
         return [...prev, { date: dateStr, completed: [mealKey] }];
       });
+      vibrate('tap');
     },
     [setMealCompletions],
   );
@@ -232,6 +240,7 @@ export function AppProvider({ children }) {
         }
         return [...prev, { date: dateStr, completed: [stretchId] }];
       });
+      vibrate('tap');
     },
     [setStretchingLogs],
   );
@@ -256,6 +265,7 @@ export function AppProvider({ children }) {
         createdAt: new Date().toISOString(),
       };
       setCompetitionLogs((prev) => [...prev, entry]);
+      vibrate('success');
     },
     [setCompetitionLogs],
   );
@@ -272,6 +282,7 @@ export function AppProvider({ children }) {
   const deleteCompetitionLog = useCallback(
     (id) => {
       setCompetitionLogs((prev) => prev.filter((log) => log.id !== id));
+      vibrate('tap');
     },
     [setCompetitionLogs],
   );
@@ -287,6 +298,7 @@ export function AppProvider({ children }) {
         completed: false,
       };
       setGoals((prev) => [...prev, entry]);
+      vibrate('success');
     },
     [setGoals],
   );
@@ -296,6 +308,7 @@ export function AppProvider({ children }) {
       setGoals((prev) =>
         prev.map((g) => (g.id === id ? { ...g, ...updates } : g)),
       );
+      vibrate('tap');
     },
     [setGoals],
   );
@@ -303,6 +316,7 @@ export function AppProvider({ children }) {
   const deleteGoal = useCallback(
     (id) => {
       setGoals((prev) => prev.filter((g) => g.id !== id));
+      vibrate('tap');
     },
     [setGoals],
   );
