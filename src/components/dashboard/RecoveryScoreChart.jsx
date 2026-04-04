@@ -14,7 +14,7 @@ function getColor(score) {
 }
 
 export default function RecoveryScoreChart() {
-  const { sleepLogs, trainingLogs, hydrationLogs, mindfulnessLogs, stretchingLogs, mealCompletions } = useApp()
+  const { sleepLogs, trainingLogs, hydrationLogs, mindfulnessLogs, stretchingLogs, mealCompletions, goals } = useApp()
 
   const chartData = useMemo(() => {
     const data = []
@@ -52,6 +52,15 @@ export default function RecoveryScoreChart() {
       const dayMeals = mealCompletions.find(d => d.date === dateStr)
       const mealsEatenCount = dayMeals ? dayMeals.completed.length : 0
 
+      // Goals check-in for this day
+      const activeGoals = (goals || []).filter(g => !g.completed)
+      const goalsCheckedDay = activeGoals.filter(
+        g => g.dailyCheckins && g.dailyCheckins.includes(dateStr)
+      ).length
+      const goalCheckinPercent = activeGoals.length > 0
+        ? Math.round((goalsCheckedDay / activeGoals.length) * 100)
+        : 0
+
       const score = calculateRecoveryScore({
         sleepScore,
         fatigueScore: 0,
@@ -61,6 +70,7 @@ export default function RecoveryScoreChart() {
         mindfulnessCount,
         stretchingPercent,
         mealsEatenCount,
+        goalCheckinPercent,
       })
 
       data.push({
@@ -71,7 +81,7 @@ export default function RecoveryScoreChart() {
     }
 
     return data
-  }, [sleepLogs, trainingLogs, hydrationLogs, mindfulnessLogs, stretchingLogs, mealCompletions])
+  }, [sleepLogs, trainingLogs, hydrationLogs, mindfulnessLogs, stretchingLogs, mealCompletions, goals])
 
   const hasData = chartData.some(d => d.score > 0)
 

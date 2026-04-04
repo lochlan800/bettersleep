@@ -215,25 +215,30 @@ export function calculateRecoveryScore({
   mindfulnessCount = 0,
   stretchingPercent = 0,
   mealsEatenCount = 0,
+  goalCheckinPercent = 0,
 }) {
   // Dynamic weights: redistribute fatigue weight when ACWR isn't reliable
-  let wSleep, wFatigue, wHydration, wSoreness, wMindfulness, wStretching, wNutrition;
+  // With ACWR:    Sleep 25 + Freshness 15 + Soreness 20 + Hydration 10 + Mindfulness 10 + Stretching 10 + Nutrition 5 + Goals 5 = 100
+  // Without ACWR: Sleep 25 + Soreness 30 + Hydration 10 + Mindfulness 10 + Stretching 10 + Nutrition 5 + Goals 10 = 100
+  let wSleep, wFatigue, wHydration, wSoreness, wMindfulness, wStretching, wNutrition, wGoals;
   if (hasReliableACWR) {
     wSleep = 25;
-    wFatigue = 20;
+    wFatigue = 15;
     wHydration = 10;
     wSoreness = 20;
     wMindfulness = 10;
     wStretching = 10;
     wNutrition = 5;
+    wGoals = 5;
   } else {
-    wSleep = 30;
+    wSleep = 25;
     wFatigue = 0;
     wHydration = 10;
     wSoreness = 30;
     wMindfulness = 10;
-    wStretching = 15;
+    wStretching = 10;
     wNutrition = 5;
+    wGoals = 10;
   }
 
   const sleepComponent = (sleepScore / 100) * wSleep;
@@ -251,13 +256,15 @@ export function calculateRecoveryScore({
   // 1 meal = 40%, 2 meals = 70%, 3 meals = 100%
   const nutritionNormalized = mealsEatenCount >= 3 ? 1 : mealsEatenCount === 2 ? 0.7 : mealsEatenCount === 1 ? 0.4 : 0;
   const nutritionComponent = nutritionNormalized * wNutrition;
+  // Goals: percentage of active goals checked in today
+  const goalsComponent = (Math.min(100, goalCheckinPercent) / 100) * wGoals;
 
   return Math.round(
     Math.min(
       100,
       Math.max(
         0,
-        sleepComponent + fatigueComponent + hydrationComponent + sorenessComponent + mindfulnessComponent + stretchingComponent + nutritionComponent
+        sleepComponent + fatigueComponent + hydrationComponent + sorenessComponent + mindfulnessComponent + stretchingComponent + nutritionComponent + goalsComponent
       )
     )
   );
