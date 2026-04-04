@@ -1,0 +1,94 @@
+import { useState, useEffect } from 'react'
+
+export default function SplashScreen({ onFinished }) {
+  const [phase, setPhase] = useState('enter') // enter → hold → exit → done
+
+  useEffect(() => {
+    // Icon flies in
+    const holdTimer = setTimeout(() => setPhase('hold'), 600)
+    // Brief pause
+    const exitTimer = setTimeout(() => setPhase('exit'), 1800)
+    // Swoosh away
+    const doneTimer = setTimeout(() => onFinished(), 2500)
+
+    return () => {
+      clearTimeout(holdTimer)
+      clearTimeout(exitTimer)
+      clearTimeout(doneTimer)
+    }
+  }, [onFinished])
+
+  return (
+    <div
+      className={`fixed inset-0 z-[9999] flex flex-col items-center justify-center bg-gradient-to-br from-primary-500 via-primary-600 to-teal-700 transition-all duration-700 ease-in-out ${
+        phase === 'exit' ? 'opacity-0 scale-110' : 'opacity-100 scale-100'
+      }`}
+    >
+      {/* Running icon */}
+      <div
+        className={`transition-all duration-600 ease-out ${
+          phase === 'enter'
+            ? '-translate-x-[100vw] opacity-0'
+            : 'translate-x-0 opacity-100'
+        }`}
+      >
+        <svg
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="white"
+          strokeWidth="1.5"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          className="w-24 h-24 drop-shadow-lg"
+        >
+          {/* Runner figure */}
+          <circle cx="13.5" cy="3.5" r="2" />
+          <path d="M7 21l3-7 2.5 2 4-5" />
+          <path d="M16.5 11L13 16l-2.5-2L8 21" />
+          <path d="M6 16l2-5 4 2" />
+          <path d="M15 6l-3.5 5" />
+          <path d="M11.5 11L17 8" />
+        </svg>
+      </div>
+
+      {/* App name */}
+      <div
+        className={`mt-6 transition-all duration-500 delay-200 ${
+          phase === 'enter'
+            ? 'opacity-0 translate-y-4'
+            : phase === 'exit'
+              ? 'opacity-0 -translate-y-4'
+              : 'opacity-100 translate-y-0'
+        }`}
+      >
+        <h1 className="text-4xl font-extrabold text-white tracking-tight">
+          MyRunningDiary
+        </h1>
+        <p className="text-center text-white/70 text-sm mt-2 font-medium">
+          Train smarter. Recover better.
+        </p>
+      </div>
+
+      {/* Animated dots */}
+      <div className="flex gap-2 mt-8">
+        {[0, 1, 2].map((i) => (
+          <div
+            key={i}
+            className="w-2 h-2 rounded-full bg-white/60"
+            style={{
+              animation: 'splash-bounce 1s ease-in-out infinite',
+              animationDelay: `${i * 0.15}s`,
+            }}
+          />
+        ))}
+      </div>
+
+      <style>{`
+        @keyframes splash-bounce {
+          0%, 100% { transform: translateY(0); opacity: 0.6; }
+          50% { transform: translateY(-8px); opacity: 1; }
+        }
+      `}</style>
+    </div>
+  )
+}

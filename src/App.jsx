@@ -1,6 +1,8 @@
+import { useState, useCallback } from 'react'
 import { Routes, Route } from 'react-router-dom'
 import { AppProvider } from './context/AppContext'
 import AppShell from './components/layout/AppShell'
+import SplashScreen from './components/layout/SplashScreen'
 import DashboardPage from './components/dashboard/DashboardPage'
 import TrainingPage from './components/training/TrainingPage'
 import SleepPage from './components/sleep/SleepPage'
@@ -13,8 +15,12 @@ import CompetitionsPage from './components/competitions/CompetitionsPage'
 import GoalsPage from './components/goals/GoalsPage'
 
 export default function App() {
+  const [showSplash, setShowSplash] = useState(true)
+  const handleSplashDone = useCallback(() => setShowSplash(false), [])
+
   return (
     <AppProvider>
+      {showSplash && <SplashScreen onFinished={handleSplashDone} />}
       <AppShell>
         <Routes>
           <Route path="/" element={<DashboardPage />} />
