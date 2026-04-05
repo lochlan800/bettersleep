@@ -32,7 +32,7 @@ export default function Sidebar() {
         >
           {({ isActive }) => (
             <>
-              <Icon size={20} className={isActive ? color : ''} />
+              <Icon size={20} className={color} />
               <span>{label}</span>
             </>
           )}
