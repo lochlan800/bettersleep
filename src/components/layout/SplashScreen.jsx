@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { vibrate } from '../../utils/vibrate'
+
 import { playSound } from '../../utils/playSound'
 import { useCelebration } from '../../context/CelebrationContext'
 
@@ -14,7 +14,6 @@ export default function SplashScreen({ onFinished }) {
     const exitTimer = setTimeout(() => setPhase('exit'), 4000)
     // Swoosh away
     const doneTimer = setTimeout(() => {
-      vibrate('success')
       playSound('explosion')
       triggerCelebration()
       onFinished()

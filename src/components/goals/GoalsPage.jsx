@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useApp } from '../../context/AppContext'
 import { Target, Plus, Trash2, Pencil, ChevronDown, ChevronUp, Check, ArrowRight, ArrowLeft, HelpCircle, CalendarCheck } from 'lucide-react'
 import { getToday } from '../../utils/dateHelpers'
-import { vibrate } from '../../utils/vibrate'
+
 import { playSound } from '../../utils/playSound'
 import { useCelebration } from '../../context/CelebrationContext'
 
@@ -101,7 +101,6 @@ function GoalWizard({ onSave, onCancel, editGoal }) {
   const { triggerCelebration } = useCelebration()
 
   const handleSave = () => {
-    vibrate('success')
     playSound('explosion')
     triggerCelebration()
     onSave({
@@ -436,7 +435,6 @@ export default function GoalsPage() {
                   ? checkins.filter(d => d !== today)
                   : [...checkins, today]
                 updateGoal(goal.id, { dailyCheckins: updated })
-                vibrate('tap')
                 if (!checkedToday) { playSound('twinkle'); triggerCelebration() }
               }
 

@@ -3,7 +3,7 @@ import { Droplets, Plus, Clock, RotateCcw } from 'lucide-react'
 import Card from '../ui/Card'
 import Button from '../ui/Button'
 import ProgressBar from '../ui/ProgressBar'
-import { vibrate } from '../../utils/vibrate'
+
 import { playSound } from '../../utils/playSound'
 import { useCelebration } from '../../context/CelebrationContext'
 import { useApp } from '../../context/AppContext'
@@ -28,7 +28,6 @@ export default function HydrationTracker() {
   const percent = Math.min(Math.round((totalMl / targetMl) * 100), 100)
 
   const handleAdd = (amountMl) => {
-    vibrate('tap')
     playSound('twinkle')
     triggerCelebration()
     addHydrationEntry(getToday(), {

@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { ChevronDown, ChevronRight, Clock, Check } from 'lucide-react'
 import { useApp } from '../../context/AppContext'
 import { getToday } from '../../utils/dateHelpers'
-import { vibrate } from '../../utils/vibrate'
+
 import { playSound } from '../../utils/playSound'
 import { useCelebration } from '../../context/CelebrationContext'
 import stretches from '../../data/stretches'
@@ -72,7 +72,7 @@ export default function StretchingRoutine() {
         >
           <div className="flex items-center">
             <button
-              onClick={() => { vibrate('tap'); if (!isDone) { playSound('twinkle'); triggerCelebration(); } toggleStretch(getToday(), s.id) }}
+              onClick={() => { if (!isDone) { playSound('twinkle'); triggerCelebration(); } toggleStretch(getToday(), s.id) }}
               className={`flex items-center justify-center w-10 h-10 shrink-0 ml-1 transition-colors ${
                 isDone ? 'text-green-500' : 'text-surface-300 dark:text-surface-600 hover:text-primary-500'
               }`}

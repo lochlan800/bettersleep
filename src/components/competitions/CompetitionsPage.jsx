@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useApp } from '../../context/AppContext'
 import { Trophy, Plus, Trash2, Pencil, ChevronDown, ChevronUp } from 'lucide-react'
 import { getToday } from '../../utils/dateHelpers'
-import { vibrate } from '../../utils/vibrate'
+
 import { playSound } from '../../utils/playSound'
 import { useCelebration } from '../../context/CelebrationContext'
 
@@ -117,7 +117,6 @@ export default function CompetitionsPage() {
     } else {
       addCompetitionLog(data)
     }
-    vibrate('success')
     playSound('explosion')
     triggerCelebration()
     resetForm()
@@ -403,7 +402,7 @@ export default function CompetitionsPage() {
                           Edit
                         </button>
                         <button
-                          onClick={() => { vibrate('tap'); deleteCompetitionLog(log.id) }}
+                          onClick={() => deleteCompetitionLog(log.id)}
                           className="flex items-center gap-1 text-sm text-red-500 hover:text-red-600 transition-colors"
                         >
                           <Trash2 size={14} />
