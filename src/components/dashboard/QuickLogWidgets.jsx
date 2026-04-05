@@ -6,7 +6,7 @@ import Button from '../ui/Button'
 import ProgressBar from '../ui/ProgressBar'
 import SleepLogForm from '../sleep/SleepLogForm'
 import RunLogForm from '../training/RunLogForm'
-import { calculateHydrationTarget } from '../../utils/scoring'
+import { calculateHydrationTarget, calculateSleepScore } from '../../utils/scoring'
 import { getToday } from '../../utils/dateHelpers'
 
 export default function QuickLogWidgets() {
@@ -14,7 +14,9 @@ export default function QuickLogWidgets() {
   const [trainOpen, setTrainOpen] = useState(false)
   const { sleepLogs, trainingLogs, settings, getTodayHydration, addHydrationEntry } = useApp()
 
-  const lastSleep = [...sleepLogs].sort((a, b) => b.date.localeCompare(a.date))[0]
+  const sortedSleep = [...sleepLogs].sort((a, b) => b.date.localeCompare(a.date))
+  const lastSleep = sortedSleep[0]
+  const sleepScore = lastSleep ? Math.round(calculateSleepScore(lastSleep, sortedSleep.slice(0, 7))) : null
   const todayTraining = trainingLogs.find(l => l.date === getToday())
   const todayHydration = getTodayHydration()
   const hydrationTarget = calculateHydrationTarget(settings.bodyWeightKg, todayTraining?.durationMinutes ?? 0)
@@ -35,8 +37,8 @@ export default function QuickLogWidgets() {
             <span className="text-sm font-semibold text-surface-700 dark:text-surface-300">Sleep</span>
           </div>
           <p className="text-3xl font-bold text-surface-900 dark:text-surface-50">
-            {lastSleep ? lastSleep.sleepScore : '—'}
-            {lastSleep && <span className="text-sm font-normal text-surface-400">/100</span>}
+            {sleepScore !== null ? sleepScore : '—'}
+            {sleepScore !== null && <span className="text-sm font-normal text-surface-400">/100</span>}
           </p>
           <p className="text-xs text-surface-500 dark:text-surface-400">{lastSleep ? `Last logged: ${lastSleep.date}` : 'No sleep logged yet'}</p>
           <Button size="sm" variant="secondary" onClick={() => setSleepOpen(true)} className="mt-auto">
