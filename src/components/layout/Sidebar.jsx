@@ -6,7 +6,7 @@ const links = [
   { to: '/training', icon: Timer, label: 'Training', color: 'text-red-500' },
   { to: '/sleep', icon: Moon, label: 'Sleep', color: 'text-indigo-500' },
   { to: '/nutrition', icon: GlassWater, label: 'Water', color: 'text-blue-500' },
-  { to: '/meals', icon: UtensilsCrossed, label: 'Meals', color: 'text-orange-500' },
+  { to: '/meals', icon: UtensilsCrossed, label: 'Meals', color: 'text-pink-500' },
   { to: '/recovery', icon: Heart, label: 'Recovery', color: 'text-rose-500' },
   { to: '/mindfulness', icon: Brain, label: 'Mindfulness', color: 'text-purple-500' },
   { to: '/competitions', icon: Trophy, label: 'Competitions', color: 'text-amber-500' },
