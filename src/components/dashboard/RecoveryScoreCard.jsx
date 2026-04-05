@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react'
+import { useEffect, useRef } from 'react'
 import useRecoveryScore from '../../hooks/useRecoveryScore'
 import ScoreRing from '../ui/ScoreRing'
 import Card from '../ui/Card'
@@ -24,18 +24,9 @@ export default function RecoveryScoreCard() {
     stretchingPercent, sorenessLevel, mindfulnessCount,
     mealsEatenCount, goalCheckinPercent, hasReliableACWR,
   } = useRecoveryScore()
-  const { triggerConfetti, splashJustFinished, clearSplashDone } = useCelebration()
+  const { triggerConfetti } = useCelebration()
   const { text, color } = getLabel(recoveryScore)
   const confettiFired = useRef(false)
-  const [animateKey, setAnimateKey] = useState(splashJustFinished ? -1 : 0)
-
-  useEffect(() => {
-    if (splashJustFinished) {
-      clearSplashDone()
-      const t = setTimeout(() => setAnimateKey(k => k + 1), 400)
-      return () => clearTimeout(t)
-    }
-  }, [splashJustFinished, clearSplashDone])
 
   useEffect(() => {
     if (recoveryScore >= 80 && !confettiFired.current) {
@@ -69,12 +60,12 @@ export default function RecoveryScoreCard() {
         </div>
 
         {/* Animated metric rings */}
-        <div key={animateKey} className="grid grid-cols-4 gap-3 w-full">
+        <div className="grid grid-cols-4 gap-3 w-full">
           {metrics.map((m, i) => (
             <div
               key={m.label}
-              className={`flex flex-col items-center gap-1 ${animateKey >= 0 ? 'ring-appear' : 'ring-hidden'}`}
-              style={animateKey >= 0 ? { animationDelay: `${i * 150}ms` } : undefined}
+              className="flex flex-col items-center gap-1 ring-appear"
+              style={{ animationDelay: `${i * 150}ms` }}
             >
               <ScoreRing score={m.value} size={52} strokeWidth={4} label="" color={m.color} />
               <span className="text-[10px] font-medium text-surface-600 dark:text-surface-400 text-center leading-tight">{m.label}</span>
@@ -84,11 +75,6 @@ export default function RecoveryScoreCard() {
       </div>
 
       <style>{`
-        .ring-hidden {
-          opacity: 0;
-          transform: scale(0) translateY(20px);
-        }
-
         .ring-appear {
           animation: ringPop 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) both;
         }
