@@ -7,6 +7,7 @@ export function CelebrationProvider({ children }) {
   const [celebrationKey, setCelebrationKey] = useState(0)
   const [confettiActive, setConfettiActive] = useState(false)
   const [confettiKey, setConfettiKey] = useState(0)
+  const [splashJustFinished, setSplashJustFinished] = useState(false)
 
   const triggerCelebration = useCallback(() => {
     setActive(true)
@@ -20,10 +21,14 @@ export function CelebrationProvider({ children }) {
     setTimeout(() => setConfettiActive(false), 3500)
   }, [])
 
+  const markSplashDone = useCallback(() => setSplashJustFinished(true), [])
+  const clearSplashDone = useCallback(() => setSplashJustFinished(false), [])
+
   return (
     <CelebrationContext.Provider value={{
       active, celebrationKey, triggerCelebration,
       confettiActive, confettiKey, triggerConfetti,
+      splashJustFinished, markSplashDone, clearSplashDone,
     }}>
       {children}
     </CelebrationContext.Provider>

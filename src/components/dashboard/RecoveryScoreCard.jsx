@@ -24,9 +24,14 @@ export default function RecoveryScoreCard() {
     stretchingPercent, sorenessLevel, mindfulnessCount,
     mealsEatenCount, goalCheckinPercent, hasReliableACWR,
   } = useRecoveryScore()
-  const { triggerConfetti } = useCelebration()
+  const { triggerConfetti, splashJustFinished, clearSplashDone } = useCelebration()
   const { text, color } = getLabel(recoveryScore)
   const confettiFired = useRef(false)
+  const shouldAnimate = splashJustFinished
+
+  useEffect(() => {
+    if (splashJustFinished) clearSplashDone()
+  }, [splashJustFinished, clearSplashDone])
 
   useEffect(() => {
     if (recoveryScore >= 80 && !confettiFired.current) {
@@ -64,8 +69,8 @@ export default function RecoveryScoreCard() {
           {metrics.map((m, i) => (
             <div
               key={m.label}
-              className="flex flex-col items-center gap-1 ring-appear"
-              style={{ animationDelay: `${i * 150}ms` }}
+              className={`flex flex-col items-center gap-1 ${shouldAnimate ? 'ring-appear' : ''}`}
+              style={shouldAnimate ? { animationDelay: `${i * 150}ms` } : undefined}
             >
               <ScoreRing score={m.value} size={52} strokeWidth={4} label="" color={m.color} />
               <span className="text-[10px] font-medium text-surface-600 dark:text-surface-400 text-center leading-tight">{m.label}</span>

@@ -5,7 +5,7 @@ import { useCelebration } from '../../context/CelebrationContext'
 
 export default function SplashScreen({ onFinished }) {
   const [phase, setPhase] = useState('enter') // enter → hold → exit → done
-  const { triggerCelebration } = useCelebration()
+  const { triggerCelebration, markSplashDone } = useCelebration()
 
   useEffect(() => {
     // Icon flies in
@@ -16,6 +16,7 @@ export default function SplashScreen({ onFinished }) {
     const doneTimer = setTimeout(() => {
       playSound('explosion')
       triggerCelebration()
+      markSplashDone()
       onFinished()
     }, 4800)
 
