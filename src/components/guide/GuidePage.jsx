@@ -6,9 +6,11 @@ import Card from '../ui/Card'
 const sections = [
   {
     title: 'What is MyRunningDiary?',
-    content: `MyRunningDiary is a training recovery tool built for runners. It tracks your runs, sleep, and water intake, then combines them into a single Recovery Score that tells you how ready your body is to train again.
+    content: `MyRunningDiary is a training recovery tool built for runners. It tracks your runs, sleep, water, meals, mindfulness, stretching, goals, and competitions, then combines them into a single Recovery Score that tells you how ready your body is to train again.
 
-The goal is simple: train smarter, recover better, and reduce your injury risk. Instead of guessing whether you should push hard or take it easy, the app gives you a data-driven answer.`,
+The goal is simple: train smarter, recover better, and reduce your injury risk. Instead of guessing whether you should push hard or take it easy, the app gives you a data-driven answer.
+
+**You can install it as an app on your phone** — tap the browser menu and select "Add to Home Screen". Share the link with friends and they'll get their own fresh copy with no data.`,
   },
   {
     title: 'How to Use It',
@@ -20,13 +22,15 @@ The goal is simple: train smarter, recover better, and reduce your injury risk. 
 
 • **Throughout the day** — Go to Water tab and tap the quick-add buttons each time you drink water.
 
-• **Check Dashboard** — Your Recovery Score updates automatically. Check the recommendations for personalised advice.
+• **Check Dashboard** — Your Recovery Score updates automatically. The colourful progress rings show each component at a glance, and the recommendations give you personalised advice.
 
 • **Recovery tab** — Use the stretching routines and tick them off as you go. This boosts your recovery score.
 
 • **Mindfulness tab** — Do at least one mindfulness activity daily — bilateral tapping, dark bath, journaling, whatever helps. This counts toward your recovery score too.
 
-• **Meals tab** — Generate a weekly meal plan with iron-rich, whole-food breakfasts and snacks optimised for runners.
+• **Meals tab** — Check your weekly meal plan and tap "I ate this" on today's meals to track what you've eaten. This counts toward your recovery score.
+
+• **Goals tab** — Set SMART goals and check in daily. Tap "Did it today?" each day you work toward your goal.
 
 • **Competitions tab** — After a race, log your result and rate your performance across 7 areas to track your progress over time.`,
   },
@@ -38,15 +42,18 @@ The goal is simple: train smarter, recover better, and reduce your injury risk. 
 The weights adjust based on how much data you have:
 
 • **With enough training history (4+ sessions):**
-  Sleep = 25% | Freshness (ACWR) = 25% | Hydration = 10% | Soreness = 20% | Mindfulness = 10% | Stretching = 10%
+  Sleep = 25% | Freshness (ACWR) = 15% | Soreness = 20% | Hydration = 10% | Mindfulness = 10% | Stretching = 10% | Nutrition = 5% | Goals = 5%
 
 • **Without enough training history:**
-  Sleep = 35% | Hydration = 10% | Soreness = 30% | Mindfulness = 10% | Stretching = 15% | Freshness = 0%
+  Sleep = 25% | Soreness = 30% | Hydration = 10% | Mindfulness = 10% | Stretching = 10% | Nutrition = 5% | Goals = 10% | Freshness = 0%
 
-ACWR is excluded when there isn't enough data to make it meaningful. Mindfulness and stretching always count — even on your first day.
+ACWR is excluded when there isn't enough data to make it meaningful. Everything else always counts — even on your first day.
+
+**The Dashboard Progress Rings:**
+When you open the dashboard, 8 colourful rings pop up in a wave showing each component: Sleep (indigo), Freshness (teal), Soreness (orange), Hydration (blue), Mindfulness (purple), Stretching (pink), Nutrition (yellow), and Goals (emerald). Each ring fills based on how well you're doing in that area.
 
 **What the scores mean:**
-• **80-100 (Excellent)** — You're fully recovered. Go hard — intervals, tempo, sprints.
+• **80-100 (Excellent)** — You're fully recovered. Go hard — intervals, tempo, sprints. You'll also see confetti rain to celebrate!
 • **60-79 (Good)** — Normal training, stick to your plan.
 • **40-59 (Fair)** — Take it easy. Easy long run or active recovery only.
 • **0-39 (Poor)** — Rest day. Focus on sleep, hydration, and stretching.`,
@@ -226,6 +233,9 @@ Even 5 minutes of one activity makes a difference. The dashboard will nudge you 
 • 7 morning snack options (fruit & nuts, hummus, energy bites, trail mix)
 • 7 afternoon snack options (yoghurt pots, smoothies, energy bars)
 
+**"I ate this" tracking:**
+On today's tab (highlighted in teal), each meal has an "I ate this" button. Tap it to mark that you've eaten that meal. This counts toward your recovery score — eating more of your planned meals gives you more nutrition points.
+
 **Nutritional focus:**
 • **Iron-rich meals** — Runners need 18mg of iron per day. Each meal shows its iron content and you can track your daily total with the iron progress bar.
 • **Macro balance** — Carb-focused for sustained energy, with balanced protein and fats. The macro bar chart shows your daily percentages.
@@ -259,7 +269,65 @@ Even 5 minutes of one activity makes a difference. The dashboard will nudge you 
 
 **Why reflect?** Rating yourself honestly after each race helps you spot patterns. Maybe your starts are always weak, or your pacing falls apart in the second half. Over time, these ratings show you exactly what to work on in training.
 
+**Personal Bests:** Tick the PB checkbox when you set a new personal best — you'll get a confetti rain celebration!
+
 You can also add free-text notes for anything else — what went well, what to improve, how conditions affected you. Every logged competition can be edited or deleted.`,
+  },
+  {
+    title: 'SMART Goals',
+    content: `The Goals tab lets you set structured goals using the SMART framework. A step-by-step wizard walks you through each part:
+
+**S — Specific:** What exactly do you want to achieve?
+**M — Measurable:** How will you track progress?
+**A — Achievable:** Is this realistic for you right now?
+**R — Relevant:** Why does this matter to you?
+**T — Time-bound:** When will you achieve this by?
+
+**Categories:**
+• **Recovery** — Sleep, stretching, mindfulness goals
+• **Training** — Distance, frequency, consistency goals
+• **Performance** — Race times, PBs, competition goals
+
+**Daily check-ins:**
+Each active goal has a "Did it today?" button. Tap it each day you work toward your goal. You can see your last 7 days in a grid and your total days checked in.
+
+**Templates:** Not sure where to start? Pick from pre-made templates like "Sleep consistency", "Weekly distance", or "Park Run PB" — they fill in the Specific, Measurable, and Achievable fields for you.
+
+**Goals contribute to your recovery score** — the more active goals you check in on today, the higher your goals percentage. This makes up 5-10% of your total recovery score.`,
+  },
+  {
+    title: 'Celebrations & Confetti',
+    content: `MyRunningDiary celebrates your achievements with animations and sound effects to keep you motivated!
+
+**Celebration animation (star → explosion → thumbs up):**
+When you tick something off — a stretch, a meal, a mindfulness activity, a goal check-in — you'll see a small celebration animation in the bottom-right corner with a star swirl, sparkle explosion, and thumbs up.
+
+This only happens when you tick something ON, not when you untick it.
+
+**Confetti rain:**
+Colourful confetti rains down the screen when:
+• Your recovery score hits 80 or above (Excellent)
+• You log a competition marked as a Personal Best (PB)
+
+**Sound effects:**
+• **Twinkle** — plays when you tick off individual items (stretches, meals, mindfulness, goal check-ins)
+• **Explosion** — plays when you save something big (a training log, sleep log, competition, or new goal)
+
+**Splash screen:**
+When you open the app, a runner emoji swooshes in with the app name, then transitions to the dashboard with an explosion sound and celebration animation.`,
+  },
+  {
+    title: 'Installing as an App',
+    content: `MyRunningDiary is a Progressive Web App (PWA) — you can install it on your phone's home screen so it looks and feels like a real app.
+
+**How to install:**
+• **Android Chrome** — Tap the three-dot menu (⋮) → "Add to Home Screen" → "Install"
+• **iPhone Safari** — Tap the share button (□↑) → "Add to Home Screen"
+
+Once installed, it opens full-screen without the browser bar and has its own icon on your home screen.
+
+**Sharing with friends:**
+Just send them the website link. Each person's data is stored privately on their own device — nobody can see anyone else's logs. When you update the app, everyone gets the latest version automatically.`,
   },
   {
     title: 'Dashboard Recommendations',
