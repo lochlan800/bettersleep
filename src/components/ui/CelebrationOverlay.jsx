@@ -1,12 +1,6 @@
-import { useEffect } from 'react'
 import { useCelebration } from '../../context/CelebrationContext'
-import { vibrate } from '../../utils/vibrate'
 
 function CelebrationAnimation() {
-  useEffect(() => {
-    vibrate('celebration')
-    return () => { try { window.navigator.vibrate(0) } catch {} }
-  }, [])
 
   return (
     <div className="fixed inset-0 z-[9999] pointer-events-none flex items-end justify-end p-6 pb-24">

@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useCallback } from 'react'
+import { vibrate } from '../utils/vibrate'
 
 const CelebrationContext = createContext(null)
 
@@ -7,6 +8,7 @@ export function CelebrationProvider({ children }) {
   const [celebrationKey, setCelebrationKey] = useState(0)
 
   const triggerCelebration = useCallback(() => {
+    vibrate('celebration')
     setActive(true)
     setCelebrationKey(k => k + 1)
     setTimeout(() => setActive(false), 2200)
