@@ -50,7 +50,7 @@ function formatTime(seconds) {
 
 export default function CompetitionsPage() {
   const { competitionLogs, addCompetitionLog, updateCompetitionLog, deleteCompetitionLog } = useApp()
-  const { triggerCelebration } = useCelebration()
+  const { triggerCelebration, triggerConfetti } = useCelebration()
   const [showForm, setShowForm] = useState(false)
   const [editingId, setEditingId] = useState(null)
   const [expandedId, setExpandedId] = useState(null)
@@ -119,6 +119,7 @@ export default function CompetitionsPage() {
     }
     playSound('explosion')
     triggerCelebration()
+    if (personalBest) triggerConfetti()
     resetForm()
     setShowForm(false)
   }

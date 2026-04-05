@@ -125,6 +125,11 @@ export default function useRecoveryScore() {
       acwr: Math.round(acwr * 100) / 100,
       hydrationPercent,
       stretchingPercent,
+      sorenessLevel: latestSoreness,
+      mindfulnessCount,
+      mealsEatenCount,
+      goalCheckinPercent,
+      hasReliableACWR,
     };
   }, [sleepLogs, trainingLogs, hydrationLogs, mindfulnessLogs, stretchingLogs, mealCompletions, goals, settings.bodyWeightKg]);
 }

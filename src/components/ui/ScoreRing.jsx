@@ -1,4 +1,4 @@
-export default function ScoreRing({ score, size = 120, strokeWidth = 8, label = 'Score' }) {
+export default function ScoreRing({ score, size = 120, strokeWidth = 8, label = 'Score', color: colorOverride }) {
   const radius = (size - strokeWidth) / 2
   const circumference = radius * 2 * Math.PI
   const offset = circumference - (score / 100) * circumference
@@ -10,7 +10,7 @@ export default function ScoreRing({ score, size = 120, strokeWidth = 8, label = 
     return '#ef4444'
   }
 
-  const color = getColor(score)
+  const color = colorOverride || getColor(score)
 
   return (
     <div className="flex flex-col items-center gap-1">

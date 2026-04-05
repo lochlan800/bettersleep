@@ -5,6 +5,7 @@ import { CelebrationProvider } from './context/CelebrationContext'
 import AppShell from './components/layout/AppShell'
 import SplashScreen from './components/layout/SplashScreen'
 import CelebrationOverlay from './components/ui/CelebrationOverlay'
+import ConfettiRain from './components/ui/ConfettiRain'
 import DashboardPage from './components/dashboard/DashboardPage'
 import TrainingPage from './components/training/TrainingPage'
 import SleepPage from './components/sleep/SleepPage'
@@ -25,6 +26,7 @@ export default function App() {
       <CelebrationProvider>
       {showSplash && <SplashScreen onFinished={handleSplashDone} />}
       <CelebrationOverlay />
+      <ConfettiRain />
       <AppShell>
         <Routes>
           <Route path="/" element={<DashboardPage />} />
