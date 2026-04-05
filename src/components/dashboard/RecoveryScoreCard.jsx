@@ -65,7 +65,7 @@ export default function RecoveryScoreCard() {
             <div
               key={m.label}
               className="flex flex-col items-center gap-1 ring-appear"
-              style={{ animationDelay: `${i * 100}ms` }}
+              style={{ animationDelay: `${i * 150}ms` }}
             >
               <ScoreRing score={m.value} size={52} strokeWidth={4} label="" color={m.color} />
               <span className="text-[10px] font-medium text-surface-600 dark:text-surface-400 text-center leading-tight">{m.label}</span>
@@ -76,16 +76,24 @@ export default function RecoveryScoreCard() {
 
       <style>{`
         .ring-appear {
-          animation: ringPop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+          animation: ringPop 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) both;
         }
 
         @keyframes ringPop {
           0% {
-            transform: scale(0);
+            transform: scale(0) translateY(20px);
             opacity: 0;
           }
+          60% {
+            transform: scale(1.15) translateY(-4px);
+            opacity: 1;
+          }
+          80% {
+            transform: scale(0.95) translateY(2px);
+            opacity: 1;
+          }
           100% {
-            transform: scale(1);
+            transform: scale(1) translateY(0);
             opacity: 1;
           }
         }
