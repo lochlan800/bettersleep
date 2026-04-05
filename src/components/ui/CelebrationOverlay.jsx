@@ -2,31 +2,22 @@ import { useEffect } from 'react'
 import { useCelebration } from '../../context/CelebrationContext'
 import { vibrate } from '../../utils/vibrate'
 
-export default function CelebrationOverlay() {
-  const { active } = useCelebration()
-
+function CelebrationAnimation() {
   useEffect(() => {
-    if (active) {
-      vibrate('celebration')
-      return () => { try { window.navigator.vibrate(0) } catch {} }
-    }
-  }, [active])
-
-  if (!active) return null
+    vibrate('celebration')
+    return () => { try { window.navigator.vibrate(0) } catch {} }
+  }, [])
 
   return (
-    <div className="fixed inset-0 z-[9999] pointer-events-none flex items-center justify-center">
-      {/* Backdrop flash */}
-      <div className="absolute inset-0 celebration-flash" />
-
+    <div className="fixed inset-0 z-[9999] pointer-events-none flex items-end justify-end p-6 pb-24">
       {/* Swirling star */}
-      <span className="celebration-swirl absolute text-6xl">⭐</span>
+      <span className="celebration-swirl absolute text-3xl">⭐</span>
 
       {/* Explosion particles */}
       {[...Array(8)].map((_, i) => (
         <span
           key={i}
-          className="celebration-particle absolute text-2xl"
+          className="celebration-particle absolute text-base"
           style={{
             '--angle': `${i * 45}deg`,
             animationDelay: '0.5s',
@@ -37,20 +28,9 @@ export default function CelebrationOverlay() {
       ))}
 
       {/* Thumbs up */}
-      <span className="celebration-thumbsup absolute text-7xl">👍</span>
+      <span className="celebration-thumbsup absolute text-4xl">👍</span>
 
       <style>{`
-        .celebration-flash {
-          background: rgba(20, 184, 166, 0.15);
-          animation: celebFlash 0.6s ease-out forwards;
-        }
-
-        @keyframes celebFlash {
-          0% { opacity: 0; }
-          20% { opacity: 1; }
-          100% { opacity: 0; }
-        }
-
         .celebration-swirl {
           animation: celebSwirl 0.7s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
         }
@@ -61,15 +41,15 @@ export default function CelebrationOverlay() {
             opacity: 0;
           }
           50% {
-            transform: scale(1.3) rotate(360deg);
+            transform: scale(1.1) rotate(360deg);
             opacity: 1;
           }
           70% {
-            transform: scale(1.5) rotate(540deg);
+            transform: scale(1.2) rotate(540deg);
             opacity: 1;
           }
           100% {
-            transform: scale(3) rotate(720deg);
+            transform: scale(1.5) rotate(720deg);
             opacity: 0;
           }
         }
@@ -88,8 +68,8 @@ export default function CelebrationOverlay() {
           100% {
             transform:
               translate(
-                calc(cos(var(--angle)) * 120px),
-                calc(sin(var(--angle)) * 120px)
+                calc(cos(var(--angle)) * 60px),
+                calc(sin(var(--angle)) * 60px)
               )
               scale(0.3);
             opacity: 0;
@@ -108,23 +88,31 @@ export default function CelebrationOverlay() {
             opacity: 0;
           }
           40% {
-            transform: scale(1.4) rotate(10deg);
+            transform: scale(1.0) rotate(10deg);
             opacity: 1;
           }
           60% {
-            transform: scale(1.2) rotate(-5deg);
+            transform: scale(0.85) rotate(-5deg);
             opacity: 1;
           }
           75% {
-            transform: scale(1.3) rotate(0deg);
+            transform: scale(0.95) rotate(0deg);
             opacity: 1;
           }
           100% {
-            transform: scale(0.8) rotate(0deg);
+            transform: scale(0.6) rotate(0deg);
             opacity: 0;
           }
         }
       `}</style>
     </div>
   )
+}
+
+export default function CelebrationOverlay() {
+  const { active, celebrationKey } = useCelebration()
+
+  if (!active) return null
+
+  return <CelebrationAnimation key={celebrationKey} />
 }

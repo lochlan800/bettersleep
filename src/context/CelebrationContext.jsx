@@ -4,14 +4,16 @@ const CelebrationContext = createContext(null)
 
 export function CelebrationProvider({ children }) {
   const [active, setActive] = useState(false)
+  const [celebrationKey, setCelebrationKey] = useState(0)
 
   const triggerCelebration = useCallback(() => {
     setActive(true)
+    setCelebrationKey(k => k + 1)
     setTimeout(() => setActive(false), 2200)
   }, [])
 
   return (
-    <CelebrationContext.Provider value={{ active, triggerCelebration }}>
+    <CelebrationContext.Provider value={{ active, celebrationKey, triggerCelebration }}>
       {children}
     </CelebrationContext.Provider>
   )
