@@ -57,6 +57,7 @@ export default function SplashScreen({ onFinished }) {
         <h1 className="text-4xl font-extrabold text-white tracking-tight">
           MyRunningDiary
         </h1>
+        <p className="text-center text-white/50 text-xs mt-1">by Lochlan Ruddock</p>
         <p className="text-center text-white/70 text-sm mt-2 font-medium">
           Train smarter. Recover better.
         </p>
