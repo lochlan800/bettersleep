@@ -9,6 +9,7 @@ import {
   calculateHydrationTarget,
   calculateRecoveryScore,
 } from '../utils/scoring';
+import { getToday } from '../utils/dateHelpers';
 import stretches from '../data/stretches';
 
 /**
@@ -45,7 +46,7 @@ export default function useRecoveryScore() {
     const fatigueScore = calculateFatigueScore(acwr);
 
     // Hydration – today only
-    const today = new Date().toISOString().slice(0, 10);
+    const today = getToday();
     const todayHydration = hydrationLogs.find((d) => d.date === today);
     const totalMl = todayHydration
       ? todayHydration.entries.reduce((sum, e) => sum + (e.amountMl ?? 0), 0)
