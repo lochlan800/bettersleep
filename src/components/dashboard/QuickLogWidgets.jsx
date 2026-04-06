@@ -15,7 +15,7 @@ const SORENESS_COLORS = ['', 'text-green-500', 'text-lime-500', 'text-yellow-500
 export default function QuickLogWidgets() {
   const [sleepOpen, setSleepOpen] = useState(false)
   const [trainOpen, setTrainOpen] = useState(false)
-  const { sleepLogs, trainingLogs, settings, getTodayHydration, addHydrationEntry, getTodaySoreness, setTodaySoreness } = useApp()
+  const { sleepLogs, trainingLogs, settings, getTodayHydration, addHydrationEntry, sorenessLogs, setTodaySoreness } = useApp()
 
   const sortedSleep = [...sleepLogs].sort((a, b) => b.date.localeCompare(a.date))
   const lastSleep = sortedSleep[0]
@@ -23,7 +23,7 @@ export default function QuickLogWidgets() {
   const todayTraining = trainingLogs.find(l => l.date === getToday())
   const todayHydration = getTodayHydration()
   const hydrationTarget = calculateHydrationTarget(settings.bodyWeightKg, todayTraining?.durationMinutes ?? 0)
-  const todaySoreness = getTodaySoreness()
+  const todaySoreness = sorenessLogs.find(d => d.date === getToday())?.level ?? null
 
   const add500 = () => {
     const now = new Date()
