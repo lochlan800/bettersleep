@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/bettersleep/favicon.svg" />
+    <link rel="manifest" href="/bettersleep/manifest.json" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#14b8a6" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Running Diary" />
+    <meta name="description" content="Train smarter. Recover better. Track your running, sleep, water, and recovery." />
+    <title>MyRunningDiary</title>
+    <script>
+      // GitHub Pages SPA: restore route from 404.html redirect
+      (function(){
+        var redirect = sessionStorage.redirect;
+        delete sessionStorage.redirect;
+        if (redirect && redirect !== location.href) {
+          history.replaceState(null, null, redirect);
+        }
+      })();
+      (function(){
+        var l = window.location;
+        if (l.search[1] === '/') {
+          var decoded = l.search.slice(1).split('&').map(function(s) {
+            return s.replace(/~and~/g, '&');
+          }).join('?');
+          var path = decoded.split('?')[0];
+          var query = decoded.split('?').slice(1).join('?');
+          window.history.replaceState(null, null,
+            l.pathname + path + (query ? '?' + query : '') + l.hash
+          );
+        }
+      })();
+    </script>
+    <script type="module" crossorigin src="/bettersleep/assets/index-Br2UYoWD.js"></script>
+    <link rel="stylesheet" crossorigin href="/bettersleep/assets/index-CKHKq_5N.css">
+  </head>
+  <body>
+    <div id="root"></div>
+    <script>
+      // Register service worker for PWA support
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('/bettersleep/sw.js').catch(err => {
+          console.log('Service worker registration failed:', err)
+        })
+      }
+    </script>
+  </body>
+</html>
