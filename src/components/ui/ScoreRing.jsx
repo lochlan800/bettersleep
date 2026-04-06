@@ -38,8 +38,8 @@ export default function ScoreRing({ score, size = 120, strokeWidth = 8, label = 
         />
       </svg>
       <div className="absolute flex flex-col items-center justify-center" style={{ width: size, height: size }}>
-        <span className="text-2xl font-bold text-surface-900 dark:text-surface-50">{Math.round(score)}</span>
-        <span className="text-xs text-surface-500 dark:text-surface-400">{label}</span>
+        <span className={`font-bold text-surface-900 dark:text-surface-50 ${size <= 60 ? 'text-xs' : 'text-2xl'}`}>{Math.round(score)}</span>
+        {label && <span className={`text-surface-500 dark:text-surface-400 ${size <= 60 ? 'text-[8px]' : 'text-xs'}`}>{label}</span>}
       </div>
     </div>
   )
