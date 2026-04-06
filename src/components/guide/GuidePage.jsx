@@ -385,6 +385,7 @@ const DATA_KEYS = [
   'bs_meal_plans',
   'bs_competition_logs',
   'bs_goals',
+  'bs_soreness_logs',
   'bs_settings',
 ];
 

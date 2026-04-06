@@ -25,7 +25,7 @@ import stretches from '../data/stretches';
  * }}
  */
 export default function useRecoveryScore() {
-  const { sleepLogs, trainingLogs, hydrationLogs, mindfulnessLogs, stretchingLogs, mealCompletions, goals, settings } = useApp();
+  const { sleepLogs, trainingLogs, hydrationLogs, mindfulnessLogs, stretchingLogs, mealCompletions, goals, settings, sorenessLogs } = useApp();
 
   return useMemo(() => {
     // Sleep – score the most recent log using the last 7 as context for consistency
@@ -65,11 +65,12 @@ export default function useRecoveryScore() {
         ? Math.min(100, Math.round((totalMl / hydrationTarget) * 100))
         : 0;
 
-    // Soreness — comes from training logs, not sleep logs
+    // Soreness — prefer today's standalone log, fall back to latest training log
+    const todaySoreness = sorenessLogs.find((d) => d.date === today)?.level;
     const sortedTraining = [...trainingLogs].sort(
       (a, b) => new Date(b.date) - new Date(a.date),
     );
-    const latestSoreness = sortedTraining[0]?.sorenessLevel ?? 1;
+    const latestSoreness = todaySoreness ?? sortedTraining[0]?.sorenessLevel ?? 1;
 
     // ACWR is only reliable with enough training history (>= 14 days, non-zero chronic)
     const hasReliableACWR = chronicLoad > 0 && trainingLogs.length >= 4;
@@ -131,5 +132,5 @@ export default function useRecoveryScore() {
       goalCheckinPercent,
       hasReliableACWR,
     };
-  }, [sleepLogs, trainingLogs, hydrationLogs, mindfulnessLogs, stretchingLogs, mealCompletions, goals, settings.bodyWeightKg]);
+  }, [sleepLogs, trainingLogs, hydrationLogs, mindfulnessLogs, stretchingLogs, mealCompletions, goals, sorenessLogs, settings.bodyWeightKg]);
 }

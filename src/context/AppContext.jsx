@@ -27,6 +27,7 @@ export function AppProvider({ children }) {
   const [mealCompletions, setMealCompletions] = useLocalStorage('bs_meal_completions', []);
   const [competitionLogs, setCompetitionLogs] = useLocalStorage('bs_competition_logs', []);
   const [stretchingLogs, setStretchingLogs] = useLocalStorage('bs_stretching_logs', []);
+  const [sorenessLogs, setSorenessLogs] = useLocalStorage('bs_soreness_logs', []);
   const [goals, setGoals] = useLocalStorage('bs_goals', []);
   const [settings, setSettings] = useLocalStorage('bs_settings', DEFAULT_SETTINGS);
 
@@ -254,6 +255,27 @@ export function AppProvider({ children }) {
     );
   }, [stretchingLogs]);
 
+  // ── Soreness actions ──────────────────────────────────────────────
+
+  const setTodaySoreness = useCallback(
+    (level) => {
+      const today = getToday();
+      setSorenessLogs((prev) => {
+        const existing = prev.find((d) => d.date === today);
+        if (existing) {
+          return prev.map((d) => (d.date === today ? { ...d, level } : d));
+        }
+        return [...prev, { date: today, level }];
+      });
+    },
+    [setSorenessLogs],
+  );
+
+  const getTodaySoreness = useCallback(() => {
+    const today = getToday();
+    return sorenessLogs.find((d) => d.date === today)?.level ?? null;
+  }, [sorenessLogs]);
+
   // ── Competition actions ───────────────────────────────────────────
 
   const addCompetitionLog = useCallback(
@@ -342,6 +364,7 @@ export function AppProvider({ children }) {
       mealCompletions,
       competitionLogs,
       stretchingLogs,
+      sorenessLogs,
       goals,
       settings,
 
@@ -362,6 +385,8 @@ export function AppProvider({ children }) {
       getTodayMealCompletions,
       toggleStretch,
       getTodayStretching,
+      setTodaySoreness,
+      getTodaySoreness,
       addCompetitionLog,
       updateCompetitionLog,
       deleteCompetitionLog,
@@ -379,6 +404,7 @@ export function AppProvider({ children }) {
       mealCompletions,
       competitionLogs,
       stretchingLogs,
+      sorenessLogs,
       goals,
       settings,
       addSleepLog,
@@ -397,6 +423,8 @@ export function AppProvider({ children }) {
       getTodayMealCompletions,
       toggleStretch,
       getTodayStretching,
+      setTodaySoreness,
+      getTodaySoreness,
       addCompetitionLog,
       updateCompetitionLog,
       deleteCompetitionLog,
