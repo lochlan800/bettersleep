@@ -17,13 +17,14 @@ export default function QuickLogWidgets() {
   const [trainOpen, setTrainOpen] = useState(false)
   const { sleepLogs, trainingLogs, settings, getTodayHydration, addHydrationEntry, sorenessLogs, setTodaySoreness } = useApp()
 
+  const today = getToday()
   const sortedSleep = [...sleepLogs].sort((a, b) => b.date.localeCompare(a.date))
-  const lastSleep = sortedSleep[0]
-  const sleepScore = lastSleep ? Math.round(calculateSleepScore(lastSleep, sortedSleep.slice(0, 7))) : null
-  const todayTraining = trainingLogs.find(l => l.date === getToday())
+  const todaySleep = sleepLogs.find(l => l.date === today)
+  const sleepScore = todaySleep ? Math.round(calculateSleepScore(todaySleep, sortedSleep.slice(0, 7))) : null
+  const todayTraining = trainingLogs.find(l => l.date === today)
   const todayHydration = getTodayHydration()
   const hydrationTarget = calculateHydrationTarget(settings.bodyWeightKg, todayTraining?.durationMinutes ?? 0)
-  const todaySoreness = sorenessLogs.find(d => d.date === getToday())?.level ?? null
+  const todaySoreness = sorenessLogs.find(d => d.date === today)?.level ?? null
 
   const add500 = () => {
     const now = new Date()
@@ -44,7 +45,7 @@ export default function QuickLogWidgets() {
             {sleepScore !== null ? sleepScore : '—'}
             {sleepScore !== null && <span className="text-sm font-normal text-surface-400">/100</span>}
           </p>
-          <p className="text-xs text-surface-500 dark:text-surface-400">{lastSleep ? `Last: ${lastSleep.date}` : 'Not logged'}</p>
+          <p className="text-xs text-surface-500 dark:text-surface-400">{todaySleep ? `Today: ${todaySleep.date}` : 'Not logged today'}</p>
           <Button size="sm" variant="secondary" onClick={() => setSleepOpen(true)} className="mt-auto">
             <Plus size={14} /> Log
           </Button>

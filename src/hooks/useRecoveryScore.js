@@ -29,14 +29,15 @@ export default function useRecoveryScore() {
   const { sleepLogs, trainingLogs, hydrationLogs, mindfulnessLogs, stretchingLogs, mealCompletions, goals, settings, sorenessLogs } = useApp();
 
   return useMemo(() => {
-    // Sleep – score the most recent log using the last 7 as context for consistency
+    // Sleep – only score today's log so it resets each morning
+    const today = getToday();
     const sortedSleep = [...sleepLogs].sort(
       (a, b) => new Date(b.date) - new Date(a.date),
     );
     const recentSleep = sortedSleep.slice(0, 7);
-    const latestSleep = recentSleep[0];
-    const sleepScore = latestSleep
-      ? calculateSleepScore(latestSleep, recentSleep)
+    const todaySleep = sleepLogs.find((l) => l.date === today);
+    const sleepScore = todaySleep
+      ? calculateSleepScore(todaySleep, recentSleep)
       : 0;
 
     // Training load metrics
@@ -46,7 +47,6 @@ export default function useRecoveryScore() {
     const fatigueScore = calculateFatigueScore(acwr);
 
     // Hydration – today only
-    const today = getToday();
     const todayHydration = hydrationLogs.find((d) => d.date === today);
     const totalMl = todayHydration
       ? todayHydration.entries.reduce((sum, e) => sum + (e.amountMl ?? 0), 0)
