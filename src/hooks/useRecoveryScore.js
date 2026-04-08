@@ -73,8 +73,13 @@ export default function useRecoveryScore() {
     );
     const latestSoreness = todaySoreness ?? sortedTraining[0]?.sorenessLevel ?? 1;
 
-    // ACWR is only reliable with enough training history (>= 14 days, non-zero chronic)
-    const hasReliableACWR = chronicLoad > 0 && trainingLogs.length >= 4;
+    // ACWR is only reliable with enough training history — need logs spanning
+    // at least 14 days so chronic load isn't artificially diluted
+    const trainingDates = trainingLogs.map((l) => new Date(l.date)).sort((a, b) => a - b);
+    const trainingSpanDays = trainingDates.length >= 2
+      ? Math.round((trainingDates[trainingDates.length - 1] - trainingDates[0]) / (1000 * 60 * 60 * 24))
+      : 0;
+    const hasReliableACWR = chronicLoad > 0 && trainingLogs.length >= 4 && trainingSpanDays >= 14;
 
     // Only use fatigue score when ACWR is reliable — otherwise it spikes
     // misleadingly (e.g. first week of logging gives ACWR of 7+)
