@@ -13,7 +13,15 @@ const EVENTS = [
   { id: '400m', label: '400m', category: 'Sprint' },
   { id: '800m', label: '800m', category: 'Middle Distance' },
   { id: '1500m', label: '1500m', category: 'Middle Distance' },
-  { id: 'parkrun', label: 'Park Run (5K)', category: 'Distance' },
+  { id: '3000m', label: '3000m', category: 'Long Distance' },
+  { id: 'parkrun', label: 'Park Run (5K)', category: 'Long Distance' },
+  { id: '10k', label: '10K', category: 'Long Distance' },
+]
+
+const CATEGORIES = [
+  { name: 'Sprint', color: '#f59e0b', icon: '⚡' },
+  { name: 'Middle Distance', color: '#8b5cf6', icon: '🏃' },
+  { name: 'Long Distance', color: '#10b981', icon: '🏅' },
 ]
 
 const PLACEMENT_OPTIONS = [
@@ -132,6 +140,40 @@ export default function CompetitionsPage() {
 
   const sortedLogs = [...(competitionLogs || [])].sort((a, b) => new Date(b.date) - new Date(a.date))
 
+  // Category counts for donut chart
+  const categoryCounts = CATEGORIES.map(cat => {
+    const count = sortedLogs.filter(log => {
+      const ev = EVENTS.find(e => e.id === log.event)
+      return ev?.category === cat.name
+    }).length
+    return { ...cat, count }
+  })
+  const totalRaces = sortedLogs.length
+
+  // Build SVG donut segments
+  const donutSegments = (() => {
+    if (totalRaces === 0) return []
+    const segments = []
+    const radius = 50
+    const circumference = 2 * Math.PI * radius
+    let offset = 0
+    for (const cat of categoryCounts) {
+      if (cat.count === 0) continue
+      const fraction = cat.count / totalRaces
+      const length = fraction * circumference
+      segments.push({
+        color: cat.color,
+        dasharray: `${length} ${circumference - length}`,
+        dashoffset: -offset,
+        name: cat.name,
+        count: cat.count,
+        percent: Math.round(fraction * 100),
+      })
+      offset += length
+    }
+    return segments
+  })()
+
   return (
     <div className="pb-20 lg:pb-4">
       <div className="max-w-3xl mx-auto px-4 py-6">
@@ -149,6 +191,61 @@ export default function CompetitionsPage() {
             Log Race
           </button>
         </div>
+
+        {/* Event Category Chart */}
+        {totalRaces > 0 && (
+          <div className="mb-6 p-5 bg-white dark:bg-surface-800 rounded-xl border border-surface-200 dark:border-surface-700">
+            <h3 className="font-bold text-surface-900 dark:text-surface-50 mb-4">Event Breakdown</h3>
+            <div className="flex items-center gap-6">
+              {/* Donut chart */}
+              <div className="relative flex-shrink-0">
+                <svg width="130" height="130" viewBox="0 0 120 120">
+                  {/* Background circle */}
+                  <circle cx="60" cy="60" r="50" fill="none" stroke="currentColor" strokeWidth="14" className="text-surface-200 dark:text-surface-700" />
+                  {/* Segments */}
+                  {donutSegments.map((seg, i) => (
+                    <circle
+                      key={seg.name}
+                      cx="60" cy="60" r="50"
+                      fill="none"
+                      stroke={seg.color}
+                      strokeWidth="14"
+                      strokeDasharray={seg.dasharray}
+                      strokeDashoffset={seg.dashoffset}
+                      strokeLinecap="round"
+                      transform="rotate(-90 60 60)"
+                      className="transition-all duration-700"
+                      style={{ animationDelay: `${i * 200}ms` }}
+                    />
+                  ))}
+                  {/* Center text */}
+                  <text x="60" y="55" textAnchor="middle" className="fill-surface-900 dark:fill-surface-50" fontSize="22" fontWeight="bold">{totalRaces}</text>
+                  <text x="60" y="72" textAnchor="middle" className="fill-surface-500" fontSize="10">races</text>
+                </svg>
+              </div>
+
+              {/* Legend */}
+              <div className="flex-1 space-y-3">
+                {CATEGORIES.map(cat => {
+                  const data = categoryCounts.find(c => c.name === cat.name)
+                  const seg = donutSegments.find(s => s.name === cat.name)
+                  return (
+                    <div key={cat.name} className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <div className="w-3 h-3 rounded-full flex-shrink-0" style={{ backgroundColor: cat.color }} />
+                        <span className="text-sm font-medium text-surface-700 dark:text-surface-300">{cat.icon} {cat.name}</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm font-bold text-surface-900 dark:text-surface-50">{data?.count || 0}</span>
+                        {seg && <span className="text-xs text-surface-500">({seg.percent}%)</span>}
+                      </div>
+                    </div>
+                  )
+                })}
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Log Form */}
         {showForm && (
@@ -175,8 +272,12 @@ export default function CompetitionsPage() {
                   onChange={e => setEvent(e.target.value)}
                   className="w-full px-3 py-2 rounded-lg border border-surface-300 dark:border-surface-600 bg-white dark:bg-surface-700 text-surface-900 dark:text-surface-50"
                 >
-                  {EVENTS.map(ev => (
-                    <option key={ev.id} value={ev.id}>{ev.label} ({ev.category})</option>
+                  {CATEGORIES.map(cat => (
+                    <optgroup key={cat.name} label={`${cat.icon} ${cat.name}`}>
+                      {EVENTS.filter(ev => ev.category === cat.name).map(ev => (
+                        <option key={ev.id} value={ev.id}>{ev.label}</option>
+                      ))}
+                    </optgroup>
                   ))}
                 </select>
               </div>
