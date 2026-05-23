@@ -1,4 +1,5 @@
 import RecoveryScoreCard from './RecoveryScoreCard'
+import FitnessAgeCard from './FitnessAgeCard'
 import RecoveryScoreChart from './RecoveryScoreChart'
 import TodayRecommendations from './TodayRecommendations'
 import QuickLogWidgets from './QuickLogWidgets'
@@ -14,6 +15,7 @@ export default function DashboardPage() {
         <h2 className="text-2xl font-bold text-surface-900 dark:text-surface-50">Recovery Dashboard</h2>
       </div>
       <RecoveryScoreCard />
+      <FitnessAgeCard />
       <QuickLogWidgets />
       <TodayRecommendations />
       <RecoveryScoreChart />
