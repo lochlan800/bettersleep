@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react'
 import useRecoveryScore from '../../hooks/useRecoveryScore'
+import { useApp } from '../../context/AppContext'
 import ScoreRing from '../ui/ScoreRing'
 import Card from '../ui/Card'
 import { useCelebration } from '../../context/CelebrationContext'
@@ -24,6 +25,8 @@ export default function RecoveryScoreCard() {
     stretchingPercent, sorenessLevel, mindfulnessCount,
     mealsEatenCount, goalCheckinPercent, hasReliableACWR,
   } = useRecoveryScore()
+  const { settings } = useApp()
+  const simple = settings.simpleMode
   const { triggerConfetti } = useCelebration()
   const { text, color } = getLabel(recoveryScore)
   const confettiFired = useRef(false)
@@ -60,18 +63,20 @@ export default function RecoveryScoreCard() {
         </div>
 
         {/* Animated metric rings */}
-        <div className="grid grid-cols-4 gap-3 w-full">
-          {metrics.map((m, i) => (
-            <div
-              key={m.label}
-              className="flex flex-col items-center gap-1 ring-appear"
-              style={{ animationDelay: `${i * 150}ms` }}
-            >
-              <ScoreRing score={m.value} size={52} strokeWidth={4} label="" color={m.color} />
-              <span className="text-[10px] font-medium text-surface-600 dark:text-surface-400 text-center leading-tight">{m.label}</span>
-            </div>
-          ))}
-        </div>
+        {!simple && (
+          <div className="grid grid-cols-4 gap-3 w-full">
+            {metrics.map((m, i) => (
+              <div
+                key={m.label}
+                className="flex flex-col items-center gap-1 ring-appear"
+                style={{ animationDelay: `${i * 150}ms` }}
+              >
+                <ScoreRing score={m.value} size={52} strokeWidth={4} label="" color={m.color} />
+                <span className="text-[10px] font-medium text-surface-600 dark:text-surface-400 text-center leading-tight">{m.label}</span>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
 
       <style>{`

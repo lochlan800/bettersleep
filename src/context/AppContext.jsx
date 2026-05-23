@@ -11,6 +11,7 @@ const AppContext = createContext(null);
 
 const DEFAULT_SETTINGS = {
   darkMode: false,
+  simpleMode: false,
   units: 'metric',
   weeklyTargetKm: 50,
   bodyWeightKg: 70,

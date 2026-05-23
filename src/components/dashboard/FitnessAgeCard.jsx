@@ -1,5 +1,5 @@
-import { useMemo, useState } from 'react'
-import { Activity, ChevronDown, ChevronUp } from 'lucide-react'
+import { useMemo } from 'react'
+import { Activity } from 'lucide-react'
 import { useApp } from '../../context/AppContext'
 import useRecoveryScore from '../../hooks/useRecoveryScore'
 import { calculateSleepScore } from '../../utils/scoring'
@@ -112,39 +112,12 @@ export default function FitnessAgeCard() {
   const circumference = radius * 2 * Math.PI
   const offset = circumference - (agePercent / 100) * circumference
 
-  const [simple, setSimple] = useState(false)
-
-  if (simple) {
-    return (
-      <Card>
-        <button onClick={() => setSimple(false)} className="w-full flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <Activity size={18} style={{ color }} />
-            <span className="text-2xl font-bold text-surface-900 dark:text-surface-50">{fitnessAge}</span>
-            <span className="text-sm text-surface-600 dark:text-surface-300">
-              Fitness Age · <span className="font-medium" style={{ color }}>{message}</span>
-            </span>
-          </div>
-          <ChevronDown size={18} className="text-surface-400" />
-        </button>
-      </Card>
-    )
-  }
-
   return (
     <Card>
       <div className="flex flex-col items-center gap-4">
-        <div className="flex items-center justify-between w-full">
-          <div className="flex items-center gap-2">
-            <Activity size={20} style={{ color }} />
-            <h3 className="font-bold text-surface-900 dark:text-surface-50">Fitness Age</h3>
-          </div>
-          <button
-            onClick={() => setSimple(true)}
-            className="flex items-center gap-1 text-xs text-surface-500 hover:text-surface-700 dark:hover:text-surface-300 transition-colors"
-          >
-            Simpler <ChevronUp size={14} />
-          </button>
+        <div className="flex items-center gap-2">
+          <Activity size={20} style={{ color }} />
+          <h3 className="font-bold text-surface-900 dark:text-surface-50">Fitness Age</h3>
         </div>
 
         {/* Age ring */}

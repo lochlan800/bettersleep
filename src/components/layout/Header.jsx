@@ -1,4 +1,4 @@
-import { Moon, Sun, Activity } from 'lucide-react'
+import { Moon, Sun, Activity, LayoutDashboard, Minus } from 'lucide-react'
 import { useApp } from '../../context/AppContext'
 
 export default function Header() {
@@ -13,12 +13,21 @@ export default function Header() {
           <p className="text-[10px] text-surface-400 dark:text-surface-500 leading-tight">by Lochlan Ruddock</p>
         </div>
       </div>
-      <button
-        onClick={() => updateSettings({ darkMode: !settings.darkMode })}
-        className="p-2 rounded-lg hover:bg-surface-100 dark:hover:bg-surface-700 text-surface-600 dark:text-surface-400 transition-colors"
-      >
-        {settings.darkMode ? <Sun size={20} /> : <Moon size={20} />}
-      </button>
+      <div className="flex items-center gap-1">
+        <button
+          onClick={() => updateSettings({ simpleMode: !settings.simpleMode })}
+          className="p-2 rounded-lg hover:bg-surface-100 dark:hover:bg-surface-700 text-surface-600 dark:text-surface-400 transition-colors"
+          title={settings.simpleMode ? 'Full mode' : 'Simple mode'}
+        >
+          {settings.simpleMode ? <LayoutDashboard size={20} /> : <Minus size={20} />}
+        </button>
+        <button
+          onClick={() => updateSettings({ darkMode: !settings.darkMode })}
+          className="p-2 rounded-lg hover:bg-surface-100 dark:hover:bg-surface-700 text-surface-600 dark:text-surface-400 transition-colors"
+        >
+          {settings.darkMode ? <Sun size={20} /> : <Moon size={20} />}
+        </button>
+      </div>
     </header>
   )
 }

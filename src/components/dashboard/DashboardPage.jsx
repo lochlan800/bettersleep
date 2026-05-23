@@ -1,3 +1,4 @@
+import { useApp } from '../../context/AppContext'
 import RecoveryScoreCard from './RecoveryScoreCard'
 import FitnessAgeCard from './FitnessAgeCard'
 import RecoveryScoreChart from './RecoveryScoreChart'
@@ -7,6 +8,8 @@ import { formatDate, getToday } from '../../utils/dateHelpers'
 
 export default function DashboardPage() {
   const today = formatDate(getToday())
+  const { settings } = useApp()
+  const simple = settings.simpleMode
 
   return (
     <div className="space-y-5">
@@ -15,10 +18,10 @@ export default function DashboardPage() {
         <h2 className="text-2xl font-bold text-surface-900 dark:text-surface-50">Recovery Dashboard</h2>
       </div>
       <RecoveryScoreCard />
-      <FitnessAgeCard />
+      {!simple && <FitnessAgeCard />}
       <QuickLogWidgets />
-      <TodayRecommendations />
-      <RecoveryScoreChart />
+      {!simple && <TodayRecommendations />}
+      {!simple && <RecoveryScoreChart />}
     </div>
   )
 }
