@@ -1,3 +1,4 @@
+import { useApp } from '../../context/AppContext';
 import SleepScoreDisplay from './SleepScoreDisplay';
 import SleepLogForm from './SleepLogForm';
 import SleepRecommendations from './SleepRecommendations';
@@ -6,6 +7,9 @@ import SleepHistory from './SleepHistory';
 import SleepTips from './SleepTips';
 
 export default function SleepPage() {
+  const { settings } = useApp();
+  const simple = settings.simpleMode;
+
   return (
     <div className="space-y-6">
       <h2 className="text-2xl font-bold text-surface-900 dark:text-surface-50">
@@ -17,10 +21,10 @@ export default function SleepPage() {
         <SleepLogForm />
       </div>
 
-      <SleepRecommendations />
-      <SleepHistoryChart />
-      <SleepHistory />
-      <SleepTips />
+      {!simple && <SleepRecommendations />}
+      {!simple && <SleepHistoryChart />}
+      {!simple && <SleepHistory />}
+      {!simple && <SleepTips />}
     </div>
   );
 }

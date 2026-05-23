@@ -460,6 +460,9 @@ function DataBackup() {
 }
 
 export default function GuidePage() {
+  const { settings } = useApp()
+  const simple = settings.simpleMode
+
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-3">
@@ -474,11 +477,13 @@ export default function GuidePage() {
 
       <DataBackup />
 
-      <div className="space-y-2">
-        {sections.map((s) => (
-          <Section key={s.title} title={s.title} content={s.content} />
-        ))}
-      </div>
+      {!simple && (
+        <div className="space-y-2">
+          {sections.map((s) => (
+            <Section key={s.title} title={s.title} content={s.content} />
+          ))}
+        </div>
+      )}
     </div>
   )
 }
