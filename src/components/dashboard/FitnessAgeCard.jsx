@@ -33,7 +33,7 @@ export default function FitnessAgeCard() {
     stretchingPercent, sorenessLevel, mindfulnessCount,
   } = useRecoveryScore()
 
-  const { fitnessAge, factors } = useMemo(() => {
+  const { fitnessAge, factors, tips } = useMemo(() => {
     const today = getToday()
 
     // Sleep consistency — average sleep score over last 7 days
@@ -98,7 +98,22 @@ export default function FitnessAgeCard() {
       }))
       .sort((a, b) => b.score - a.score)
 
-    return { fitnessAge: age, factors: factorList }
+    // Generate tips for weakest areas (score < 60)
+    const tipMap = {
+      Recovery: 'Log your sleep, water, stretching and mindfulness to boost your overall recovery score.',
+      Sleep: 'Log your sleep every morning — aim for 7-9 hours with a consistent bedtime.',
+      Training: 'Train 4-5 days per week to build consistency. Even short runs count.',
+      Hydration: 'Drink water throughout the day — tap +500ml on the dashboard each time.',
+      Stretching: 'Do your stretching routine after training — tick off each stretch on the Recovery page.',
+      Mindfulness: 'Do at least one mindfulness activity daily — even 3 minutes of box breathing helps.',
+      Soreness: 'Rest when sore. Log a low soreness level (1-2) to improve this score.',
+    }
+    const tips = factorList
+      .filter(f => f.score < 60)
+      .slice(0, 3)
+      .map(f => ({ label: f.label, tip: tipMap[f.label] }))
+
+    return { fitnessAge: age, factors: factorList, tips }
   }, [sleepLogs, trainingLogs, recoveryScore, sleepScore, hydrationPercent, stretchingPercent, sorenessLevel, mindfulnessCount])
 
   const color = getAgeColor(fitnessAge)
@@ -167,6 +182,29 @@ export default function FitnessAgeCard() {
             </div>
           ))}
         </div>
+
+        {/* Tips to lower fitness age */}
+        {tips.length > 0 && (
+          <div className="w-full mt-2 p-3 bg-surface-50 dark:bg-surface-700/50 rounded-lg">
+            <p className="text-xs font-semibold text-surface-700 dark:text-surface-300 mb-2">To bring your age down:</p>
+            <ul className="space-y-1.5">
+              {tips.map(t => (
+                <li key={t.label} className="flex items-start gap-2">
+                  <span className="text-red-500 text-xs mt-0.5">*</span>
+                  <span className="text-xs text-surface-600 dark:text-surface-400">
+                    <span className="font-medium text-surface-800 dark:text-surface-200">{t.label}:</span> {t.tip}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+
+        {tips.length === 0 && (
+          <p className="text-xs text-emerald-600 dark:text-emerald-400 text-center mt-1">
+            All areas looking strong — keep it up!
+          </p>
+        )}
       </div>
     </Card>
   )
