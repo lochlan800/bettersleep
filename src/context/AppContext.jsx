@@ -28,6 +28,7 @@ export function AppProvider({ children }) {
   const [mealPlans, setMealPlans] = useLocalStorage('bs_meal_plans', []);
   const [mealCompletions, setMealCompletions] = useLocalStorage('bs_meal_completions', []);
   const [foodLog, setFoodLog] = useLocalStorage('bs_food_log', []);
+  const [customFoods, setCustomFoods] = useLocalStorage('bs_custom_foods', []);
   const [competitionLogs, setCompetitionLogs] = useLocalStorage('bs_competition_logs', []);
   const [stretchingLogs, setStretchingLogs] = useLocalStorage('bs_stretching_logs', []);
   const [sorenessLogs, setSorenessLogs] = useLocalStorage('bs_soreness_logs', []);
@@ -249,6 +250,18 @@ export function AppProvider({ children }) {
     return foodLog.filter((e) => e.date === today);
   }, [foodLog]);
 
+  const addCustomFood = useCallback(
+    (food) => {
+      setCustomFoods((prev) => {
+        if (prev.some((f) => f.name === food.name)) {
+          return prev.map((f) => (f.name === food.name ? food : f));
+        }
+        return [...prev, food];
+      });
+    },
+    [setCustomFoods],
+  );
+
   // ── Stretching actions ─────────���──────────────────────────────��───
 
   const toggleStretch = useCallback(
@@ -387,6 +400,7 @@ export function AppProvider({ children }) {
       mealPlans,
       mealCompletions,
       foodLog,
+      customFoods,
       competitionLogs,
       stretchingLogs,
       sorenessLogs,
@@ -411,6 +425,7 @@ export function AppProvider({ children }) {
       addFoodEntry,
       removeFoodEntry,
       getTodayFoodLog,
+      addCustomFood,
       toggleStretch,
       getTodayStretching,
       setTodaySoreness,
@@ -431,6 +446,7 @@ export function AppProvider({ children }) {
       mealPlans,
       mealCompletions,
       foodLog,
+      customFoods,
       competitionLogs,
       stretchingLogs,
       sorenessLogs,
@@ -453,6 +469,7 @@ export function AppProvider({ children }) {
       addFoodEntry,
       removeFoodEntry,
       getTodayFoodLog,
+      addCustomFood,
       toggleStretch,
       getTodayStretching,
       setTodaySoreness,

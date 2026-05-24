@@ -413,7 +413,7 @@ function scaleNutrients(nutrients, grams) {
 }
 
 export default function MealPlannerPage() {
-  const { addFoodEntry, removeFoodEntry, getTodayFoodLog, settings, updateSettings, trainingLogs } = useApp()
+  const { addFoodEntry, removeFoodEntry, getTodayFoodLog, addCustomFood, customFoods, settings, updateSettings, trainingLogs } = useApp()
   const [search, setSearch] = useState('')
   const [showResults, setShowResults] = useState(false)
   const [selectedFood, setSelectedFood] = useState(null)
@@ -450,11 +450,17 @@ export default function MealPlannerPage() {
     [todayFoods, foodGroups, nutrientTargets]
   )
 
+  const allFoods = useMemo(() => {
+    const dbNames = new Set(FOOD_DATABASE.map(f => f.name))
+    const extras = customFoods.filter(f => !dbNames.has(f.name))
+    return [...FOOD_DATABASE, ...extras]
+  }, [customFoods])
+
   const searchResults = useMemo(() => {
     if (!search.trim()) return []
     const q = search.toLowerCase()
-    return FOOD_DATABASE.filter(f => f.name.toLowerCase().includes(q)).slice(0, 8)
-  }, [search])
+    return allFoods.filter(f => f.name.toLowerCase().includes(q)).slice(0, 8)
+  }, [search, allFoods])
 
   const handleSelect = (food) => {
     setSelectedFood(food)
@@ -493,12 +499,13 @@ export default function MealPlannerPage() {
   const handleConfirmCustom = () => {
     if (!customFood) return
     const g = parseInt(customGrams, 10) || 100
-    const nutrients = {}
+    const per100 = {}
     Object.keys(customNutrients).forEach(k => {
-      nutrients[k] = parseFloat(customNutrients[k]) || 0
+      per100[k] = parseFloat(customNutrients[k]) || 0
     })
-    const scaled = scaleNutrients(nutrients, g)
+    const scaled = scaleNutrients(per100, g)
     addFoodEntry({ name: customFood, groups: customGroups, nutrients: scaled, grams: g })
+    addCustomFood({ name: customFood, groups: customGroups, nutrients: per100 })
     setCustomFood(null)
     setSearch('')
   }
