@@ -418,6 +418,10 @@ export default function MealPlannerPage() {
   const [showResults, setShowResults] = useState(false)
   const [selectedFood, setSelectedFood] = useState(null)
   const [grams, setGrams] = useState('100')
+  const [customFood, setCustomFood] = useState(null)
+  const [customNutrients, setCustomNutrients] = useState({ protein: '', carbs: '', fat: '', fibre: '', iron: '', calcium: '', vitC: '' })
+  const [customGrams, setCustomGrams] = useState('100')
+  const [customGroups, setCustomGroups] = useState([])
   const [ageInput, setAgeInput] = useState(String(settings.realAge || ''))
   const [weightInput, setWeightInput] = useState(String(settings.bodyWeightKg))
 
@@ -466,11 +470,30 @@ export default function MealPlannerPage() {
     setGrams('100')
   }
 
-  const handleCustomAdd = () => {
+  const handleStartCustom = () => {
     if (!search.trim()) return
-    addFoodEntry({ name: search.trim(), groups: [], nutrients: { carbs: 0, protein: 0, fat: 0, fibre: 0, iron: 0, calcium: 0, vitC: 0 }, grams: 0 })
-    setSearch('')
+    setCustomFood(search.trim())
+    setCustomNutrients({ protein: '', carbs: '', fat: '', fibre: '', iron: '', calcium: '', vitC: '' })
+    setCustomGrams('100')
+    setCustomGroups([])
     setShowResults(false)
+  }
+
+  const handleConfirmCustom = () => {
+    if (!customFood) return
+    const g = parseInt(customGrams, 10) || 100
+    const nutrients = {}
+    Object.keys(customNutrients).forEach(k => {
+      nutrients[k] = parseFloat(customNutrients[k]) || 0
+    })
+    const scaled = scaleNutrients(nutrients, g)
+    addFoodEntry({ name: customFood, groups: customGroups, nutrients: scaled, grams: g })
+    setCustomFood(null)
+    setSearch('')
+  }
+
+  const toggleCustomGroup = (name) => {
+    setCustomGroups(prev => prev.includes(name) ? prev.filter(g => g !== name) : [...prev, name])
   }
 
   return (
@@ -521,7 +544,7 @@ export default function MealPlannerPage() {
               ))}
               {searchResults.length === 0 && (
                 <button
-                  onClick={handleCustomAdd}
+                  onClick={handleStartCustom}
                   className="w-full px-3 py-2.5 text-left hover:bg-surface-50 dark:hover:bg-surface-700 flex items-center gap-2"
                 >
                   <Plus size={16} className="text-primary-500" />
@@ -555,6 +578,73 @@ export default function MealPlannerPage() {
                 >Add</button>
               </div>
               <p className="text-[10px] text-surface-400 mt-1.5">Nutrients per 100g: {selectedFood.nutrients.protein}g protein, {selectedFood.nutrients.carbs}g carbs, {selectedFood.nutrients.fat}g fat</p>
+            </div>
+          )}
+
+          {customFood && (
+            <div className="mt-2 p-3 border border-surface-200 dark:border-surface-700 rounded-lg bg-surface-50 dark:bg-surface-700/50">
+              <div className="flex items-center justify-between mb-3">
+                <span className="text-sm font-medium text-surface-900 dark:text-surface-50">{customFood}</span>
+                <button onClick={() => setCustomFood(null)} className="text-surface-400 hover:text-red-500">
+                  <X size={14} />
+                </button>
+              </div>
+
+              <div className="flex items-center gap-2 mb-3">
+                <input
+                  type="number"
+                  value={customGrams}
+                  onChange={(e) => setCustomGrams(e.target.value)}
+                  min="1"
+                  className="w-20 px-2 py-1.5 text-sm rounded-md border border-surface-300 dark:border-surface-600 bg-white dark:bg-surface-700 text-surface-900 dark:text-surface-50 text-center"
+                />
+                <span className="text-xs text-surface-500">grams</span>
+              </div>
+
+              <p className="text-[11px] text-surface-500 dark:text-surface-400 mb-2">Food groups:</p>
+              <div className="flex flex-wrap gap-1.5 mb-3">
+                {FOOD_GROUP_BASE.map(g => (
+                  <button
+                    key={g.name}
+                    onClick={() => toggleCustomGroup(g.name)}
+                    className={`text-[11px] px-2 py-1 rounded-full border transition-colors ${
+                      customGroups.includes(g.name)
+                        ? 'bg-primary-500 text-white border-primary-500'
+                        : 'border-surface-300 dark:border-surface-600 text-surface-500 dark:text-surface-400'
+                    }`}
+                  >{g.icon} {g.name}</button>
+                ))}
+              </div>
+
+              <p className="text-[11px] text-surface-500 dark:text-surface-400 mb-2">Nutrients per 100g:</p>
+              <div className="grid grid-cols-2 gap-x-3 gap-y-1.5 mb-3">
+                {[
+                  { key: 'protein', label: 'Protein (g)' },
+                  { key: 'carbs', label: 'Carbs (g)' },
+                  { key: 'fat', label: 'Fat (g)' },
+                  { key: 'fibre', label: 'Fibre (g)' },
+                  { key: 'iron', label: 'Iron (mg)' },
+                  { key: 'calcium', label: 'Calcium (mg)' },
+                  { key: 'vitC', label: 'Vit C (mg)' },
+                ].map(({ key, label }) => (
+                  <div key={key} className="flex items-center gap-1.5">
+                    <label className="text-[10px] text-surface-500 w-16 shrink-0">{label}</label>
+                    <input
+                      type="number"
+                      min="0"
+                      value={customNutrients[key]}
+                      onChange={(e) => setCustomNutrients(prev => ({ ...prev, [key]: e.target.value }))}
+                      placeholder="0"
+                      className="w-full px-1.5 py-1 text-xs rounded border border-surface-300 dark:border-surface-600 bg-white dark:bg-surface-700 text-surface-900 dark:text-surface-50 text-center"
+                    />
+                  </div>
+                ))}
+              </div>
+
+              <button
+                onClick={handleConfirmCustom}
+                className="w-full py-1.5 text-xs font-medium rounded-md bg-primary-500 text-white"
+              >Add</button>
             </div>
           )}
         </div>
