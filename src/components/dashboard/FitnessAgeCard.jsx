@@ -1,5 +1,5 @@
-import { useMemo } from 'react'
-import { Activity } from 'lucide-react'
+import { useMemo, useState } from 'react'
+import { Activity, ChevronDown, ChevronUp } from 'lucide-react'
 import { useApp } from '../../context/AppContext'
 import useRecoveryScore from '../../hooks/useRecoveryScore'
 import { calculateSleepScore } from '../../utils/scoring'
@@ -26,17 +26,25 @@ function getMessage(age) {
   return 'Let\'s get to work!'
 }
 
+const TIP_MAP = {
+  Recovery: 'Log sleep, water, stretching & mindfulness',
+  Sleep: 'Log 7-9 hours with a consistent bedtime',
+  Training: 'Train 4-5 days per week consistently',
+  Hydration: 'Tap +500ml each time you drink water',
+  Stretching: 'Tick off stretches on the Recovery page',
+  Mindfulness: 'Do one mindfulness activity today',
+  Soreness: 'Rest up — log low soreness (1-2)',
+}
+
 export default function FitnessAgeCard() {
   const { sleepLogs, trainingLogs } = useApp()
   const {
     recoveryScore, sleepScore, hydrationPercent,
     stretchingPercent, sorenessLevel, mindfulnessCount,
   } = useRecoveryScore()
+  const [expanded, setExpanded] = useState(false)
 
-  const { fitnessAge, factors, tips } = useMemo(() => {
-    const today = getToday()
-
-    // Sleep consistency — average sleep score over last 7 days
+  const { fitnessAge, factors } = useMemo(() => {
     const last7Days = Array.from({ length: 7 }, (_, i) => getDaysAgo(i))
     const sortedSleep = [...sleepLogs].sort((a, b) => b.date.localeCompare(a.date))
     const recentSleepScores = last7Days
@@ -49,83 +57,55 @@ export default function FitnessAgeCard() {
       ? recentSleepScores.reduce((a, b) => a + b, 0) / recentSleepScores.length
       : 0
 
-    // Training consistency — how many of last 7 days had training
     const trainingDaysCount = last7Days.filter(date =>
       trainingLogs.some(l => l.date === date)
     ).length
     const trainingConsistency = Math.min(100, (trainingDaysCount / 5) * 100)
-
-    // Mindfulness score (0-100)
     const mindScore = Math.min(100, (mindfulnessCount / 3) * 100)
-
-    // Soreness score (inverted: level 1 = 100%, level 5 = 0%)
     const sorenessScore = ((5 - sorenessLevel) / 4) * 100
 
-    // Weighted fitness score
-    const weights = {
-      recovery: 0.30,
-      sleep: 0.20,
-      training: 0.15,
-      hydration: 0.10,
-      stretching: 0.10,
-      mindfulness: 0.10,
-      soreness: 0.05,
-    }
+    const components = [
+      { label: 'Recovery', score: recoveryScore, weight: 0.30 },
+      { label: 'Sleep', score: avgSleepScore, weight: 0.20 },
+      { label: 'Training', score: trainingConsistency, weight: 0.15 },
+      { label: 'Hydration', score: Math.min(100, hydrationPercent), weight: 0.10 },
+      { label: 'Stretching', score: stretchingPercent, weight: 0.10 },
+      { label: 'Mindfulness', score: mindScore, weight: 0.10 },
+      { label: 'Soreness', score: sorenessScore, weight: 0.05 },
+    ]
 
-    const components = {
-      recovery: { score: recoveryScore, weight: weights.recovery, label: 'Recovery' },
-      sleep: { score: avgSleepScore, weight: weights.sleep, label: 'Sleep' },
-      training: { score: trainingConsistency, weight: weights.training, label: 'Training' },
-      hydration: { score: Math.min(100, hydrationPercent), weight: weights.hydration, label: 'Hydration' },
-      stretching: { score: stretchingPercent, weight: weights.stretching, label: 'Stretching' },
-      mindfulness: { score: mindScore, weight: weights.mindfulness, label: 'Mindfulness' },
-      soreness: { score: sorenessScore, weight: weights.soreness, label: 'Soreness' },
-    }
-
-    const fitnessScore = Object.values(components).reduce(
-      (sum, c) => sum + c.score * c.weight, 0
-    )
-
-    // Map 0-100 score to age 65-18
+    const fitnessScore = components.reduce((sum, c) => sum + c.score * c.weight, 0)
     const age = Math.round(65 - (fitnessScore / 100) * 47)
 
-    // Build factors list sorted by impact
-    const factorList = Object.values(components)
-      .map(c => ({
+    const factorList = components.map(c => {
+      const score = Math.round(c.score)
+      const yearsAdded = Math.round(((100 - c.score) / 100) * c.weight * 47)
+      const improvedScore = Math.min(100, c.score + 50)
+      const yearsSaved = Math.round(((improvedScore - c.score) / 100) * c.weight * 47)
+      return {
         label: c.label,
-        score: Math.round(c.score),
-        helping: c.score >= 60,
-      }))
-      .sort((a, b) => b.score - a.score)
+        score,
+        weight: Math.round(c.weight * 100),
+        yearsAdded,
+        yearsSaved: yearsSaved > 0 ? yearsSaved : 0,
+        tip: TIP_MAP[c.label],
+      }
+    }).sort((a, b) => a.score - b.score)
 
-    // Generate tips for weakest areas (score < 60)
-    const tipMap = {
-      Recovery: 'Log your sleep, water, stretching and mindfulness to boost your overall recovery score.',
-      Sleep: 'Log your sleep every morning — aim for 7-9 hours with a consistent bedtime.',
-      Training: 'Train 4-5 days per week to build consistency. Even short runs count.',
-      Hydration: 'Drink water throughout the day — tap +500ml on the dashboard each time.',
-      Stretching: 'Do your stretching routine after training — tick off each stretch on the Recovery page.',
-      Mindfulness: 'Do at least one mindfulness activity daily — even 3 minutes of box breathing helps.',
-      Soreness: 'Rest when sore. Log a low soreness level (1-2) to improve this score.',
-    }
-    const tips = factorList
-      .filter(f => f.score < 60)
-      .slice(0, 3)
-      .map(f => ({ label: f.label, tip: tipMap[f.label] }))
-
-    return { fitnessAge: age, factors: factorList, tips }
+    return { fitnessAge: age, factors: factorList }
   }, [sleepLogs, trainingLogs, recoveryScore, sleepScore, hydrationPercent, stretchingPercent, sorenessLevel, mindfulnessCount])
 
   const color = getAgeColor(fitnessAge)
   const message = getMessage(fitnessAge)
-
-  // SVG ring showing age mapped to 0-100 scale (18=100, 65=0)
   const agePercent = Math.max(0, Math.min(100, ((65 - fitnessAge) / 47) * 100))
   const ringSize = 130
   const strokeWidth = 10
   const radius = (ringSize - strokeWidth) / 2
   const circumference = radius * 2 * Math.PI
   const offset = circumference - (agePercent / 100) * circumference
+
+  const weakFactors = factors.filter(f => f.score < 70)
+  const strongFactors = factors.filter(f => f.score >= 70)
 
   return (
     <Card>
@@ -135,75 +115,138 @@ export default function FitnessAgeCard() {
           <h3 className="font-bold text-surface-900 dark:text-surface-50">Fitness Age</h3>
         </div>
 
-        {/* Age ring */}
-        <div className="relative flex items-center justify-center">
-          <svg width={ringSize} height={ringSize} className="-rotate-90">
-            <circle
-              cx={ringSize / 2} cy={ringSize / 2} r={radius}
-              fill="none" stroke="currentColor" strokeWidth={strokeWidth}
-              className="text-surface-200 dark:text-surface-700"
-            />
-            <circle
-              cx={ringSize / 2} cy={ringSize / 2} r={radius}
-              fill="none" stroke={color} strokeWidth={strokeWidth}
-              strokeDasharray={circumference} strokeDashoffset={offset}
-              strokeLinecap="round"
-              className="transition-all duration-1000 ease-out"
-            />
-          </svg>
-          <div className="absolute flex flex-col items-center justify-center" style={{ width: ringSize, height: ringSize }}>
-            <span className="text-4xl font-bold text-surface-900 dark:text-surface-50">{fitnessAge}</span>
-            <span className="text-xs text-surface-500 dark:text-surface-400">years</span>
+        {/* Tappable age ring */}
+        <button onClick={() => setExpanded(!expanded)} className="relative flex flex-col items-center gap-1">
+          <div className="relative flex items-center justify-center">
+            <svg width={ringSize} height={ringSize} className="-rotate-90">
+              <circle
+                cx={ringSize / 2} cy={ringSize / 2} r={radius}
+                fill="none" stroke="currentColor" strokeWidth={strokeWidth}
+                className="text-surface-200 dark:text-surface-700"
+              />
+              <circle
+                cx={ringSize / 2} cy={ringSize / 2} r={radius}
+                fill="none" stroke={color} strokeWidth={strokeWidth}
+                strokeDasharray={circumference} strokeDashoffset={offset}
+                strokeLinecap="round"
+                className="transition-all duration-1000 ease-out"
+              />
+            </svg>
+            <div className="absolute flex flex-col items-center justify-center" style={{ width: ringSize, height: ringSize }}>
+              <span className="text-4xl font-bold text-surface-900 dark:text-surface-50">{fitnessAge}</span>
+              <span className="text-xs text-surface-500 dark:text-surface-400">years</span>
+            </div>
           </div>
-        </div>
+          <div className="flex items-center gap-1 text-xs text-surface-400">
+            <span>Tap for details</span>
+            {expanded ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+          </div>
+        </button>
 
         <p className="text-sm text-center text-surface-600 dark:text-surface-300">
           Your body is performing like a <span className="font-bold" style={{ color }}>{fitnessAge}-year-old</span>
         </p>
         <p className="text-xs font-medium text-center" style={{ color }}>{message}</p>
 
-        {/* Factor breakdown */}
-        <div className="w-full grid grid-cols-2 gap-x-4 gap-y-1.5 mt-1">
-          {factors.map(f => (
-            <div key={f.label} className="flex items-center justify-between">
-              <span className="text-xs text-surface-600 dark:text-surface-400">{f.label}</span>
-              <div className="flex items-center gap-1.5">
-                <div className="w-12 h-1.5 rounded-full bg-surface-200 dark:bg-surface-700 overflow-hidden">
-                  <div
-                    className="h-full rounded-full transition-all duration-500"
-                    style={{
-                      width: `${f.score}%`,
-                      backgroundColor: f.score >= 70 ? '#10b981' : f.score >= 40 ? '#eab308' : '#ef4444',
-                    }}
-                  />
-                </div>
-                <span className="text-[10px] font-medium text-surface-500 w-6 text-right">{f.score}</span>
+        {/* Expanded detail view */}
+        {expanded && (
+          <div className="w-full space-y-4 mt-1">
+            {/* What's adding years */}
+            <div className="p-3 bg-surface-50 dark:bg-surface-700/50 rounded-lg">
+              <p className="text-xs font-semibold text-surface-700 dark:text-surface-300 mb-3">What's making your age {fitnessAge}</p>
+              <div className="space-y-2">
+                {factors.map(f => (
+                  <div key={f.label} className="flex items-center justify-between">
+                    <div className="flex items-center gap-2 flex-1 min-w-0">
+                      <div
+                        className="w-2 h-2 rounded-full flex-shrink-0"
+                        style={{ backgroundColor: f.score >= 70 ? '#10b981' : f.score >= 40 ? '#eab308' : '#ef4444' }}
+                      />
+                      <span className="text-xs text-surface-700 dark:text-surface-300">{f.label}</span>
+                      <span className="text-[10px] text-surface-400">{f.score}%</span>
+                    </div>
+                    <span className={`text-xs font-bold ${f.yearsAdded === 0 ? 'text-emerald-500' : f.yearsAdded <= 2 ? 'text-yellow-500' : 'text-red-500'}`}>
+                      {f.yearsAdded === 0 ? '0' : `+${f.yearsAdded}`} yrs
+                    </span>
+                  </div>
+                ))}
               </div>
             </div>
-          ))}
-        </div>
 
-        {/* Tips to lower fitness age */}
-        {tips.length > 0 && (
-          <div className="w-full mt-2 p-3 bg-surface-50 dark:bg-surface-700/50 rounded-lg">
-            <p className="text-xs font-semibold text-surface-700 dark:text-surface-300 mb-2">To bring your age down:</p>
-            <ul className="space-y-1.5">
-              {tips.map(t => (
-                <li key={t.label} className="flex items-start gap-2">
-                  <span className="text-red-500 text-xs mt-0.5">*</span>
-                  <span className="text-xs text-surface-600 dark:text-surface-400">
-                    <span className="font-medium text-surface-800 dark:text-surface-200">{t.label}:</span> {t.tip}
-                  </span>
-                </li>
-              ))}
-            </ul>
+            {/* How to bring it down */}
+            {weakFactors.length > 0 && (
+              <div className="p-3 bg-emerald-50 dark:bg-emerald-900/20 rounded-lg">
+                <p className="text-xs font-semibold text-emerald-700 dark:text-emerald-400 mb-3">How to bring it down</p>
+                <div className="space-y-2.5">
+                  {weakFactors.slice(0, 4).map(f => (
+                    <div key={f.label}>
+                      <div className="flex items-center justify-between mb-0.5">
+                        <span className="text-xs font-medium text-surface-800 dark:text-surface-200">{f.label}</span>
+                        {f.yearsSaved > 0 && (
+                          <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400">-{f.yearsSaved} yrs</span>
+                        )}
+                      </div>
+                      <p className="text-[11px] text-surface-500 dark:text-surface-400">{f.tip}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Strong areas */}
+            {strongFactors.length > 0 && (
+              <div className="p-3 bg-surface-50 dark:bg-surface-700/50 rounded-lg">
+                <p className="text-xs font-semibold text-emerald-600 dark:text-emerald-400 mb-1">
+                  Keeping you young: {strongFactors.map(f => f.label).join(', ')}
+                </p>
+              </div>
+            )}
           </div>
         )}
 
-        {tips.length === 0 && (
-          <p className="text-xs text-emerald-600 dark:text-emerald-400 text-center mt-1">
-            All areas looking strong — keep it up!
-          </p>
+        {/* Collapsed: simple factor bars */}
+        {!expanded && (
+          <>
+            <div className="w-full grid grid-cols-2 gap-x-4 gap-y-1.5 mt-1">
+              {factors.map(f => (
+                <div key={f.label} className="flex items-center justify-between">
+                  <span className="text-xs text-surface-600 dark:text-surface-400">{f.label}</span>
+                  <div className="flex items-center gap-1.5">
+                    <div className="w-12 h-1.5 rounded-full bg-surface-200 dark:bg-surface-700 overflow-hidden">
+                      <div
+                        className="h-full rounded-full transition-all duration-500"
+                        style={{
+                          width: `${f.score}%`,
+                          backgroundColor: f.score >= 70 ? '#10b981' : f.score >= 40 ? '#eab308' : '#ef4444',
+                        }}
+                      />
+                    </div>
+                    <span className="text-[10px] font-medium text-surface-500 w-6 text-right">{f.score}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {weakFactors.length > 0 ? (
+              <div className="w-full mt-2 p-3 bg-surface-50 dark:bg-surface-700/50 rounded-lg">
+                <p className="text-xs font-semibold text-surface-700 dark:text-surface-300 mb-2">To bring your age down:</p>
+                <ul className="space-y-1.5">
+                  {weakFactors.slice(0, 3).map(f => (
+                    <li key={f.label} className="flex items-start gap-2">
+                      <span className="text-red-500 text-xs mt-0.5">*</span>
+                      <span className="text-xs text-surface-600 dark:text-surface-400">
+                        <span className="font-medium text-surface-800 dark:text-surface-200">{f.label}:</span> {f.tip}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ) : (
+              <p className="text-xs text-emerald-600 dark:text-emerald-400 text-center mt-1">
+                All areas looking strong — keep it up!
+              </p>
+            )}
+          </>
         )}
       </div>
     </Card>
