@@ -1,6 +1,7 @@
 import { useState, useMemo } from 'react'
 import { useApp } from '../../context/AppContext'
-import { Search, Plus, X, Apple, Beef, Wheat, Droplets, Flame } from 'lucide-react'
+import { getDaysAgo } from '../../utils/dateHelpers'
+import { Search, Plus, X } from 'lucide-react'
 import Card from '../ui/Card'
 
 const FOOD_DATABASE = [
@@ -286,27 +287,73 @@ const FOOD_DATABASE = [
   { name: 'Tahini', groups: ['Protein'], nutrients: { carbs: 6, protein: 5, fat: 16, fibre: 3, iron: 2.7, calcium: 130, vitC: 0 } },
 ]
 
-const FOOD_GROUPS = [
-  { name: 'Fruit', color: '#f59e0b', icon: '🍎', target: 2 },
-  { name: 'Vegetables', color: '#10b981', icon: '🥦', target: 3 },
-  { name: 'Protein', color: '#ef4444', icon: '🥩', target: 2 },
-  { name: 'Grains', color: '#8b5cf6', icon: '🌾', target: 3 },
-  { name: 'Dairy', color: '#3b82f6', icon: '🥛', target: 2 },
+const FOOD_GROUP_BASE = [
+  { name: 'Fruit', color: '#f59e0b', icon: '🍎' },
+  { name: 'Vegetables', color: '#10b981', icon: '🥦' },
+  { name: 'Protein', color: '#ef4444', icon: '🥩' },
+  { name: 'Grains', color: '#8b5cf6', icon: '🌾' },
+  { name: 'Dairy', color: '#3b82f6', icon: '🥛' },
 ]
 
-const NUTRIENT_TARGETS = {
-  protein: { target: 60, unit: 'g', label: 'Protein' },
-  carbs: { target: 250, unit: 'g', label: 'Carbs' },
-  fat: { target: 70, unit: 'g', label: 'Fat' },
-  fibre: { target: 30, unit: 'g', label: 'Fibre' },
-  iron: { target: 18, unit: 'mg', label: 'Iron' },
-  calcium: { target: 1000, unit: 'mg', label: 'Calcium' },
-  vitC: { target: 80, unit: 'mg', label: 'Vitamin C' },
+function getPersonalizedTargets(age, weightKg, trainingDaysPerWeek) {
+  const isChild = age && age < 16
+  const isGrowing = age && age < 19
+  const w = weightKg || 70
+
+  // Protein: 1.2g/kg sedentary, up to 1.8g/kg for heavy training
+  const proteinPerKg = 1.2 + (trainingDaysPerWeek / 7) * 0.6
+  const protein = Math.round(w * proteinPerKg)
+
+  // Carbs: 4g/kg base, up to 8g/kg for heavy training runners
+  const carbsPerKg = 4 + (trainingDaysPerWeek / 7) * 4
+  const carbs = Math.round(w * carbsPerKg)
+
+  // Fat: ~1g/kg
+  const fat = Math.round(w * 1.0)
+
+  // Fibre: 25-30g, slightly less for younger
+  const fibre = isChild ? 20 : 30
+
+  // Iron: higher for growing teens & runners
+  const ironBase = isGrowing ? 15 : 14
+  const iron = Math.round(ironBase + trainingDaysPerWeek * 0.5)
+
+  // Calcium: higher for growing teens
+  const calcium = isGrowing ? 1300 : 1000
+
+  // Vitamin C
+  const vitC = 80 + trainingDaysPerWeek * 5
+
+  // Food group servings scale with training
+  const extra = trainingDaysPerWeek >= 4 ? 1 : 0
+  const foodGroups = FOOD_GROUP_BASE.map(g => {
+    const targets = {
+      Fruit: 2 + extra,
+      Vegetables: 3 + extra,
+      Protein: 2 + extra,
+      Grains: 3 + extra,
+      Dairy: isGrowing ? 3 : 2,
+    }
+    return { ...g, target: targets[g.name] }
+  })
+
+  return {
+    foodGroups,
+    nutrientTargets: {
+      protein: { target: protein, unit: 'g', label: 'Protein' },
+      carbs: { target: carbs, unit: 'g', label: 'Carbs' },
+      fat: { target: fat, unit: 'g', label: 'Fat' },
+      fibre: { target: fibre, unit: 'g', label: 'Fibre' },
+      iron: { target: iron, unit: 'mg', label: 'Iron' },
+      calcium: { target: calcium, unit: 'mg', label: 'Calcium' },
+      vitC: { target: vitC, unit: 'mg', label: 'Vitamin C' },
+    },
+  }
 }
 
-function getSuggestions(todayFoods) {
+function getSuggestions(todayFoods, foodGroups, nutrientTargets) {
   const groupCounts = {}
-  FOOD_GROUPS.forEach(g => { groupCounts[g.name] = 0 })
+  foodGroups.forEach(g => { groupCounts[g.name] = 0 })
   todayFoods.forEach(f => {
     f.groups.forEach(g => { groupCounts[g] = (groupCounts[g] || 0) + 1 })
   })
@@ -316,8 +363,8 @@ function getSuggestions(todayFoods) {
     Object.keys(totals).forEach(k => { totals[k] += f.nutrients[k] || 0 })
   })
 
-  const missingGroups = FOOD_GROUPS.filter(g => groupCounts[g.name] < g.target)
-  const lowNutrients = Object.entries(NUTRIENT_TARGETS)
+  const missingGroups = foodGroups.filter(g => groupCounts[g.name] < g.target)
+  const lowNutrients = Object.entries(nutrientTargets)
     .filter(([key, { target }]) => totals[key] < target * 0.5)
     .map(([key, info]) => ({ key, ...info, current: totals[key] }))
 
@@ -356,13 +403,23 @@ function scaleNutrients(nutrients, grams) {
 }
 
 export default function MealPlannerPage() {
-  const { addFoodEntry, removeFoodEntry, getTodayFoodLog } = useApp()
+  const { addFoodEntry, removeFoodEntry, getTodayFoodLog, settings, trainingLogs } = useApp()
   const [search, setSearch] = useState('')
   const [showResults, setShowResults] = useState(false)
   const [selectedFood, setSelectedFood] = useState(null)
   const [grams, setGrams] = useState('100')
 
   const todayFoods = getTodayFoodLog()
+
+  const trainingDaysPerWeek = useMemo(() => {
+    const last7 = Array.from({ length: 7 }, (_, i) => getDaysAgo(i))
+    return last7.filter(d => trainingLogs.some(l => l.date === d)).length
+  }, [trainingLogs])
+
+  const { foodGroups, nutrientTargets } = useMemo(
+    () => getPersonalizedTargets(settings.realAge, settings.bodyWeightKg, trainingDaysPerWeek),
+    [settings.realAge, settings.bodyWeightKg, trainingDaysPerWeek]
+  )
 
   const { missingGroups, lowNutrients, suggestions, groupCounts, totals } = useMemo(
     () => getSuggestions(todayFoods.map(e => {
@@ -371,8 +428,8 @@ export default function MealPlannerPage() {
         return { ...dbFood, nutrients: scaleNutrients(dbFood.nutrients, e.grams) }
       }
       return { name: e.name, groups: e.groups || [], nutrients: e.nutrients || {} }
-    })),
-    [todayFoods]
+    }), foodGroups, nutrientTargets),
+    [todayFoods, foodGroups, nutrientTargets]
   )
 
   const searchResults = useMemo(() => {
@@ -409,6 +466,9 @@ export default function MealPlannerPage() {
       <div>
         <h2 className="text-2xl font-bold text-surface-900 dark:text-surface-50">Food Log</h2>
         <p className="text-sm text-surface-500 dark:text-surface-400 mt-1">Log what you eat, get suggestions for what's missing</p>
+        <p className="text-[11px] text-surface-400 mt-0.5">
+          Targets based on: {settings.realAge ? `age ${settings.realAge}` : 'no age set'}, {settings.bodyWeightKg}kg, {trainingDaysPerWeek} training days/week
+        </p>
       </div>
 
       {/* Search input */}
@@ -513,7 +573,7 @@ export default function MealPlannerPage() {
       <Card>
         <h3 className="text-sm font-bold text-surface-800 dark:text-surface-200 mb-3">Food Groups</h3>
         <div className="space-y-2.5">
-          {FOOD_GROUPS.map(group => {
+          {foodGroups.map(group => {
             const count = groupCounts[group.name] || 0
             const pct = Math.min(100, (count / group.target) * 100)
             return (
@@ -542,7 +602,7 @@ export default function MealPlannerPage() {
       <Card>
         <h3 className="text-sm font-bold text-surface-800 dark:text-surface-200 mb-3">Nutrients</h3>
         <div className="grid grid-cols-2 gap-3">
-          {Object.entries(NUTRIENT_TARGETS).map(([key, { target, unit, label }]) => {
+          {Object.entries(nutrientTargets).map(([key, { target, unit, label }]) => {
             const current = Math.round(totals[key] || 0)
             const pct = Math.min(100, (current / target) * 100)
             const low = pct < 50
