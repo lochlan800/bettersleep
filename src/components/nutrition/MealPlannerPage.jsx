@@ -589,11 +589,14 @@ export default function MealPlannerPage() {
               min="5"
               max="100"
               value={ageInput}
-              onChange={(e) => setAgeInput(e.target.value)}
+              onChange={(e) => {
+                setAgeInput(e.target.value)
+                const v = parseInt(e.target.value, 10)
+                if (v >= 5 && v <= 100) updateSettings({ realAge: v })
+              }}
               onBlur={() => {
                 const v = parseInt(ageInput, 10)
-                updateSettings({ realAge: v >= 5 && v <= 100 ? v : null })
-                if (!(v >= 5 && v <= 100)) setAgeInput('')
+                if (!(v >= 5 && v <= 100)) { updateSettings({ realAge: null }); setAgeInput('') }
               }}
               placeholder="—"
               className="w-12 px-1.5 py-1 text-xs rounded border border-surface-300 dark:border-surface-600 bg-white dark:bg-surface-700 text-surface-900 dark:text-surface-50 text-center"
@@ -606,11 +609,14 @@ export default function MealPlannerPage() {
               min="20"
               max="200"
               value={weightInput}
-              onChange={(e) => setWeightInput(e.target.value)}
+              onChange={(e) => {
+                setWeightInput(e.target.value)
+                const v = parseInt(e.target.value, 10)
+                if (v >= 20 && v <= 200) updateSettings({ bodyWeightKg: v })
+              }}
               onBlur={() => {
                 const v = parseInt(weightInput, 10)
-                if (v >= 20 && v <= 200) updateSettings({ bodyWeightKg: v })
-                else setWeightInput(String(settings.bodyWeightKg))
+                if (!(v >= 20 && v <= 200)) setWeightInput(String(settings.bodyWeightKg))
               }}
               className="w-14 px-1.5 py-1 text-xs rounded border border-surface-300 dark:border-surface-600 bg-white dark:bg-surface-700 text-surface-900 dark:text-surface-50 text-center"
             />
