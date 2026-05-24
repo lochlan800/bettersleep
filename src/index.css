@@ -48,3 +48,36 @@ body {
 #root {
   min-height: 100vh;
 }
+
+.page-transition-wrapper {
+  perspective: 1200px;
+}
+
+.page-transition {
+  transform-style: preserve-3d;
+  backface-visibility: hidden;
+  transition: transform 0.3s ease, opacity 0.3s ease, scale 0.3s ease;
+}
+
+.page-flip-out {
+  scale: 0.92;
+  opacity: 0;
+  transform: rotateY(90deg);
+}
+
+.page-flip-in {
+  animation: flipIn 0.3s ease forwards;
+}
+
+@keyframes flipIn {
+  0% {
+    scale: 0.92;
+    opacity: 0;
+    transform: rotateY(-90deg);
+  }
+  100% {
+    scale: 1;
+    opacity: 1;
+    transform: rotateY(0deg);
+  }
+}
