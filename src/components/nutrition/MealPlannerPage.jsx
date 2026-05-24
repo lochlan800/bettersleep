@@ -1,7 +1,7 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useRef } from 'react'
 import { useApp } from '../../context/AppContext'
 import { getDaysAgo } from '../../utils/dateHelpers'
-import { Search, Plus, X } from 'lucide-react'
+import { Search, Plus, X, Camera } from 'lucide-react'
 import Card from '../ui/Card'
 
 const FOOD_DATABASE = [
@@ -422,6 +422,8 @@ export default function MealPlannerPage() {
   const [customNutrients, setCustomNutrients] = useState({ protein: '', carbs: '', fat: '', fibre: '', iron: '', calcium: '', vitC: '' })
   const [customGrams, setCustomGrams] = useState('100')
   const [customGroups, setCustomGroups] = useState([])
+  const [labelPhoto, setLabelPhoto] = useState(null)
+  const fileInputRef = useRef(null)
   const [ageInput, setAgeInput] = useState(String(settings.realAge || ''))
   const [weightInput, setWeightInput] = useState(String(settings.bodyWeightKg))
 
@@ -476,7 +478,16 @@ export default function MealPlannerPage() {
     setCustomNutrients({ protein: '', carbs: '', fat: '', fibre: '', iron: '', calcium: '', vitC: '' })
     setCustomGrams('100')
     setCustomGroups([])
+    setLabelPhoto(null)
     setShowResults(false)
+  }
+
+  const handlePhotoUpload = (e) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    const reader = new FileReader()
+    reader.onload = (ev) => setLabelPhoto(ev.target.result)
+    reader.readAsDataURL(file)
   }
 
   const handleConfirmCustom = () => {
@@ -600,6 +611,33 @@ export default function MealPlannerPage() {
                 />
                 <span className="text-xs text-surface-500">grams</span>
               </div>
+
+              {/* Photo of nutritional label */}
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                capture="environment"
+                onChange={handlePhotoUpload}
+                className="hidden"
+              />
+              {labelPhoto ? (
+                <div className="mb-3">
+                  <div className="flex items-center justify-between mb-1.5">
+                    <span className="text-[11px] text-surface-500 dark:text-surface-400">Nutritional label:</span>
+                    <button onClick={() => setLabelPhoto(null)} className="text-[10px] text-red-500">Remove</button>
+                  </div>
+                  <img src={labelPhoto} alt="Nutritional label" className="w-full rounded-lg border border-surface-200 dark:border-surface-600" />
+                </div>
+              ) : (
+                <button
+                  onClick={() => fileInputRef.current?.click()}
+                  className="w-full mb-3 py-2 border-2 border-dashed border-surface-300 dark:border-surface-600 rounded-lg flex items-center justify-center gap-2 text-xs text-surface-500 dark:text-surface-400 hover:border-primary-400 hover:text-primary-500 transition-colors"
+                >
+                  <Camera size={16} />
+                  <span>Photo the nutritional label</span>
+                </button>
+              )}
 
               <p className="text-[11px] text-surface-500 dark:text-surface-400 mb-2">Food groups:</p>
               <div className="flex flex-wrap gap-1.5 mb-3">
