@@ -654,7 +654,7 @@ export default function MealPlannerPage() {
                 ))}
               </div>
 
-              <p className="text-[11px] text-surface-500 dark:text-surface-400 mb-2">Nutrients per 100g:</p>
+              <p className="text-[11px] text-surface-500 dark:text-surface-400 mb-2">Enter the values from the packet (per 100g):</p>
               <div className="grid grid-cols-2 gap-x-3 gap-y-1.5 mb-3">
                 {[
                   { key: 'protein', label: 'Protein (g)' },
@@ -678,6 +678,27 @@ export default function MealPlannerPage() {
                   </div>
                 ))}
               </div>
+
+              {(() => {
+                const g = parseInt(customGrams, 10) || 100
+                const hasValues = Object.values(customNutrients).some(v => parseFloat(v) > 0)
+                if (!hasValues || g === 100) return null
+                const scale = g / 100
+                return (
+                  <div className="mb-3 p-2 bg-primary-50 dark:bg-primary-900/20 rounded-lg">
+                    <p className="text-[11px] font-medium text-primary-700 dark:text-primary-400 mb-1">
+                      What you'll get from {g}g:
+                    </p>
+                    <p className="text-[10px] text-primary-600 dark:text-primary-400">
+                      {[
+                        customNutrients.protein && `${Math.round(parseFloat(customNutrients.protein) * scale * 10) / 10}g protein`,
+                        customNutrients.carbs && `${Math.round(parseFloat(customNutrients.carbs) * scale * 10) / 10}g carbs`,
+                        customNutrients.fat && `${Math.round(parseFloat(customNutrients.fat) * scale * 10) / 10}g fat`,
+                      ].filter(Boolean).join(' · ')}
+                    </p>
+                  </div>
+                )
+              })()}
 
               <button
                 onClick={handleConfirmCustom}
