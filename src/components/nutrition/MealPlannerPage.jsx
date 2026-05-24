@@ -326,15 +326,25 @@ function getPersonalizedTargets(age, weightKg, trainingDaysPerWeek) {
 
   // Food group servings scale with training
   const extra = trainingDaysPerWeek >= 4 ? 1 : 0
+  const activityMultiplier = 1 + (trainingDaysPerWeek / 7) * 0.3
+
   const foodGroups = FOOD_GROUP_BASE.map(g => {
-    const targets = {
+    const servingTargets = {
       Fruit: 2 + extra,
       Vegetables: 3 + extra,
       Protein: 2 + extra,
       Grains: 3 + extra,
       Dairy: isGrowing ? 3 : 2,
     }
-    return { ...g, target: targets[g.name] }
+    // Daily gram targets based on age, weight, training
+    const gramTargets = {
+      Fruit: Math.round((isChild ? 200 : 250) * activityMultiplier),
+      Vegetables: Math.round((isChild ? 250 : 350) * activityMultiplier),
+      Protein: Math.round(w * proteinPerKg),
+      Grains: Math.round((isChild ? 200 : 250) * activityMultiplier),
+      Dairy: Math.round((isGrowing ? 400 : 300) * activityMultiplier),
+    }
+    return { ...g, target: servingTargets[g.name], gramTarget: gramTargets[g.name] }
   })
 
   return {
@@ -582,7 +592,7 @@ export default function MealPlannerPage() {
                 <div className="flex-1">
                   <div className="flex justify-between mb-0.5">
                     <span className="text-xs font-medium text-surface-700 dark:text-surface-300">{group.name}</span>
-                    <span className="text-xs text-surface-500">{count}/{group.target}</span>
+                    <span className="text-xs text-surface-500">{count}/{group.target} · <span className="font-medium">{group.gramTarget}g</span></span>
                   </div>
                   <div className="w-full h-2 bg-surface-200 dark:bg-surface-700 rounded-full overflow-hidden">
                     <div
