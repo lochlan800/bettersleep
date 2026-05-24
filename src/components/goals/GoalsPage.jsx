@@ -317,8 +317,7 @@ function daysUntil(deadline) {
 }
 
 export default function GoalsPage() {
-  const { goals, addGoal, updateGoal, deleteGoal, settings } = useApp()
-  const simple = settings.simpleMode
+  const { goals, addGoal, updateGoal, deleteGoal } = useApp()
   const { triggerCelebration } = useCelebration()
   const [showWizard, setShowWizard] = useState(false)
   const [editingId, setEditingId] = useState(null)
@@ -503,7 +502,7 @@ export default function GoalsPage() {
                     </div>
                   )}
 
-                  {expanded && !simple && (
+                  {expanded && (
                     <div className="px-4 pb-4 border-t border-surface-200 dark:border-surface-700 pt-3 space-y-2">
                       {/* Last 7 days check-in grid */}
                       {!goal.completed && (

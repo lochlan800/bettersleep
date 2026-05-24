@@ -238,8 +238,7 @@ function generateWeek() {
 }
 
 export default function MealPlannerPage() {
-  const { mealPlans, updateMealPlan, toggleMealCompletion, getTodayMealCompletions, settings } = useApp()
-  const simple = settings.simpleMode
+  const { mealPlans, updateMealPlan, toggleMealCompletion, getTodayMealCompletions } = useApp()
   const { triggerCelebration } = useCelebration()
   const todayMeals = getTodayMealCompletions()
   const [weekPlan, setWeekPlan] = useState(mealPlans || generateWeek())
@@ -393,7 +392,7 @@ export default function MealPlannerPage() {
               )}
             </div>
             <h3 className={`text-lg font-semibold mb-3 ${isDone ? 'text-green-600 dark:text-green-400' : 'text-primary-600 dark:text-primary-400'}`}>{meal.name}</h3>
-            {!simple && meal.fruitVeg.length > 0 && (
+            {meal.fruitVeg.length > 0 && (
               <div className="mb-3 flex flex-wrap gap-2">
                 {meal.fruitVeg.map(fv => (
                   <span key={fv} className="text-xs bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 px-2 py-1 rounded">
@@ -402,22 +401,19 @@ export default function MealPlannerPage() {
                 ))}
               </div>
             )}
-            {!simple && (
-              <div className="mb-3">
-                <h4 className="font-medium text-surface-700 dark:text-surface-300 mb-2">Ingredients:</h4>
-                <ul className="list-disc list-inside text-sm text-surface-600 dark:text-surface-400 space-y-1">
-                  {meal.ingredients.map((ing, i) => (
-                    <li key={i}>{ing}</li>
-                  ))}
-                </ul>
-              </div>
-            )}
-            {!simple && <p className="text-sm text-surface-600 dark:text-surface-400 italic">{meal.prep}</p>}
+            <div className="mb-3">
+              <h4 className="font-medium text-surface-700 dark:text-surface-300 mb-2">Ingredients:</h4>
+              <ul className="list-disc list-inside text-sm text-surface-600 dark:text-surface-400 space-y-1">
+                {meal.ingredients.map((ing, i) => (
+                  <li key={i}>{ing}</li>
+                ))}
+              </ul>
+            </div>
+            <p className="text-sm text-surface-600 dark:text-surface-400 italic">{meal.prep}</p>
           </div>
           )
         })}
 
-        {!simple && <>
         {/* 7-a-day tracker */}
         <div className="mb-6 p-4 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-900">
           <h2 className="font-bold text-green-700 dark:text-green-400 mb-3">{plan.day}'s 7-a-Day</h2>
@@ -522,7 +518,6 @@ export default function MealPlannerPage() {
             </div>
           ))}
         </div>
-        </>}
       </div>
     </div>
   )

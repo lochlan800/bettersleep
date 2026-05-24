@@ -107,8 +107,7 @@ const CATEGORY_COLORS = {
 }
 
 export default function MindfulnessPage() {
-  const { mindfulnessLogs, toggleMindfulnessActivity, getTodayMindfulness, settings } = useApp()
-  const simple = settings.simpleMode
+  const { mindfulnessLogs, toggleMindfulnessActivity, getTodayMindfulness } = useApp()
   const { triggerCelebration } = useCelebration()
 
   const todayLog = getTodayMindfulness()
@@ -177,14 +176,12 @@ export default function MindfulnessPage() {
                     <h4 className={`text-sm font-semibold ${done ? 'text-primary-700 dark:text-primary-400' : 'text-surface-900 dark:text-surface-50'}`}>
                       {activity.name}
                     </h4>
-                    {!simple && (
-                      <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-medium ${CATEGORY_COLORS[activity.category] || 'bg-surface-100 text-surface-600'}`}>
+                    <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-medium ${CATEGORY_COLORS[activity.category] || 'bg-surface-100 text-surface-600'}`}>
                         {activity.category}
                       </span>
-                    )}
                   </div>
-                  {!simple && <p className="text-xs text-surface-600 dark:text-surface-400 leading-relaxed">{activity.description}</p>}
-                  {!simple && <p className="text-[10px] text-surface-400 mt-1.5">{activity.duration}</p>}
+                  <p className="text-xs text-surface-600 dark:text-surface-400 leading-relaxed">{activity.description}</p>
+                  <p className="text-[10px] text-surface-400 mt-1.5">{activity.duration}</p>
                 </div>
                 <div className={`shrink-0 w-6 h-6 rounded-full border-2 flex items-center justify-center mt-0.5 transition-colors ${
                   done

@@ -57,8 +57,7 @@ function formatTime(seconds) {
 }
 
 export default function CompetitionsPage() {
-  const { competitionLogs, addCompetitionLog, updateCompetitionLog, deleteCompetitionLog, settings } = useApp()
-  const simple = settings.simpleMode
+  const { competitionLogs, addCompetitionLog, updateCompetitionLog, deleteCompetitionLog } = useApp()
   const { triggerCelebration, triggerConfetti } = useCelebration()
   const [showForm, setShowForm] = useState(false)
   const [editingId, setEditingId] = useState(null)
@@ -194,7 +193,7 @@ export default function CompetitionsPage() {
         </div>
 
         {/* Event Category Chart */}
-        {totalRaces > 0 && !simple && (
+        {totalRaces > 0 && (
           <div className="mb-6 p-5 bg-white dark:bg-surface-800 rounded-xl border border-surface-200 dark:border-surface-700">
             <h3 className="font-bold text-surface-900 dark:text-surface-50 mb-4">Event Breakdown</h3>
             <div className="flex items-center gap-6">
@@ -465,7 +464,7 @@ export default function CompetitionsPage() {
                   </button>
 
                   {/* Expanded detail */}
-                  {expanded && !simple && (
+                  {expanded && (
                     <div className="px-4 pb-4 border-t border-surface-200 dark:border-surface-700 pt-3">
                       <h4 className="font-semibold text-surface-900 dark:text-surface-50 mb-3">Self-Assessment</h4>
                       <div className="space-y-2 mb-4">

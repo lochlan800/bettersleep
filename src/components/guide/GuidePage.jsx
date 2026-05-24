@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { BookOpen, ChevronDown, ChevronRight, Download, Upload } from 'lucide-react'
-import { useApp } from '../../context/AppContext'
+
 import Card from '../ui/Card'
 
 const sections = [
@@ -460,9 +460,6 @@ function DataBackup() {
 }
 
 export default function GuidePage() {
-  const { settings } = useApp()
-  const simple = settings.simpleMode
-
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-3">
@@ -477,13 +474,11 @@ export default function GuidePage() {
 
       <DataBackup />
 
-      {!simple && (
-        <div className="space-y-2">
-          {sections.map((s) => (
-            <Section key={s.title} title={s.title} content={s.content} />
-          ))}
-        </div>
-      )}
+      <div className="space-y-2">
+        {sections.map((s) => (
+          <Section key={s.title} title={s.title} content={s.content} />
+        ))}
+      </div>
     </div>
   )
 }

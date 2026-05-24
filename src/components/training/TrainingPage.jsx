@@ -1,4 +1,3 @@
-import { useApp } from '../../context/AppContext'
 import FatigueScoreDisplay from './FatigueScoreDisplay'
 import RunLogForm from './RunLogForm'
 import TrainingLoadChart from './TrainingLoadChart'
@@ -6,9 +5,6 @@ import TrainingBreakdown from './TrainingBreakdown'
 import TrainingHistory from './TrainingHistory'
 
 export default function TrainingPage() {
-  const { settings } = useApp()
-  const simple = settings.simpleMode
-
   return (
     <div className="space-y-6">
       <div>
@@ -18,15 +14,15 @@ export default function TrainingPage() {
         </p>
       </div>
 
-      {!simple && <FatigueScoreDisplay />}
+      <FatigueScoreDisplay />
 
-      <div className={simple ? '' : 'grid gap-6 lg:grid-cols-2'}>
+      <div className="grid gap-6 lg:grid-cols-2">
         <RunLogForm />
-        {!simple && <TrainingLoadChart />}
+        <TrainingLoadChart />
       </div>
 
-      {!simple && <TrainingBreakdown />}
-      {!simple && <TrainingHistory />}
+      <TrainingBreakdown />
+      <TrainingHistory />
     </div>
   )
 }
