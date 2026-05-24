@@ -157,12 +157,22 @@ export default function FitnessAgeCard() {
           <div className="flex items-center gap-2">
             <span className="text-xs text-surface-500 dark:text-surface-400">Real age: <span className="font-bold text-surface-800 dark:text-surface-100">{settings.realAge}</span></span>
             <span className="text-xs text-surface-400">|</span>
-            <span className={`text-xs font-bold ${fitnessAge < settings.realAge ? 'text-emerald-500' : fitnessAge > settings.realAge ? 'text-red-500' : 'text-surface-500'}`}>
+            <span className={`text-xs font-bold ${
+              fitnessAge < settings.realAge ? 'text-emerald-500'
+                : fitnessAge === settings.realAge ? 'text-surface-500'
+                : fitnessAge <= 30 ? 'text-emerald-500'
+                : fitnessAge <= 40 ? 'text-yellow-500'
+                : 'text-red-500'
+            }`}>
               {fitnessAge < settings.realAge
                 ? `${settings.realAge - fitnessAge} yrs younger`
-                : fitnessAge > settings.realAge
-                  ? `${fitnessAge - settings.realAge} yrs older`
-                  : 'Matches your real age'}
+                : fitnessAge === settings.realAge
+                  ? 'Matches your real age'
+                  : fitnessAge <= 30
+                    ? `${fitnessAge - settings.realAge} yrs older · still strong`
+                    : fitnessAge <= 40
+                      ? `${fitnessAge - settings.realAge} yrs older · decent`
+                      : `${fitnessAge - settings.realAge} yrs older`}
             </span>
             <button
               onClick={() => { setAgeInput(String(settings.realAge)); setEditingAge(true) }}
