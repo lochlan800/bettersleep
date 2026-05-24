@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { Activity, ChevronDown, ChevronUp } from 'lucide-react'
+import { Activity, ChevronDown, ChevronUp, Pencil } from 'lucide-react'
 import { useApp } from '../../context/AppContext'
 import useRecoveryScore from '../../hooks/useRecoveryScore'
 import { calculateSleepScore } from '../../utils/scoring'
@@ -166,8 +166,8 @@ export default function FitnessAgeCard() {
             </span>
             <button
               onClick={() => { setAgeInput(String(settings.realAge)); setEditingAge(true) }}
-              className="text-[10px] text-primary-500 underline ml-1"
-            >edit</button>
+              className="p-1 rounded-md text-surface-400 hover:text-primary-500 hover:bg-surface-100 dark:hover:bg-surface-700 transition-colors"
+            ><Pencil size={12} /></button>
           </div>
         ) : !editingAge ? (
           <button
