@@ -63,6 +63,8 @@ body {
   scale: 0.92;
   opacity: 0;
   transform: rotateY(90deg);
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.3);
+  border-radius: 12px;
 }
 
 .page-flip-in {
@@ -74,10 +76,14 @@ body {
     scale: 0.92;
     opacity: 0;
     transform: rotateY(-90deg);
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.3);
+    border-radius: 12px;
   }
   100% {
     scale: 1;
     opacity: 1;
     transform: rotateY(0deg);
+    box-shadow: none;
+    border-radius: 0;
   }
 }
