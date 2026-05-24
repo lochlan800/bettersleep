@@ -137,10 +137,12 @@ export default function FitnessAgeCard() {
               <span className="text-xs text-surface-500 dark:text-surface-400">years</span>
             </div>
           </div>
-          <div className="flex items-center gap-1 text-xs text-surface-400">
-            <span>Tap for details</span>
-            {expanded ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
-          </div>
+          {!expanded && (
+            <div className="flex items-center gap-1 text-xs text-primary-500">
+              <span>Show Stats</span>
+              <ChevronDown size={14} />
+            </div>
+          )}
         </button>
 
         <p className="text-sm text-center text-surface-600 dark:text-surface-300">
@@ -201,6 +203,13 @@ export default function FitnessAgeCard() {
                 </p>
               </div>
             )}
+
+            <button
+              onClick={() => setExpanded(false)}
+              className="w-full py-2 rounded-lg bg-surface-200 dark:bg-surface-700 text-sm font-medium text-surface-600 dark:text-surface-300 hover:bg-surface-300 dark:hover:bg-surface-600 transition-colors flex items-center justify-center gap-1"
+            >
+              <ChevronUp size={16} /> Hide Stats
+            </button>
           </div>
         )}
 
