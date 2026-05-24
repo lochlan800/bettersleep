@@ -413,7 +413,7 @@ function scaleNutrients(nutrients, grams) {
 }
 
 export default function MealPlannerPage() {
-  const { addFoodEntry, removeFoodEntry, getTodayFoodLog, settings, trainingLogs } = useApp()
+  const { addFoodEntry, removeFoodEntry, getTodayFoodLog, settings, updateSettings, trainingLogs } = useApp()
   const [search, setSearch] = useState('')
   const [showResults, setShowResults] = useState(false)
   const [selectedFood, setSelectedFood] = useState(null)
@@ -578,10 +578,40 @@ export default function MealPlannerPage() {
 
       {/* Food groups progress */}
       <Card>
-        <h3 className="text-sm font-bold text-surface-800 dark:text-surface-200 mb-1">Food Groups</h3>
-        <p className="text-[11px] text-surface-400 mb-3">
-          Based on: {settings.realAge ? `age ${settings.realAge}` : 'no age set'}, {settings.bodyWeightKg}kg, {trainingDaysPerWeek} training days/week
-        </p>
+        <h3 className="text-sm font-bold text-surface-800 dark:text-surface-200 mb-2">Food Groups</h3>
+        <div className="flex items-center gap-3 mb-3 flex-wrap">
+          <div className="flex items-center gap-1.5">
+            <label className="text-[11px] text-surface-500">Age</label>
+            <input
+              type="number"
+              min="5"
+              max="100"
+              value={settings.realAge || ''}
+              onChange={(e) => {
+                const v = parseInt(e.target.value, 10)
+                updateSettings({ realAge: v >= 5 && v <= 100 ? v : null })
+              }}
+              placeholder="—"
+              className="w-12 px-1.5 py-1 text-xs rounded border border-surface-300 dark:border-surface-600 bg-white dark:bg-surface-700 text-surface-900 dark:text-surface-50 text-center"
+            />
+          </div>
+          <div className="flex items-center gap-1.5">
+            <label className="text-[11px] text-surface-500">Weight</label>
+            <input
+              type="number"
+              min="20"
+              max="200"
+              value={settings.bodyWeightKg}
+              onChange={(e) => {
+                const v = parseInt(e.target.value, 10)
+                if (v >= 20 && v <= 200) updateSettings({ bodyWeightKg: v })
+              }}
+              className="w-14 px-1.5 py-1 text-xs rounded border border-surface-300 dark:border-surface-600 bg-white dark:bg-surface-700 text-surface-900 dark:text-surface-50 text-center"
+            />
+            <span className="text-[11px] text-surface-400">kg</span>
+          </div>
+          <span className="text-[11px] text-surface-400">{trainingDaysPerWeek} training days/wk</span>
+        </div>
         <div className="space-y-2.5">
           {foodGroups.map(group => {
             const count = groupCounts[group.name] || 0
