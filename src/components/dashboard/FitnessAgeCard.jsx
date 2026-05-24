@@ -37,12 +37,14 @@ const TIP_MAP = {
 }
 
 export default function FitnessAgeCard() {
-  const { sleepLogs, trainingLogs } = useApp()
+  const { sleepLogs, trainingLogs, settings, updateSettings } = useApp()
   const {
     recoveryScore, sleepScore, hydrationPercent,
     stretchingPercent, sorenessLevel, mindfulnessCount,
   } = useRecoveryScore()
   const [expanded, setExpanded] = useState(false)
+  const [editingAge, setEditingAge] = useState(false)
+  const [ageInput, setAgeInput] = useState('')
 
   const { fitnessAge, factors } = useMemo(() => {
     const last7Days = Array.from({ length: 7 }, (_, i) => getDaysAgo(i))
@@ -149,6 +151,59 @@ export default function FitnessAgeCard() {
           Your body is performing like a <span className="font-bold" style={{ color }}>{fitnessAge}-year-old</span>
         </p>
         <p className="text-xs font-medium text-center" style={{ color }}>{message}</p>
+
+        {/* Real age comparison */}
+        {settings.realAge ? (
+          <div className="flex items-center gap-2">
+            <span className="text-xs text-surface-500 dark:text-surface-400">Real age: <span className="font-bold text-surface-800 dark:text-surface-100">{settings.realAge}</span></span>
+            <span className="text-xs text-surface-400">|</span>
+            <span className={`text-xs font-bold ${fitnessAge < settings.realAge ? 'text-emerald-500' : fitnessAge > settings.realAge ? 'text-red-500' : 'text-surface-500'}`}>
+              {fitnessAge < settings.realAge
+                ? `${settings.realAge - fitnessAge} yrs younger`
+                : fitnessAge > settings.realAge
+                  ? `${fitnessAge - settings.realAge} yrs older`
+                  : 'Matches your real age'}
+            </span>
+            <button
+              onClick={() => { setAgeInput(String(settings.realAge)); setEditingAge(true) }}
+              className="text-[10px] text-primary-500 underline ml-1"
+            >edit</button>
+          </div>
+        ) : !editingAge ? (
+          <button
+            onClick={() => setEditingAge(true)}
+            className="text-xs text-primary-500 underline"
+          >Set your real age</button>
+        ) : null}
+
+        {editingAge && (
+          <div className="flex items-center gap-2">
+            <input
+              type="number"
+              min="5"
+              max="100"
+              value={ageInput}
+              onChange={(e) => setAgeInput(e.target.value)}
+              placeholder="Age"
+              className="w-16 px-2 py-1 text-sm rounded-md border border-surface-300 dark:border-surface-600 bg-white dark:bg-surface-700 text-surface-900 dark:text-surface-50 text-center"
+              autoFocus
+            />
+            <button
+              onClick={() => {
+                const val = parseInt(ageInput, 10)
+                if (val >= 5 && val <= 100) {
+                  updateSettings({ realAge: val })
+                  setEditingAge(false)
+                }
+              }}
+              className="px-2 py-1 text-xs font-medium rounded-md bg-primary-500 text-white"
+            >Save</button>
+            <button
+              onClick={() => setEditingAge(false)}
+              className="px-2 py-1 text-xs font-medium rounded-md bg-surface-200 dark:bg-surface-600 text-surface-600 dark:text-surface-300"
+            >Cancel</button>
+          </div>
+        )}
 
         {/* Expanded detail view */}
         {expanded && (

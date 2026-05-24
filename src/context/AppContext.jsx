@@ -15,6 +15,7 @@ const DEFAULT_SETTINGS = {
   units: 'metric',
   weeklyTargetKm: 50,
   bodyWeightKg: 70,
+  realAge: null,
 };
 
 // ── Provider ────────────────────────────────────────────────────────
