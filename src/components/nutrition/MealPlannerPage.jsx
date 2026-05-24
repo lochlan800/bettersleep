@@ -418,6 +418,8 @@ export default function MealPlannerPage() {
   const [showResults, setShowResults] = useState(false)
   const [selectedFood, setSelectedFood] = useState(null)
   const [grams, setGrams] = useState('100')
+  const [ageInput, setAgeInput] = useState(String(settings.realAge || ''))
+  const [weightInput, setWeightInput] = useState(String(settings.bodyWeightKg))
 
   const todayFoods = getTodayFoodLog()
 
@@ -586,10 +588,12 @@ export default function MealPlannerPage() {
               type="number"
               min="5"
               max="100"
-              value={settings.realAge || ''}
-              onChange={(e) => {
-                const v = parseInt(e.target.value, 10)
+              value={ageInput}
+              onChange={(e) => setAgeInput(e.target.value)}
+              onBlur={() => {
+                const v = parseInt(ageInput, 10)
                 updateSettings({ realAge: v >= 5 && v <= 100 ? v : null })
+                if (!(v >= 5 && v <= 100)) setAgeInput('')
               }}
               placeholder="—"
               className="w-12 px-1.5 py-1 text-xs rounded border border-surface-300 dark:border-surface-600 bg-white dark:bg-surface-700 text-surface-900 dark:text-surface-50 text-center"
@@ -601,10 +605,12 @@ export default function MealPlannerPage() {
               type="number"
               min="20"
               max="200"
-              value={settings.bodyWeightKg}
-              onChange={(e) => {
-                const v = parseInt(e.target.value, 10)
+              value={weightInput}
+              onChange={(e) => setWeightInput(e.target.value)}
+              onBlur={() => {
+                const v = parseInt(weightInput, 10)
                 if (v >= 20 && v <= 200) updateSettings({ bodyWeightKg: v })
+                else setWeightInput(String(settings.bodyWeightKg))
               }}
               className="w-14 px-1.5 py-1 text-xs rounded border border-surface-300 dark:border-surface-600 bg-white dark:bg-surface-700 text-surface-900 dark:text-surface-50 text-center"
             />
