@@ -27,6 +27,7 @@ export function AppProvider({ children }) {
   const [mindfulnessLogs, setMindfulnessLogs] = useLocalStorage('bs_mindfulness_logs', []);
   const [mealPlans, setMealPlans] = useLocalStorage('bs_meal_plans', []);
   const [mealCompletions, setMealCompletions] = useLocalStorage('bs_meal_completions', []);
+  const [foodLog, setFoodLog] = useLocalStorage('bs_food_log', []);
   const [competitionLogs, setCompetitionLogs] = useLocalStorage('bs_competition_logs', []);
   const [stretchingLogs, setStretchingLogs] = useLocalStorage('bs_stretching_logs', []);
   const [sorenessLogs, setSorenessLogs] = useLocalStorage('bs_soreness_logs', []);
@@ -227,7 +228,28 @@ export function AppProvider({ children }) {
     );
   }, [mealCompletions]);
 
-  // ── Stretching actions ────────────────────────────────────────────
+  // ── Food log actions ──��──────────────────────────────��───────────
+
+  const addFoodEntry = useCallback(
+    (entry) => {
+      setFoodLog((prev) => [...prev, { ...entry, id: crypto.randomUUID(), date: getToday() }]);
+    },
+    [setFoodLog],
+  );
+
+  const removeFoodEntry = useCallback(
+    (id) => {
+      setFoodLog((prev) => prev.filter((e) => e.id !== id));
+    },
+    [setFoodLog],
+  );
+
+  const getTodayFoodLog = useCallback(() => {
+    const today = getToday();
+    return foodLog.filter((e) => e.date === today);
+  }, [foodLog]);
+
+  // ── Stretching actions ─────────���──────────────────────────────��───
 
   const toggleStretch = useCallback(
     (date, stretchId) => {
@@ -364,6 +386,7 @@ export function AppProvider({ children }) {
       mindfulnessLogs,
       mealPlans,
       mealCompletions,
+      foodLog,
       competitionLogs,
       stretchingLogs,
       sorenessLogs,
@@ -385,6 +408,9 @@ export function AppProvider({ children }) {
       updateMealPlan,
       toggleMealCompletion,
       getTodayMealCompletions,
+      addFoodEntry,
+      removeFoodEntry,
+      getTodayFoodLog,
       toggleStretch,
       getTodayStretching,
       setTodaySoreness,
@@ -404,6 +430,7 @@ export function AppProvider({ children }) {
       mindfulnessLogs,
       mealPlans,
       mealCompletions,
+      foodLog,
       competitionLogs,
       stretchingLogs,
       sorenessLogs,
@@ -423,6 +450,9 @@ export function AppProvider({ children }) {
       updateMealPlan,
       toggleMealCompletion,
       getTodayMealCompletions,
+      addFoodEntry,
+      removeFoodEntry,
+      getTodayFoodLog,
       toggleStretch,
       getTodayStretching,
       setTodaySoreness,
