@@ -1,7 +1,7 @@
 import { useMemo } from 'react'
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine } from 'recharts'
 import { useApp } from '../../context/AppContext'
-import { calculateSleepScore, calculateRecoveryScore } from '../../utils/scoring'
+import { calculateSleepScore, calculateRecoveryScore, calculateACWR, calculateFatigueScore } from '../../utils/scoring'
 import { formatDate, getDaysAgo } from '../../utils/dateHelpers'
 import stretches from '../../data/stretches'
 import Card from '../ui/Card'
@@ -14,25 +14,35 @@ function getColor(score) {
 }
 
 export default function RecoveryScoreChart() {
-  const { sleepLogs, trainingLogs, hydrationLogs, mindfulnessLogs, stretchingLogs, mealCompletions, goals } = useApp()
+  const { sleepLogs, trainingLogs, hydrationLogs, mindfulnessLogs, stretchingLogs, sorenessLogs, mealCompletions, goals } = useApp()
 
   const chartData = useMemo(() => {
     const data = []
 
+    // Calculate ACWR reliability once (same for all days in the chart)
+    const trainingDates = trainingLogs.map(l => new Date(l.date)).sort((a, b) => a - b)
+    const trainingSpanDays = trainingDates.length >= 2
+      ? Math.round((trainingDates[trainingDates.length - 1] - trainingDates[0]) / (1000 * 60 * 60 * 24))
+      : 0
+    const acwr = calculateACWR(trainingLogs)
+    const fatigueScore = calculateFatigueScore(acwr)
+    const chronicLoad = trainingLogs.length >= 4 ? 1 : 0
+    const hasReliableACWR = chronicLoad > 0 && trainingLogs.length >= 4 && trainingSpanDays >= 14
+
     for (let i = 6; i >= 0; i--) {
       const dateStr = getDaysAgo(i)
 
-      // Sleep score for this day
-      const sleepLogsUpToDate = sleepLogs.filter(l => l.date <= dateStr)
-      const sorted = [...sleepLogsUpToDate].sort((a, b) => b.date.localeCompare(a.date))
-      const recent = sorted.slice(0, 7)
-      const latest = recent[0]
-      const sleepScore = latest ? calculateSleepScore(latest, recent) : 0
+      // Sleep score — only use that day's log (matches useRecoveryScore reset behavior)
+      const daySleep = sleepLogs.find(l => l.date === dateStr)
+      const sortedSleep = [...sleepLogs].sort((a, b) => b.date.localeCompare(a.date))
+      const recentSleep = sortedSleep.slice(0, 7)
+      const sleepScore = daySleep ? calculateSleepScore(daySleep, recentSleep) : 0
 
-      // Soreness from most recent training on or before this day
+      // Soreness — prefer standalone soreness log, fall back to training log
+      const daySorenessLog = sorenessLogs.find(d => d.date === dateStr)
       const trainingUpToDate = trainingLogs.filter(l => l.date <= dateStr)
       const sortedTraining = [...trainingUpToDate].sort((a, b) => b.date.localeCompare(a.date))
-      const latestSoreness = sortedTraining[0]?.sorenessLevel ?? 1
+      const latestSoreness = daySorenessLog?.level ?? sortedTraining[0]?.sorenessLevel ?? 1
 
       // Hydration for this day
       const dayHydration = hydrationLogs.find(d => d.date === dateStr)
@@ -63,10 +73,10 @@ export default function RecoveryScoreChart() {
 
       const score = calculateRecoveryScore({
         sleepScore,
-        fatigueScore: 0,
+        fatigueScore,
         hydrationPercent,
         sorenessLevel: latestSoreness,
-        hasReliableACWR: false,
+        hasReliableACWR,
         mindfulnessCount,
         stretchingPercent,
         mealsEatenCount,
@@ -81,7 +91,7 @@ export default function RecoveryScoreChart() {
     }
 
     return data
-  }, [sleepLogs, trainingLogs, hydrationLogs, mindfulnessLogs, stretchingLogs, mealCompletions, goals])
+  }, [sleepLogs, trainingLogs, hydrationLogs, mindfulnessLogs, stretchingLogs, sorenessLogs, mealCompletions, goals])
 
   const hasData = chartData.some(d => d.score > 0)
 
