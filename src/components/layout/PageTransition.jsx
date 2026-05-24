@@ -23,6 +23,7 @@ export default function PageTransition({ children }) {
       timeoutRef.current = setTimeout(() => {
         setDisplayChildren(children)
         setPhase('flip-in')
+        window.scrollTo(0, 0)
         timeoutRef.current = setTimeout(() => {
           setPhase('idle')
         }, 300)

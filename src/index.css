@@ -51,9 +51,11 @@ body {
 
 .page-transition-wrapper {
   perspective: 1200px;
+  perspective-origin: center center;
 }
 
 .page-transition {
+  transform-origin: center center;
   transform-style: preserve-3d;
   backface-visibility: hidden;
   transition: transform 0.3s ease, opacity 0.3s ease, scale 0.3s ease;
