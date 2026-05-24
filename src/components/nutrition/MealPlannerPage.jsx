@@ -348,15 +348,30 @@ function getSuggestions(todayFoods) {
   return { missingGroups, lowNutrients, suggestions: suggestions.slice(0, 6), groupCounts, totals }
 }
 
+function scaleNutrients(nutrients, grams) {
+  const scale = grams / 100
+  const scaled = {}
+  Object.keys(nutrients).forEach(k => { scaled[k] = Math.round(nutrients[k] * scale * 10) / 10 })
+  return scaled
+}
+
 export default function MealPlannerPage() {
   const { addFoodEntry, removeFoodEntry, getTodayFoodLog } = useApp()
   const [search, setSearch] = useState('')
   const [showResults, setShowResults] = useState(false)
+  const [selectedFood, setSelectedFood] = useState(null)
+  const [grams, setGrams] = useState('100')
 
   const todayFoods = getTodayFoodLog()
 
   const { missingGroups, lowNutrients, suggestions, groupCounts, totals } = useMemo(
-    () => getSuggestions(todayFoods.map(e => FOOD_DATABASE.find(f => f.name === e.name) || { name: e.name, groups: e.groups || [], nutrients: e.nutrients || {} })),
+    () => getSuggestions(todayFoods.map(e => {
+      const dbFood = FOOD_DATABASE.find(f => f.name === e.name)
+      if (dbFood && e.grams) {
+        return { ...dbFood, nutrients: scaleNutrients(dbFood.nutrients, e.grams) }
+      }
+      return { name: e.name, groups: e.groups || [], nutrients: e.nutrients || {} }
+    })),
     [todayFoods]
   )
 
@@ -366,15 +381,25 @@ export default function MealPlannerPage() {
     return FOOD_DATABASE.filter(f => f.name.toLowerCase().includes(q)).slice(0, 8)
   }, [search])
 
-  const handleAdd = (food) => {
-    addFoodEntry({ name: food.name, groups: food.groups, nutrients: food.nutrients })
-    setSearch('')
+  const handleSelect = (food) => {
+    setSelectedFood(food)
+    setGrams('100')
     setShowResults(false)
+  }
+
+  const handleConfirmAdd = () => {
+    if (!selectedFood) return
+    const g = parseInt(grams, 10) || 100
+    const scaled = scaleNutrients(selectedFood.nutrients, g)
+    addFoodEntry({ name: selectedFood.name, groups: selectedFood.groups, nutrients: scaled, grams: g })
+    setSelectedFood(null)
+    setSearch('')
+    setGrams('100')
   }
 
   const handleCustomAdd = () => {
     if (!search.trim()) return
-    addFoodEntry({ name: search.trim(), groups: [], nutrients: { carbs: 0, protein: 0, fat: 0, fibre: 0, iron: 0, calcium: 0, vitC: 0 } })
+    addFoodEntry({ name: search.trim(), groups: [], nutrients: { carbs: 0, protein: 0, fat: 0, fibre: 0, iron: 0, calcium: 0, vitC: 0 }, grams: 0 })
     setSearch('')
     setShowResults(false)
   }
@@ -406,12 +431,12 @@ export default function MealPlannerPage() {
             )}
           </div>
 
-          {showResults && search.trim() && (
+          {showResults && search.trim() && !selectedFood && (
             <div className="absolute z-20 mt-1 w-full bg-white dark:bg-surface-800 border border-surface-200 dark:border-surface-700 rounded-lg shadow-lg max-h-60 overflow-y-auto">
               {searchResults.map(food => (
                 <button
                   key={food.name}
-                  onClick={() => handleAdd(food)}
+                  onClick={() => handleSelect(food)}
                   className="w-full px-3 py-2.5 text-left hover:bg-surface-50 dark:hover:bg-surface-700 flex items-center justify-between border-b border-surface-100 dark:border-surface-700 last:border-0"
                 >
                   <div>
@@ -436,6 +461,33 @@ export default function MealPlannerPage() {
               )}
             </div>
           )}
+
+          {selectedFood && (
+            <div className="mt-2 p-3 border border-surface-200 dark:border-surface-700 rounded-lg bg-surface-50 dark:bg-surface-700/50">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-sm font-medium text-surface-900 dark:text-surface-50">{selectedFood.name}</span>
+                <button onClick={() => setSelectedFood(null)} className="text-surface-400 hover:text-red-500">
+                  <X size={14} />
+                </button>
+              </div>
+              <div className="flex items-center gap-2">
+                <input
+                  type="number"
+                  value={grams}
+                  onChange={(e) => setGrams(e.target.value)}
+                  min="1"
+                  className="w-20 px-2 py-1.5 text-sm rounded-md border border-surface-300 dark:border-surface-600 bg-white dark:bg-surface-700 text-surface-900 dark:text-surface-50 text-center"
+                  autoFocus
+                />
+                <span className="text-xs text-surface-500">grams</span>
+                <button
+                  onClick={handleConfirmAdd}
+                  className="ml-auto px-3 py-1.5 text-xs font-medium rounded-md bg-primary-500 text-white"
+                >Add</button>
+              </div>
+              <p className="text-[10px] text-surface-400 mt-1.5">Nutrients per 100g: {selectedFood.nutrients.protein}g protein, {selectedFood.nutrients.carbs}g carbs, {selectedFood.nutrients.fat}g fat</p>
+            </div>
+          )}
         </div>
       </Card>
 
@@ -447,6 +499,7 @@ export default function MealPlannerPage() {
             {todayFoods.map(entry => (
               <div key={entry.id} className="flex items-center gap-1.5 px-2.5 py-1.5 bg-surface-100 dark:bg-surface-700 rounded-full">
                 <span className="text-xs font-medium text-surface-700 dark:text-surface-300">{entry.name}</span>
+                {entry.grams > 0 && <span className="text-[10px] text-surface-400">{entry.grams}g</span>}
                 <button onClick={() => removeFoodEntry(entry.id)} className="text-surface-400 hover:text-red-500">
                   <X size={12} />
                 </button>
@@ -522,7 +575,7 @@ export default function MealPlannerPage() {
             {suggestions.map(s => (
               <button
                 key={s.name}
-                onClick={() => handleAdd(s)}
+                onClick={() => handleSelect(s)}
                 className="w-full flex items-center justify-between p-2.5 rounded-lg bg-surface-50 dark:bg-surface-700/50 hover:bg-surface-100 dark:hover:bg-surface-700 transition-colors"
               >
                 <div className="text-left">
