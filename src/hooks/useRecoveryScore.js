@@ -11,6 +11,7 @@ import {
 } from '../utils/scoring';
 import { getToday } from '../utils/dateHelpers';
 import stretches from '../data/stretches';
+import { getFreeSugar } from '../utils/freeSugar';
 
 /**
  * Computes the current recovery dashboard metrics from app state.
@@ -100,15 +101,15 @@ export default function useRecoveryScore() {
     // Nutrition — score based on today's food log
     const todayFoodEntries = foodLog.filter((e) => e.date === today);
     const foodGroupsHit = new Set();
-    let totalSugar = 0;
+    let totalFreeSugar = 0;
     todayFoodEntries.forEach((e) => {
       (e.groups || []).forEach((g) => foodGroupsHit.add(g));
-      totalSugar += e.nutrients?.sugar || 0;
+      totalFreeSugar += getFreeSugar(e);
     });
     const groupScore = todayFoodEntries.length > 0
       ? Math.round((foodGroupsHit.size / 5) * 100)
       : 0;
-    const sugarOk = totalSugar <= 30 ? 100 : Math.max(0, 100 - (totalSugar - 30) * 5);
+    const sugarOk = totalFreeSugar <= 30 ? 100 : Math.max(0, 100 - (totalFreeSugar - 30) * 5);
     const hasLoggedFood = todayFoodEntries.length > 0 ? 100 : 0;
     const nutritionPercent = todayFoodEntries.length > 0
       ? Math.round(groupScore * 0.6 + sugarOk * 0.2 + hasLoggedFood * 0.2)

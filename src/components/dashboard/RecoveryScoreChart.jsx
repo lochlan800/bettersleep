@@ -5,6 +5,7 @@ import { calculateSleepScore, calculateRecoveryScore, calculateACWR, calculateFa
 import { formatDate, getDaysAgo } from '../../utils/dateHelpers'
 import stretches from '../../data/stretches'
 import Card from '../ui/Card'
+import { getFreeSugar } from '../../utils/freeSugar'
 
 function getColor(score) {
   if (score >= 80) return '#14b8a6'
@@ -61,13 +62,13 @@ export default function RecoveryScoreChart() {
       // Nutrition — from food log
       const dayFoodEntries = foodLog.filter(e => e.date === dateStr)
       const dayFoodGroups = new Set()
-      let daySugar = 0
+      let dayFreeSugar = 0
       dayFoodEntries.forEach(e => {
         ;(e.groups || []).forEach(g => dayFoodGroups.add(g))
-        daySugar += e.nutrients?.sugar || 0
+        dayFreeSugar += getFreeSugar(e)
       })
       const dayGroupScore = dayFoodEntries.length > 0 ? Math.round((dayFoodGroups.size / 5) * 100) : 0
-      const daySugarOk = daySugar <= 30 ? 100 : Math.max(0, 100 - (daySugar - 30) * 5)
+      const daySugarOk = dayFreeSugar <= 30 ? 100 : Math.max(0, 100 - (dayFreeSugar - 30) * 5)
       const dayHasFood = dayFoodEntries.length > 0 ? 100 : 0
       const dayNutritionPercent = dayFoodEntries.length > 0
         ? Math.round(dayGroupScore * 0.6 + daySugarOk * 0.2 + dayHasFood * 0.2)

@@ -4,6 +4,7 @@ import { getDaysAgo } from '../../utils/dateHelpers'
 import { Search, Plus, X, Camera, History, ChevronLeft, ChevronRight, PieChart as PieChartIcon } from 'lucide-react'
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from 'recharts'
 import Card from '../ui/Card'
+import { getFreeSugar } from '../../utils/freeSugar'
 
 const FOOD_DATABASE = [
   // ── Fruits ──
@@ -365,6 +366,7 @@ const CEREAL_NAMES = new Set([
 
 const MILK_PER_100ML = { carbs: 5, protein: 3.4, fat: 1.8, fibre: 0, iron: 0, calcium: 120, vitC: 1, sugar: 5 }
 
+
 function getPersonalizedTargets(age, weightKg, trainingDaysPerWeek) {
   const isChild = age && age < 16
   const isGrowing = age && age < 19
@@ -427,7 +429,7 @@ function getPersonalizedTargets(age, weightKg, trainingDaysPerWeek) {
       iron: { target: iron, unit: 'mg', label: 'Iron' },
       calcium: { target: calcium, unit: 'mg', label: 'Calcium' },
       vitC: { target: vitC, unit: 'mg', label: 'Vitamin C' },
-      sugar: { target: 30, unit: 'g', label: 'Sugar', isLimit: true },
+      freeSugar: { target: 30, unit: 'g', label: 'Added Sugar', isLimit: true },
     },
   }
 }
@@ -444,9 +446,10 @@ function getSuggestions(todayFoods, foodGroups, nutrientTargets, allFoodsDb) {
     })
   })
 
-  const totals = { carbs: 0, protein: 0, fat: 0, fibre: 0, iron: 0, calcium: 0, vitC: 0, sugar: 0 }
+  const totals = { carbs: 0, protein: 0, fat: 0, fibre: 0, iron: 0, calcium: 0, vitC: 0, sugar: 0, freeSugar: 0 }
   todayFoods.forEach(f => {
-    Object.keys(totals).forEach(k => { totals[k] += f.nutrients[k] || 0 })
+    Object.keys(totals).forEach(k => { if (k !== 'freeSugar') totals[k] += f.nutrients[k] || 0 })
+    totals.freeSugar += getFreeSugar(f)
   })
 
   const missingGroups = foodGroups.filter(g => groupCounts[g.name] < g.target)
@@ -646,9 +649,10 @@ export default function MealPlannerPage() {
   }, [foodLog, historyDate])
 
   const historyTotals = useMemo(() => {
-    const t = { carbs: 0, protein: 0, fat: 0, fibre: 0, iron: 0, calcium: 0, vitC: 0, sugar: 0 }
+    const t = { carbs: 0, protein: 0, fat: 0, fibre: 0, iron: 0, calcium: 0, vitC: 0, sugar: 0, freeSugar: 0 }
     historyFoods.forEach(f => {
-      Object.keys(t).forEach(k => { t[k] += f.nutrients?.[k] || 0 })
+      Object.keys(t).forEach(k => { if (k !== 'freeSugar') t[k] += f.nutrients?.[k] || 0 })
+      t.freeSugar += getFreeSugar(f)
     })
     return t
   }, [historyFoods])
@@ -685,7 +689,7 @@ export default function MealPlannerPage() {
   const averageData = useMemo(() => {
     if (foodLog.length === 0) return null
     const groupGrams = { Fruit: 0, Vegetables: 0, Protein: 0, Grains: 0, Dairy: 0 }
-    const nutrientTotals = { carbs: 0, protein: 0, fat: 0, fibre: 0, iron: 0, calcium: 0, vitC: 0, sugar: 0 }
+    const nutrientTotals = { carbs: 0, protein: 0, fat: 0, fibre: 0, iron: 0, calcium: 0, vitC: 0, sugar: 0, freeSugar: 0 }
     const dates = new Set()
 
     foodLog.forEach(entry => {
@@ -695,8 +699,9 @@ export default function MealPlannerPage() {
         if (groupGrams[group] !== undefined) groupGrams[group] += g
       })
       Object.keys(nutrientTotals).forEach(k => {
-        nutrientTotals[k] += entry.nutrients?.[k] || 0
+        if (k !== 'freeSugar') nutrientTotals[k] += entry.nutrients?.[k] || 0
       })
+      nutrientTotals.freeSugar += getFreeSugar(entry)
     })
 
     const totalGrams = Object.values(groupGrams).reduce((a, b) => a + b, 0)
@@ -933,8 +938,8 @@ export default function MealPlannerPage() {
                         <span className="text-[10px] text-surface-500">
                           {Math.round(entry.nutrients?.protein || 0)}p · {Math.round(entry.nutrients?.carbs || 0)}c · {Math.round(entry.nutrients?.fat || 0)}f
                         </span>
-                        {(entry.nutrients?.sugar || 0) > 5 && (
-                          <span className="text-[10px] text-red-500 ml-1">{Math.round(entry.nutrients.sugar)}g sugar</span>
+                        {getFreeSugar(entry) > 5 && (
+                          <span className="text-[10px] text-red-500 ml-1">{Math.round(getFreeSugar(entry))}g sugar</span>
                         )}
                       </div>
                     </div>
@@ -1055,8 +1060,8 @@ export default function MealPlannerPage() {
           {showResults && search.trim() && !selectedFood && (
             <div className="absolute z-20 mt-1 w-full bg-white dark:bg-surface-800 border border-surface-200 dark:border-surface-700 rounded-lg shadow-lg max-h-60 overflow-y-auto">
               {searchResults.map(food => {
-                const foodSugar = food.nutrients.sugar || 0
-                const highSugar = foodSugar > 15
+                const foodFreeSugar = getFreeSugar(food)
+                const highFreeSugar = foodFreeSugar > 15
                 return (
                   <button
                     key={food.name}
@@ -1066,9 +1071,9 @@ export default function MealPlannerPage() {
                     <div>
                       <div className="flex items-center gap-1.5">
                         <span className="text-sm font-medium text-surface-900 dark:text-surface-50">{food.name}</span>
-                        {highSugar && (
+                        {highFreeSugar && (
                           <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-red-100 dark:bg-red-900/40 text-red-600 dark:text-red-400 font-medium">
-                            {foodSugar}g sugar
+                            {foodFreeSugar}g sugar
                           </span>
                         )}
                       </div>
@@ -1120,20 +1125,22 @@ export default function MealPlannerPage() {
               <p className="text-[10px] text-surface-400 mt-1.5">Nutrients per 100g: {selectedFood.nutrients.protein}g protein, {selectedFood.nutrients.carbs}g carbs, {selectedFood.nutrients.fat}g fat, {selectedFood.nutrients.sugar || 0}g sugar</p>
               {(() => {
                 const g = parseInt(grams, 10) || 100
-                const addingSugar = Math.round((selectedFood.nutrients.sugar || 0) * g / 100 * 10) / 10
-                const currentSugar = Math.round(totals.sugar || 0)
-                const newTotal = currentSugar + addingSugar
+                const foodFreeSugar = getFreeSugar(selectedFood)
+                const addingFreeSugar = Math.round(foodFreeSugar * g / 100 * 10) / 10
+                const currentFreeSugar = Math.round(totals.freeSugar || 0)
+                const newTotal = currentFreeSugar + addingFreeSugar
+                if (addingFreeSugar === 0) return null
                 if (newTotal > 30) return (
                   <div className="mt-1.5 px-2 py-1.5 bg-red-50 dark:bg-red-900/30 rounded-md border border-red-200 dark:border-red-800">
                     <p className="text-[11px] font-medium text-red-600 dark:text-red-400">
-                      Warning: This adds {addingSugar}g sugar — total would be {Math.round(newTotal)}g (over 30g limit)
+                      Warning: This adds {addingFreeSugar}g added sugar — total would be {Math.round(newTotal)}g (over 30g limit)
                     </p>
                   </div>
                 )
-                if (addingSugar > 0 && newTotal > 24) return (
+                if (newTotal > 24) return (
                   <div className="mt-1.5 px-2 py-1.5 bg-orange-50 dark:bg-orange-900/30 rounded-md border border-orange-200 dark:border-orange-800">
                     <p className="text-[11px] font-medium text-orange-600 dark:text-orange-400">
-                      This adds {addingSugar}g sugar — total would be {Math.round(newTotal)}g/30g
+                      This adds {addingFreeSugar}g added sugar — total would be {Math.round(newTotal)}g/30g
                     </p>
                   </div>
                 )
@@ -1273,13 +1280,13 @@ export default function MealPlannerPage() {
           <h3 className="text-sm font-bold text-surface-800 dark:text-surface-200 mb-3">Today's food</h3>
           <div className="flex flex-wrap gap-2">
             {todayFoods.map(entry => {
-              const entrySugar = entry.nutrients?.sugar || 0
-              const highSugar = entrySugar > 5
+              const entryFreeSugar = getFreeSugar(entry)
+              const highSugar = entryFreeSugar > 5
               return (
                 <div key={entry.id} className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-full ${highSugar ? 'bg-red-50 dark:bg-red-900/20 ring-1 ring-red-200 dark:ring-red-800' : 'bg-surface-100 dark:bg-surface-700'}`}>
                   <span className="text-xs font-medium text-surface-700 dark:text-surface-300">{entry.name}</span>
                   {entry.grams > 0 && <span className="text-[10px] text-surface-400">{entry.grams}g</span>}
-                  {highSugar && <span className="text-[9px] text-red-500 font-medium">{Math.round(entrySugar)}g sugar</span>}
+                  {highSugar && <span className="text-[9px] text-red-500 font-medium">{Math.round(entryFreeSugar)}g sugar</span>}
                   <button onClick={() => removeFoodEntry(entry.id)} className="text-surface-400 hover:text-red-500">
                     <X size={12} />
                   </button>
