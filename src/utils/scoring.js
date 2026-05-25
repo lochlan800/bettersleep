@@ -126,6 +126,8 @@ export function calculateAcuteLoad(trainingLogs) {
  * @returns {number}
  */
 export function calculateChronicLoad(trainingLogs) {
+  if (trainingLogs.length === 0) return 0;
+
   const today = new Date();
   const last28 = trainingLogs.filter((log) => {
     const logDate = parseISO(log.date);
@@ -133,12 +135,24 @@ export function calculateChronicLoad(trainingLogs) {
     return daysAgo >= 0 && daysAgo < 28;
   });
 
+  if (last28.length === 0) return 0;
+
   const totalLoad = last28.reduce((sum, log) => {
     return sum + calculateTrainingLoad(log.durationMinutes, log.intensity);
   }, 0);
 
-  // Average weekly load = total load / 4 weeks
-  return totalLoad / 4;
+  // Divide by the actual weeks of training history (capped at 4 weeks).
+  // Without this, new users get artificially low chronic load — total
+  // divided by 4 weeks when only 2 weeks of data exist — inflating ACWR
+  // to 2+ and pegging fatigue at 100 / freshness at 0.
+  const earliestDate = last28.reduce((earliest, log) => {
+    const d = parseISO(log.date);
+    return !earliest || d < earliest ? d : earliest;
+  }, null);
+  const daysSpan = differenceInCalendarDays(today, earliestDate) + 1;
+  const weeks = Math.max(1, Math.min(4, daysSpan / 7));
+
+  return totalLoad / weeks;
 }
 
 /**
