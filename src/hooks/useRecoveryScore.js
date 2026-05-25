@@ -26,7 +26,7 @@ import stretches from '../data/stretches';
  * }}
  */
 export default function useRecoveryScore() {
-  const { sleepLogs, trainingLogs, hydrationLogs, mindfulnessLogs, stretchingLogs, mealCompletions, goals, settings, sorenessLogs } = useApp();
+  const { sleepLogs, trainingLogs, hydrationLogs, mindfulnessLogs, stretchingLogs, mealCompletions, foodLog, goals, settings, sorenessLogs } = useApp();
 
   return useMemo(() => {
     // Sleep – only score today's log so it resets each morning
@@ -97,7 +97,24 @@ export default function useRecoveryScore() {
       ? Math.round((stretchingDone / totalStretches) * 100)
       : 0;
 
-    // Meals — how many planned meals eaten today
+    // Nutrition — score based on today's food log
+    const todayFoodEntries = foodLog.filter((e) => e.date === today);
+    const foodGroupsHit = new Set();
+    let totalSugar = 0;
+    todayFoodEntries.forEach((e) => {
+      (e.groups || []).forEach((g) => foodGroupsHit.add(g));
+      totalSugar += e.nutrients?.sugar || 0;
+    });
+    const groupScore = todayFoodEntries.length > 0
+      ? Math.round((foodGroupsHit.size / 5) * 100)
+      : 0;
+    const sugarOk = totalSugar <= 30 ? 100 : Math.max(0, 100 - (totalSugar - 30) * 5);
+    const hasLoggedFood = todayFoodEntries.length > 0 ? 100 : 0;
+    const nutritionPercent = todayFoodEntries.length > 0
+      ? Math.round(groupScore * 0.6 + sugarOk * 0.2 + hasLoggedFood * 0.2)
+      : -1;
+
+    // Fall back to old meal completions if no food logged
     const todayMealLog = mealCompletions.find((d) => d.date === today);
     const mealsEatenCount = todayMealLog ? todayMealLog.completed.length : 0;
 
@@ -120,6 +137,7 @@ export default function useRecoveryScore() {
       mindfulnessCount,
       stretchingPercent,
       mealsEatenCount,
+      nutritionPercent,
       goalCheckinPercent,
     });
 
@@ -135,8 +153,9 @@ export default function useRecoveryScore() {
       sorenessLevel: latestSoreness,
       mindfulnessCount,
       mealsEatenCount,
+      nutritionPercent: nutritionPercent >= 0 ? nutritionPercent : (mealsEatenCount >= 3 ? 100 : mealsEatenCount * 35),
       goalCheckinPercent,
       hasReliableACWR,
     };
-  }, [sleepLogs, trainingLogs, hydrationLogs, mindfulnessLogs, stretchingLogs, mealCompletions, goals, sorenessLogs, settings.bodyWeightKg]);
+  }, [sleepLogs, trainingLogs, hydrationLogs, mindfulnessLogs, stretchingLogs, mealCompletions, foodLog, goals, sorenessLogs, settings.bodyWeightKg]);
 }

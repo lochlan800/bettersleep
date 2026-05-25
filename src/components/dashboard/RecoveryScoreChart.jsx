@@ -14,7 +14,7 @@ function getColor(score) {
 }
 
 export default function RecoveryScoreChart() {
-  const { sleepLogs, trainingLogs, hydrationLogs, mindfulnessLogs, stretchingLogs, sorenessLogs, mealCompletions, goals } = useApp()
+  const { sleepLogs, trainingLogs, hydrationLogs, mindfulnessLogs, stretchingLogs, sorenessLogs, mealCompletions, foodLog, goals } = useApp()
 
   const chartData = useMemo(() => {
     const data = []
@@ -58,7 +58,22 @@ export default function RecoveryScoreChart() {
       const stretchingDone = dayStretching ? dayStretching.completed.length : 0
       const stretchingPercent = stretches.length > 0 ? Math.round((stretchingDone / stretches.length) * 100) : 0
 
-      // Meals for this day
+      // Nutrition — from food log
+      const dayFoodEntries = foodLog.filter(e => e.date === dateStr)
+      const dayFoodGroups = new Set()
+      let daySugar = 0
+      dayFoodEntries.forEach(e => {
+        ;(e.groups || []).forEach(g => dayFoodGroups.add(g))
+        daySugar += e.nutrients?.sugar || 0
+      })
+      const dayGroupScore = dayFoodEntries.length > 0 ? Math.round((dayFoodGroups.size / 5) * 100) : 0
+      const daySugarOk = daySugar <= 30 ? 100 : Math.max(0, 100 - (daySugar - 30) * 5)
+      const dayHasFood = dayFoodEntries.length > 0 ? 100 : 0
+      const dayNutritionPercent = dayFoodEntries.length > 0
+        ? Math.round(dayGroupScore * 0.6 + daySugarOk * 0.2 + dayHasFood * 0.2)
+        : -1
+
+      // Fall back to old meal completions
       const dayMeals = mealCompletions.find(d => d.date === dateStr)
       const mealsEatenCount = dayMeals ? dayMeals.completed.length : 0
 
@@ -80,6 +95,7 @@ export default function RecoveryScoreChart() {
         mindfulnessCount,
         stretchingPercent,
         mealsEatenCount,
+        nutritionPercent: dayNutritionPercent,
         goalCheckinPercent,
       })
 
@@ -91,7 +107,7 @@ export default function RecoveryScoreChart() {
     }
 
     return data
-  }, [sleepLogs, trainingLogs, hydrationLogs, mindfulnessLogs, stretchingLogs, sorenessLogs, mealCompletions, goals])
+  }, [sleepLogs, trainingLogs, hydrationLogs, mindfulnessLogs, stretchingLogs, sorenessLogs, mealCompletions, foodLog, goals])
 
   const hasData = chartData.some(d => d.score > 0)
 

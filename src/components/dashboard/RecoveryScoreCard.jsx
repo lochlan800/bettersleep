@@ -11,18 +11,11 @@ const getLabel = (s) => {
   return { text: 'Poor', color: 'text-red-600 dark:text-red-400' }
 }
 
-function nutritionScore(count) {
-  if (count >= 3) return 100
-  if (count === 2) return 70
-  if (count === 1) return 40
-  return 0
-}
-
 export default function RecoveryScoreCard() {
   const {
     recoveryScore, sleepScore, fatigueScore, hydrationPercent,
     stretchingPercent, sorenessLevel, mindfulnessCount,
-    mealsEatenCount, goalCheckinPercent, hasReliableACWR,
+    nutritionPercent, goalCheckinPercent, hasReliableACWR,
   } = useRecoveryScore()
   const { triggerConfetti } = useCelebration()
   const { text, color } = getLabel(recoveryScore)
@@ -42,7 +35,7 @@ export default function RecoveryScoreCard() {
     { label: 'Hydration', value: Math.round(hydrationPercent), color: '#3b82f6' },
     { label: 'Mindful', value: Math.min(100, Math.round((mindfulnessCount / 3) * 100)), color: '#a855f7' },
     { label: 'Stretching', value: Math.round(stretchingPercent), color: '#ec4899' },
-    { label: 'Nutrition', value: nutritionScore(mealsEatenCount), color: '#eab308' },
+    { label: 'Nutrition', value: Math.round(nutritionPercent), color: '#eab308' },
     { label: 'Goals', value: Math.round(goalCheckinPercent), color: '#10b981' },
   ]
 
