@@ -1,6 +1,7 @@
 import { useApp } from '../../context/AppContext'
 import { calculateACWR } from '../../utils/scoring'
-import { getDaysAgo, formatDate } from '../../utils/dateHelpers'
+import { parseISO, format } from 'date-fns'
+import { getDaysAgo } from '../../utils/dateHelpers'
 import Card from '../ui/Card'
 
 export default function RestDayPlanner() {
@@ -30,7 +31,7 @@ export default function RestDayPlanner() {
             }`}>
               {hasTraining ? 'R' : '—'}
             </div>
-            <span className="text-[10px] text-surface-400">{formatDate(date).split(' ')[0]}</span>
+            <span className="text-[10px] text-surface-400">{format(parseISO(date), 'EEE')}</span>
           </div>
         ))}
       </div>
