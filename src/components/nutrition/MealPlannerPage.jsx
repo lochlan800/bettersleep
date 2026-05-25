@@ -344,6 +344,26 @@ const FOOD_GROUP_BASE = [
   { name: 'Dairy', color: '#3b82f6', icon: '🥛' },
 ]
 
+const CEREAL_NAMES = new Set([
+  'Oats', 'Weetabix', 'Weetabix Minis (chocolate)', 'Weetabix Protein',
+  'Granola', 'Muesli', 'Crunchy Nut Cornflakes', 'Cornflakes', 'Coco Pops',
+  'Rice Krispies', 'Frosties', 'Cheerios', 'Honey Cheerios', 'Shreddies',
+  'Coco Shreddies', 'Frosted Shreddies', 'Special K', 'Special K Protein',
+  'Bran Flakes', 'All-Bran', 'Fruit & Fibre', 'Crunchy Nut Clusters',
+  'Cookie Crisp', 'Golden Nuggets', 'Sugar Puffs / Honey Monster Puffs',
+  'Raisin Bran', 'Lucky Charms', 'Curiously Cinnamon', 'Krave',
+  'Lion Cereal', 'Nesquik Cereal', 'Frosted Flakes', 'Corn Chex',
+  'Grape Nuts', 'Shredded Wheat', 'Shredded Wheat Bitesize',
+  'Harvest Morn / Aldi Granola', 'Alpen', 'Alpen No Added Sugar',
+  "Jordan's Country Crisp", 'Dorset Cereals Muesli', 'Puffed Wheat',
+  'Puffed Rice', 'Choco Pillows', 'Weetos', 'Ready Brek',
+  'Instant oat sachets', 'Granola (chocolate)', 'Granola (nut)',
+  'Granola (berry)', 'Protein granola', 'Muesli (no added sugar)',
+  'Porridge',
+])
+
+const MILK_PER_100ML = { carbs: 5, protein: 3.4, fat: 1.8, fibre: 0, iron: 0, calcium: 120, vitC: 1, sugar: 5 }
+
 function getPersonalizedTargets(age, weightKg, trainingDaysPerWeek) {
   const isChild = age && age < 16
   const isGrowing = age && age < 19
@@ -560,6 +580,11 @@ export default function MealPlannerPage() {
     const g = parseInt(grams, 10) || 100
     const scaled = scaleNutrients(selectedFood.nutrients, g)
     addFoodEntry({ name: selectedFood.name, groups: selectedFood.groups, nutrients: scaled, grams: g })
+    if (CEREAL_NAMES.has(selectedFood.name)) {
+      const milkMl = Math.round(g * (125 / 30))
+      const milkNutrients = scaleNutrients(MILK_PER_100ML, milkMl)
+      addFoodEntry({ name: `Milk (with ${selectedFood.name})`, groups: ['Dairy'], nutrients: milkNutrients, grams: milkMl })
+    }
     setSelectedFood(null)
     setSearch('')
     setGrams('100')
@@ -715,6 +740,13 @@ export default function MealPlannerPage() {
                 )
                 return null
               })()}
+              {CEREAL_NAMES.has(selectedFood.name) && (
+                <div className="mt-1.5 px-2 py-1.5 bg-blue-50 dark:bg-blue-900/30 rounded-md border border-blue-200 dark:border-blue-800">
+                  <p className="text-[11px] font-medium text-blue-600 dark:text-blue-400">
+                    + {Math.round((parseInt(grams, 10) || 100) * (125 / 30))}ml milk will be added automatically
+                  </p>
+                </div>
+              )}
             </div>
           )}
 
