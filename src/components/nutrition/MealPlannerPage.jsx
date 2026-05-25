@@ -140,6 +140,7 @@ const FOOD_DATABASE = [
   { name: 'Soya milk', groups: ['Dairy'], nutrients: { carbs: 4, protein: 7, fat: 4, fibre: 1, iron: 0.4, calcium: 300, vitC: 0, sugar: 2 } },
   { name: 'Yoghurt', groups: ['Dairy'], nutrients: { carbs: 12, protein: 10, fat: 4, fibre: 0, iron: 0.1, calcium: 200, vitC: 1, sugar: 4 } },
   { name: 'Greek yoghurt', groups: ['Dairy'], nutrients: { carbs: 4, protein: 10, fat: 5, fibre: 0, iron: 0.1, calcium: 110, vitC: 0, sugar: 4 } },
+  { name: 'Kefir', groups: ['Dairy'], nutrients: { carbs: 4, protein: 3, fat: 2, fibre: 0, iron: 0.1, calcium: 130, vitC: 0, sugar: 4 } },
   { name: 'Cheese', groups: ['Dairy'], nutrients: { carbs: 1, protein: 7, fat: 9, fibre: 0, iron: 0.2, calcium: 200, vitC: 0, sugar: 0 } },
   { name: 'Cheddar cheese', groups: ['Dairy'], nutrients: { carbs: 1, protein: 25, fat: 33, fibre: 0, iron: 0.7, calcium: 720, vitC: 0, sugar: 0 } },
   { name: 'Mozzarella', groups: ['Dairy'], nutrients: { carbs: 2, protein: 22, fat: 22, fibre: 0, iron: 0.4, calcium: 505, vitC: 0, sugar: 1 } },
