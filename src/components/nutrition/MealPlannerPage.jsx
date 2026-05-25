@@ -410,11 +410,16 @@ function getPersonalizedTargets(age, weightKg, trainingDaysPerWeek) {
   }
 }
 
-function getSuggestions(todayFoods, foodGroups, nutrientTargets) {
+function getSuggestions(todayFoods, foodGroups, nutrientTargets, allFoodsDb) {
   const groupCounts = {}
   foodGroups.forEach(g => { groupCounts[g.name] = 0 })
+  const groupGrams = {}
+  foodGroups.forEach(g => { groupGrams[g.name] = 0 })
   todayFoods.forEach(f => {
-    f.groups.forEach(g => { groupCounts[g] = (groupCounts[g] || 0) + 1 })
+    f.groups.forEach(g => {
+      groupCounts[g] = (groupCounts[g] || 0) + 1
+      groupGrams[g] = (groupGrams[g] || 0) + (f.loggedGrams || 100)
+    })
   })
 
   const totals = { carbs: 0, protein: 0, fat: 0, fibre: 0, iron: 0, calcium: 0, vitC: 0 }
@@ -427,31 +432,63 @@ function getSuggestions(todayFoods, foodGroups, nutrientTargets) {
     .filter(([key, { target }]) => totals[key] < target * 0.5)
     .map(([key, info]) => ({ key, ...info, current: totals[key] }))
 
+  const nutrientGaps = Object.entries(nutrientTargets)
+    .filter(([key, { target }]) => totals[key] < target)
+    .map(([key, info]) => ({ key, ...info, current: totals[key], gap: info.target - totals[key] }))
+    .sort((a, b) => (a.current / a.target) - (b.current / b.target))
+
   const eatenNames = new Set(todayFoods.map(f => f.name))
+  const db = allFoodsDb || FOOD_DATABASE
   const suggestions = []
+  const usedNames = new Set()
+
+  nutrientGaps.forEach(({ key, label, gap, target, current, unit }) => {
+    if (suggestions.length >= 8) return
+    const pctHave = Math.round((current / target) * 100)
+    const options = db.filter(f =>
+      f.nutrients[key] > 0 && !eatenNames.has(f.name) && !usedNames.has(f.name)
+    ).map(f => {
+      const per100 = f.nutrients[key]
+      const gramsNeeded = Math.min(300, Math.max(30, Math.round((gap / per100) * 100)))
+      const wouldAdd = Math.round(per100 * gramsNeeded / 100 * 10) / 10
+      return { ...f, suggestedGrams: gramsNeeded, wouldAdd, nutrientKey: key }
+    }).sort((a, b) => {
+      const aServing = a.suggestedGrams >= 50 && a.suggestedGrams <= 200 ? 1 : 0
+      const bServing = b.suggestedGrams >= 50 && b.suggestedGrams <= 200 ? 1 : 0
+      if (aServing !== bServing) return bServing - aServing
+      return a.suggestedGrams - b.suggestedGrams
+    })
+
+    if (options.length > 0) {
+      const pick = options[0]
+      usedNames.add(pick.name)
+      suggestions.push({
+        ...pick,
+        reason: `${pick.suggestedGrams}g → +${pick.wouldAdd}${unit} ${label.toLowerCase()} (${pctHave}% of daily target)`,
+      })
+    }
+  })
 
   missingGroups.forEach(group => {
-    const options = FOOD_DATABASE.filter(f =>
-      f.groups.includes(group.name) && !eatenNames.has(f.name)
+    if (suggestions.length >= 8) return
+    const gramGap = (group.gramTarget || 200) - (groupGrams[group.name] || 0)
+    if (gramGap <= 0) return
+    const options = db.filter(f =>
+      f.groups.includes(group.name) && !eatenNames.has(f.name) && !usedNames.has(f.name)
     )
     if (options.length > 0) {
-      const pick = options[Math.floor(Math.random() * Math.min(3, options.length))]
-      if (!suggestions.find(s => s.name === pick.name)) {
-        suggestions.push({ ...pick, reason: `Add more ${group.name.toLowerCase()}` })
-      }
+      const pick = options[Math.floor(Math.random() * Math.min(5, options.length))]
+      const servingGrams = Math.min(200, Math.max(50, gramGap))
+      usedNames.add(pick.name)
+      suggestions.push({
+        ...pick,
+        suggestedGrams: servingGrams,
+        reason: `Need ${gramGap}g more ${group.name.toLowerCase()} today`,
+      })
     }
   })
 
-  lowNutrients.forEach(({ key, label }) => {
-    const options = FOOD_DATABASE.filter(f =>
-      f.nutrients[key] > 2 && !eatenNames.has(f.name) && !suggestions.find(s => s.name === f.name)
-    ).sort((a, b) => b.nutrients[key] - a.nutrients[key])
-    if (options.length > 0) {
-      suggestions.push({ ...options[0], reason: `Boost your ${label.toLowerCase()}` })
-    }
-  })
-
-  return { missingGroups, lowNutrients, suggestions: suggestions.slice(0, 6), groupCounts, totals }
+  return { missingGroups, lowNutrients, suggestions: suggestions.slice(0, 8), groupCounts, totals }
 }
 
 function scaleNutrients(nutrients, grams) {
@@ -488,22 +525,22 @@ export default function MealPlannerPage() {
     [settings.realAge, settings.bodyWeightKg, trainingDaysPerWeek]
   )
 
-  const { missingGroups, lowNutrients, suggestions, groupCounts, totals } = useMemo(
-    () => getSuggestions(todayFoods.map(e => {
-      const dbFood = FOOD_DATABASE.find(f => f.name === e.name)
-      if (dbFood && e.grams) {
-        return { ...dbFood, nutrients: scaleNutrients(dbFood.nutrients, e.grams) }
-      }
-      return { name: e.name, groups: e.groups || [], nutrients: e.nutrients || {} }
-    }), foodGroups, nutrientTargets),
-    [todayFoods, foodGroups, nutrientTargets]
-  )
-
   const allFoods = useMemo(() => {
     const dbNames = new Set(FOOD_DATABASE.map(f => f.name))
     const extras = customFoods.filter(f => !dbNames.has(f.name))
     return [...FOOD_DATABASE, ...extras]
   }, [customFoods])
+
+  const { missingGroups, lowNutrients, suggestions, groupCounts, totals } = useMemo(
+    () => getSuggestions(todayFoods.map(e => {
+      const dbFood = allFoods.find(f => f.name === e.name)
+      if (dbFood && e.grams) {
+        return { ...dbFood, nutrients: scaleNutrients(dbFood.nutrients, e.grams), loggedGrams: e.grams }
+      }
+      return { name: e.name, groups: e.groups || [], nutrients: e.nutrients || {}, loggedGrams: e.grams || 100 }
+    }), foodGroups, nutrientTargets, allFoods),
+    [todayFoods, foodGroups, nutrientTargets, allFoods]
+  )
 
   const searchResults = useMemo(() => {
     if (!search.trim()) return []
@@ -884,22 +921,32 @@ export default function MealPlannerPage() {
       </Card>
 
       {/* Suggestions */}
-      {(missingGroups.length > 0 || lowNutrients.length > 0) && (
+      {suggestions.length > 0 && (
         <Card>
-          <h3 className="text-sm font-bold text-surface-800 dark:text-surface-200 mb-1">Suggestions</h3>
-          <p className="text-xs text-surface-500 dark:text-surface-400 mb-3">Based on what you're missing today</p>
-          <div className="space-y-2.5">
+          <h3 className="text-sm font-bold text-surface-800 dark:text-surface-200 mb-1">Suggested for you</h3>
+          <p className="text-xs text-surface-500 dark:text-surface-400 mb-3">Foods to fill your nutrient gaps today</p>
+          <div className="space-y-2">
             {suggestions.map(s => (
               <button
                 key={s.name}
-                onClick={() => handleSelect(s)}
-                className="w-full flex items-center justify-between p-2.5 rounded-lg bg-surface-50 dark:bg-surface-700/50 hover:bg-surface-100 dark:hover:bg-surface-700 transition-colors"
+                onClick={() => {
+                  setSelectedFood(s)
+                  setGrams(String(s.suggestedGrams || 100))
+                }}
+                className="w-full flex items-center justify-between p-3 rounded-xl bg-surface-50 dark:bg-surface-700/50 hover:bg-surface-100 dark:hover:bg-surface-700 transition-colors border border-surface-200 dark:border-surface-600"
               >
-                <div className="text-left">
-                  <span className="text-sm font-medium text-surface-800 dark:text-surface-200">{s.name}</span>
-                  <p className="text-[11px] text-surface-500 dark:text-surface-400">{s.reason}</p>
+                <div className="text-left flex-1 min-w-0">
+                  <span className="text-sm font-semibold text-surface-800 dark:text-surface-200">{s.name}</span>
+                  <p className="text-[11px] text-emerald-600 dark:text-emerald-400 mt-0.5">{s.reason}</p>
                 </div>
-                <Plus size={16} className="text-primary-500 shrink-0" />
+                <div className="flex items-center gap-1.5 shrink-0 ml-2">
+                  {s.suggestedGrams && (
+                    <span className="text-[11px] font-medium bg-primary-100 dark:bg-primary-900/40 text-primary-700 dark:text-primary-300 px-2 py-0.5 rounded-full">
+                      {s.suggestedGrams}g
+                    </span>
+                  )}
+                  <Plus size={16} className="text-primary-500" />
+                </div>
               </button>
             ))}
           </div>
@@ -912,7 +959,7 @@ export default function MealPlannerPage() {
         </div>
       )}
 
-      {todayFoods.length === 0 && (
+      {todayFoods.length === 0 && suggestions.length === 0 && (
         <div className="text-center py-8">
           <p className="text-surface-400 text-sm">Start logging what you eat to get personalised suggestions</p>
         </div>
