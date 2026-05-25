@@ -1,7 +1,8 @@
 import { useState, useMemo, useRef } from 'react'
 import { useApp } from '../../context/AppContext'
 import { getDaysAgo } from '../../utils/dateHelpers'
-import { Search, Plus, X, Camera, History, ChevronLeft, ChevronRight } from 'lucide-react'
+import { Search, Plus, X, Camera, History, ChevronLeft, ChevronRight, PieChart as PieChartIcon } from 'lucide-react'
+import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from 'recharts'
 import Card from '../ui/Card'
 
 const FOOD_DATABASE = [
@@ -534,6 +535,7 @@ export default function MealPlannerPage() {
   const [ageInput, setAgeInput] = useState(String(settings.realAge || ''))
   const [weightInput, setWeightInput] = useState(String(settings.bodyWeightKg))
   const [showHistory, setShowHistory] = useState(false)
+  const [showAverage, setShowAverage] = useState(false)
   const [historyDate, setHistoryDate] = useState(null)
   const [calendarMonth, setCalendarMonth] = useState(() => {
     const now = new Date()
@@ -677,6 +679,175 @@ export default function MealPlannerPage() {
     const y = p.month === 11 ? p.year + 1 : p.year
     return { year: y, month: m }
   })
+
+  const GROUP_COLORS = { Fruit: '#f59e0b', Vegetables: '#10b981', Protein: '#ef4444', Grains: '#8b5cf6', Dairy: '#3b82f6' }
+
+  const averageData = useMemo(() => {
+    if (foodLog.length === 0) return null
+    const groupGrams = { Fruit: 0, Vegetables: 0, Protein: 0, Grains: 0, Dairy: 0 }
+    const nutrientTotals = { carbs: 0, protein: 0, fat: 0, fibre: 0, iron: 0, calcium: 0, vitC: 0, sugar: 0 }
+    const dates = new Set()
+
+    foodLog.forEach(entry => {
+      if (entry.date) dates.add(entry.date)
+      const g = entry.grams || 100
+      ;(entry.groups || []).forEach(group => {
+        if (groupGrams[group] !== undefined) groupGrams[group] += g
+      })
+      Object.keys(nutrientTotals).forEach(k => {
+        nutrientTotals[k] += entry.nutrients?.[k] || 0
+      })
+    })
+
+    const totalGrams = Object.values(groupGrams).reduce((a, b) => a + b, 0)
+    const dayCount = dates.size || 1
+
+    const pieData = Object.entries(groupGrams)
+      .filter(([, v]) => v > 0)
+      .map(([name, value]) => ({
+        name,
+        value: Math.round(value),
+        pct: totalGrams > 0 ? Math.round((value / totalGrams) * 100) : 0,
+        color: GROUP_COLORS[name],
+      }))
+      .sort((a, b) => b.value - a.value)
+
+    const avgNutrients = {}
+    Object.keys(nutrientTotals).forEach(k => {
+      avgNutrients[k] = Math.round(nutrientTotals[k] / dayCount * 10) / 10
+    })
+
+    return { pieData, avgNutrients, dayCount, totalGrams }
+  }, [foodLog])
+
+  if (showAverage) {
+    return (
+      <div className="space-y-5">
+        <div className="flex items-center justify-between">
+          <div>
+            <h2 className="text-2xl font-bold text-surface-900 dark:text-surface-50">Diet Breakdown</h2>
+            <p className="text-sm text-surface-500 dark:text-surface-400 mt-1">
+              {averageData ? `Average across ${averageData.dayCount} day${averageData.dayCount !== 1 ? 's' : ''} of logging` : 'No data yet'}
+            </p>
+          </div>
+          <button
+            onClick={() => setShowAverage(false)}
+            className="px-3 py-1.5 text-xs font-medium rounded-lg bg-surface-200 dark:bg-surface-700 text-surface-700 dark:text-surface-300"
+          >Back</button>
+        </div>
+
+        {!averageData ? (
+          <div className="text-center py-12">
+            <p className="text-surface-400 text-sm">Log some food first to see your diet breakdown.</p>
+          </div>
+        ) : (
+          <>
+            <Card>
+              <h3 className="text-sm font-bold text-surface-800 dark:text-surface-200 mb-2">Food Groups</h3>
+              <div className="h-56">
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie
+                      data={averageData.pieData}
+                      cx="50%"
+                      cy="50%"
+                      innerRadius={50}
+                      outerRadius={85}
+                      paddingAngle={2}
+                      dataKey="value"
+                      stroke="none"
+                    >
+                      {averageData.pieData.map(entry => (
+                        <Cell key={entry.name} fill={entry.color} />
+                      ))}
+                    </Pie>
+                    <Tooltip
+                      formatter={(value, name) => {
+                        const item = averageData.pieData.find(d => d.name === name)
+                        return [`${item?.pct}% (${Math.round(value)}g)`, name]
+                      }}
+                      contentStyle={{
+                        backgroundColor: 'var(--tooltip-bg, #fff)',
+                        border: '1px solid #e5e7eb',
+                        borderRadius: '8px',
+                        fontSize: '13px',
+                      }}
+                    />
+                  </PieChart>
+                </ResponsiveContainer>
+              </div>
+              <div className="grid grid-cols-2 gap-2 mt-2">
+                {averageData.pieData.map(d => (
+                  <div key={d.name} className="flex items-center gap-2">
+                    <div className="w-3 h-3 rounded-full shrink-0" style={{ backgroundColor: d.color }} />
+                    <span className="text-xs text-surface-700 dark:text-surface-300">{d.name}</span>
+                    <span className="text-xs font-bold text-surface-900 dark:text-surface-50 ml-auto">{d.pct}%</span>
+                  </div>
+                ))}
+              </div>
+            </Card>
+
+            <Card>
+              <h3 className="text-sm font-bold text-surface-800 dark:text-surface-200 mb-3">Daily Average Nutrients</h3>
+              <div className="grid grid-cols-2 gap-3">
+                {Object.entries(nutrientTargets).map(([key, { target, unit, label, isLimit }]) => {
+                  const avg = averageData.avgNutrients[key] || 0
+                  const pct = Math.min(100, (avg / target) * 100)
+                  const over = isLimit && avg > target
+                  const nearLimit = isLimit && avg > target * 0.8
+                  const low = !isLimit && pct < 50
+                  const barColor = isLimit
+                    ? (over ? '#ef4444' : nearLimit ? '#f97316' : '#10b981')
+                    : (low ? '#ef4444' : '#10b981')
+                  const textColor = isLimit
+                    ? (over ? 'text-red-500 font-bold' : nearLimit ? 'text-orange-500' : 'text-emerald-500')
+                    : (low ? 'text-red-500' : 'text-emerald-500')
+                  return (
+                    <div key={key} className="flex items-center gap-2">
+                      <div className="flex-1">
+                        <div className="flex justify-between items-center">
+                          <span className="text-xs text-surface-600 dark:text-surface-400">{label}{isLimit ? ' ⚠' : ''}</span>
+                          <span className={`text-[10px] font-medium ${textColor}`}>
+                            {Math.round(avg)}/{target}{unit}
+                          </span>
+                        </div>
+                        <div className="w-full h-1.5 bg-surface-200 dark:bg-surface-700 rounded-full overflow-hidden mt-1">
+                          <div
+                            className="h-full rounded-full transition-all duration-500"
+                            style={{ width: `${isLimit ? Math.min(100, pct) : pct}%`, backgroundColor: barColor }}
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  )
+                })}
+              </div>
+
+              <div className="mt-4 pt-3 border-t border-surface-200 dark:border-surface-700">
+                <div className="grid grid-cols-3 gap-3 text-center">
+                  <div>
+                    <p className="text-lg font-bold text-surface-900 dark:text-surface-50">{Math.round(averageData.avgNutrients.protein)}g</p>
+                    <p className="text-[10px] text-surface-500">Protein/day</p>
+                  </div>
+                  <div>
+                    <p className="text-lg font-bold text-surface-900 dark:text-surface-50">{Math.round(averageData.avgNutrients.carbs)}g</p>
+                    <p className="text-[10px] text-surface-500">Carbs/day</p>
+                  </div>
+                  <div>
+                    <p className="text-lg font-bold text-surface-900 dark:text-surface-50">{Math.round(averageData.avgNutrients.fat)}g</p>
+                    <p className="text-[10px] text-surface-500">Fat/day</p>
+                  </div>
+                </div>
+                <p className="text-center text-[11px] text-surface-400 mt-2">
+                  ~{Math.round(averageData.avgNutrients.protein * 4 + averageData.avgNutrients.carbs * 4 + averageData.avgNutrients.fat * 9)} cal/day avg
+                </p>
+              </div>
+            </Card>
+          </>
+        )}
+      </div>
+    )
+  }
 
   if (showHistory) {
     return (
@@ -843,13 +1014,22 @@ export default function MealPlannerPage() {
           <h2 className="text-2xl font-bold text-surface-900 dark:text-surface-50">Food Log</h2>
           <p className="text-sm text-surface-500 dark:text-surface-400 mt-1">Log what you eat, get suggestions for what's missing</p>
         </div>
-        <button
-          onClick={() => setShowHistory(true)}
-          className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg bg-surface-200 dark:bg-surface-700 text-surface-700 dark:text-surface-300 hover:bg-surface-300 dark:hover:bg-surface-600 transition-colors"
-        >
-          <History size={14} />
-          History
-        </button>
+        <div className="flex gap-2">
+          <button
+            onClick={() => setShowAverage(true)}
+            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg bg-surface-200 dark:bg-surface-700 text-surface-700 dark:text-surface-300 hover:bg-surface-300 dark:hover:bg-surface-600 transition-colors"
+          >
+            <PieChartIcon size={14} />
+            Average
+          </button>
+          <button
+            onClick={() => setShowHistory(true)}
+            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg bg-surface-200 dark:bg-surface-700 text-surface-700 dark:text-surface-300 hover:bg-surface-300 dark:hover:bg-surface-600 transition-colors"
+          >
+            <History size={14} />
+            History
+          </button>
+        </div>
       </div>
 
       {/* Search input */}
