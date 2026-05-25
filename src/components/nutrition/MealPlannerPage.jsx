@@ -1,7 +1,7 @@
 import { useState, useMemo, useRef } from 'react'
 import { useApp } from '../../context/AppContext'
 import { getDaysAgo } from '../../utils/dateHelpers'
-import { Search, Plus, X, Camera } from 'lucide-react'
+import { Search, Plus, X, Camera, History, ChevronLeft, ChevronRight } from 'lucide-react'
 import Card from '../ui/Card'
 
 const FOOD_DATABASE = [
@@ -520,7 +520,7 @@ function scaleNutrients(nutrients, grams) {
 }
 
 export default function MealPlannerPage() {
-  const { addFoodEntry, removeFoodEntry, getTodayFoodLog, addCustomFood, customFoods, settings, updateSettings, trainingLogs } = useApp()
+  const { addFoodEntry, removeFoodEntry, getTodayFoodLog, addCustomFood, customFoods, foodLog, settings, updateSettings, trainingLogs } = useApp()
   const [search, setSearch] = useState('')
   const [showResults, setShowResults] = useState(false)
   const [selectedFood, setSelectedFood] = useState(null)
@@ -533,6 +533,12 @@ export default function MealPlannerPage() {
   const fileInputRef = useRef(null)
   const [ageInput, setAgeInput] = useState(String(settings.realAge || ''))
   const [weightInput, setWeightInput] = useState(String(settings.bodyWeightKg))
+  const [showHistory, setShowHistory] = useState(false)
+  const [historyDate, setHistoryDate] = useState(null)
+  const [calendarMonth, setCalendarMonth] = useState(() => {
+    const now = new Date()
+    return { year: now.getFullYear(), month: now.getMonth() }
+  })
 
   const todayFoods = getTodayFoodLog()
 
@@ -626,11 +632,224 @@ export default function MealPlannerPage() {
     setCustomGroups(prev => prev.includes(name) ? prev.filter(g => g !== name) : [...prev, name])
   }
 
+  const datesWithFood = useMemo(() => {
+    const dates = new Set()
+    foodLog.forEach(e => { if (e.date) dates.add(e.date) })
+    return dates
+  }, [foodLog])
+
+  const historyFoods = useMemo(() => {
+    if (!historyDate) return []
+    return foodLog.filter(e => e.date === historyDate)
+  }, [foodLog, historyDate])
+
+  const historyTotals = useMemo(() => {
+    const t = { carbs: 0, protein: 0, fat: 0, fibre: 0, iron: 0, calcium: 0, vitC: 0, sugar: 0 }
+    historyFoods.forEach(f => {
+      Object.keys(t).forEach(k => { t[k] += f.nutrients?.[k] || 0 })
+    })
+    return t
+  }, [historyFoods])
+
+  const calendarDays = useMemo(() => {
+    const { year, month } = calendarMonth
+    const firstDay = new Date(year, month, 1).getDay()
+    const daysInMonth = new Date(year, month + 1, 0).getDate()
+    const offset = (firstDay + 6) % 7
+    const days = []
+    for (let i = 0; i < offset; i++) days.push(null)
+    for (let d = 1; d <= daysInMonth; d++) {
+      const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`
+      days.push({ day: d, date: dateStr, hasFood: datesWithFood.has(dateStr) })
+    }
+    return days
+  }, [calendarMonth, datesWithFood])
+
+  const monthLabel = new Date(calendarMonth.year, calendarMonth.month).toLocaleDateString('en-GB', { month: 'long', year: 'numeric' })
+
+  const prevMonth = () => setCalendarMonth(p => {
+    const m = p.month === 0 ? 11 : p.month - 1
+    const y = p.month === 0 ? p.year - 1 : p.year
+    return { year: y, month: m }
+  })
+  const nextMonth = () => setCalendarMonth(p => {
+    const m = p.month === 11 ? 0 : p.month + 1
+    const y = p.month === 11 ? p.year + 1 : p.year
+    return { year: y, month: m }
+  })
+
+  if (showHistory) {
+    return (
+      <div className="space-y-5">
+        <div className="flex items-center justify-between">
+          <div>
+            <h2 className="text-2xl font-bold text-surface-900 dark:text-surface-50">Food History</h2>
+            <p className="text-sm text-surface-500 dark:text-surface-400 mt-1">
+              {historyDate ? new Date(historyDate + 'T12:00:00').toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }) : 'Tap a date to see what you ate'}
+            </p>
+          </div>
+          <button
+            onClick={() => { setShowHistory(false); setHistoryDate(null) }}
+            className="px-3 py-1.5 text-xs font-medium rounded-lg bg-surface-200 dark:bg-surface-700 text-surface-700 dark:text-surface-300"
+          >Back</button>
+        </div>
+
+        {!historyDate && (
+          <Card>
+            <div className="flex items-center justify-between mb-3">
+              <button onClick={prevMonth} className="p-1 rounded-lg hover:bg-surface-100 dark:hover:bg-surface-700">
+                <ChevronLeft size={18} className="text-surface-500" />
+              </button>
+              <span className="text-sm font-bold text-surface-800 dark:text-surface-200">{monthLabel}</span>
+              <button onClick={nextMonth} className="p-1 rounded-lg hover:bg-surface-100 dark:hover:bg-surface-700">
+                <ChevronRight size={18} className="text-surface-500" />
+              </button>
+            </div>
+            <div className="grid grid-cols-7 gap-1 text-center mb-1">
+              {['M','T','W','T','F','S','S'].map((d, i) => (
+                <span key={i} className="text-[10px] font-medium text-surface-400">{d}</span>
+              ))}
+            </div>
+            <div className="grid grid-cols-7 gap-1">
+              {calendarDays.map((cell, i) => {
+                if (!cell) return <div key={`e${i}`} />
+                const isToday = cell.date === new Date().toISOString().slice(0, 10)
+                return (
+                  <button
+                    key={cell.date}
+                    onClick={() => cell.hasFood && setHistoryDate(cell.date)}
+                    className={`aspect-square rounded-lg flex flex-col items-center justify-center text-xs transition-colors relative ${
+                      cell.hasFood
+                        ? 'bg-primary-50 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300 font-medium hover:bg-primary-100 dark:hover:bg-primary-900/50'
+                        : 'text-surface-400 dark:text-surface-500'
+                    } ${isToday ? 'ring-2 ring-primary-400' : ''}`}
+                  >
+                    {cell.day}
+                    {cell.hasFood && (
+                      <div className="w-1 h-1 rounded-full bg-primary-500 mt-0.5" />
+                    )}
+                  </button>
+                )
+              })}
+            </div>
+          </Card>
+        )}
+
+        {historyDate && (
+          <>
+            <div className="flex gap-2">
+              <button
+                onClick={() => setHistoryDate(null)}
+                className="px-3 py-1.5 text-xs font-medium rounded-lg bg-surface-200 dark:bg-surface-700 text-surface-700 dark:text-surface-300"
+              >Calendar</button>
+            </div>
+
+            <Card>
+              <h3 className="text-sm font-bold text-surface-800 dark:text-surface-200 mb-3">
+                What you ate ({historyFoods.length} item{historyFoods.length !== 1 ? 's' : ''})
+              </h3>
+              {historyFoods.length === 0 ? (
+                <p className="text-sm text-surface-400">No food logged on this day.</p>
+              ) : (
+                <div className="space-y-2">
+                  {historyFoods.map(entry => (
+                    <div key={entry.id} className="flex items-center justify-between p-2 rounded-lg bg-surface-50 dark:bg-surface-700/50">
+                      <div>
+                        <span className="text-sm font-medium text-surface-800 dark:text-surface-200">{entry.name}</span>
+                        {entry.grams > 0 && <span className="text-[11px] text-surface-400 ml-1.5">{entry.grams}g</span>}
+                      </div>
+                      <div className="text-right">
+                        <span className="text-[10px] text-surface-500">
+                          {Math.round(entry.nutrients?.protein || 0)}p · {Math.round(entry.nutrients?.carbs || 0)}c · {Math.round(entry.nutrients?.fat || 0)}f
+                        </span>
+                        {(entry.nutrients?.sugar || 0) > 5 && (
+                          <span className="text-[10px] text-red-500 ml-1">{Math.round(entry.nutrients.sugar)}g sugar</span>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </Card>
+
+            {historyFoods.length > 0 && (
+              <Card>
+                <h3 className="text-sm font-bold text-surface-800 dark:text-surface-200 mb-3">Day's totals</h3>
+                <div className="grid grid-cols-2 gap-3">
+                  {Object.entries(nutrientTargets).map(([key, { target, unit, label, isLimit }]) => {
+                    const current = Math.round(historyTotals[key] || 0)
+                    const pct = Math.min(100, (current / target) * 100)
+                    const over = isLimit && current > target
+                    const nearLimit = isLimit && current > target * 0.8
+                    const low = !isLimit && pct < 50
+                    const barColor = isLimit
+                      ? (over ? '#ef4444' : nearLimit ? '#f97316' : '#10b981')
+                      : (low ? '#ef4444' : '#10b981')
+                    const textColor = isLimit
+                      ? (over ? 'text-red-500 font-bold' : nearLimit ? 'text-orange-500' : 'text-emerald-500')
+                      : (low ? 'text-red-500' : 'text-emerald-500')
+                    return (
+                      <div key={key} className="flex items-center gap-2">
+                        <div className="flex-1">
+                          <div className="flex justify-between items-center">
+                            <span className="text-xs text-surface-600 dark:text-surface-400">{label}{isLimit ? ' ⚠' : ''}</span>
+                            <span className={`text-[10px] font-medium ${textColor}`}>
+                              {current}/{target}{unit}{over ? ' OVER' : ''}
+                            </span>
+                          </div>
+                          <div className="w-full h-1.5 bg-surface-200 dark:bg-surface-700 rounded-full overflow-hidden mt-1">
+                            <div
+                              className="h-full rounded-full transition-all duration-500"
+                              style={{ width: `${isLimit ? Math.min(100, pct) : pct}%`, backgroundColor: barColor }}
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    )
+                  })}
+                </div>
+
+                <div className="mt-4 pt-3 border-t border-surface-200 dark:border-surface-700">
+                  <div className="grid grid-cols-3 gap-3 text-center">
+                    <div>
+                      <p className="text-lg font-bold text-surface-900 dark:text-surface-50">{Math.round(historyTotals.protein)}g</p>
+                      <p className="text-[10px] text-surface-500">Protein</p>
+                    </div>
+                    <div>
+                      <p className="text-lg font-bold text-surface-900 dark:text-surface-50">{Math.round(historyTotals.carbs)}g</p>
+                      <p className="text-[10px] text-surface-500">Carbs</p>
+                    </div>
+                    <div>
+                      <p className="text-lg font-bold text-surface-900 dark:text-surface-50">{Math.round(historyTotals.fat)}g</p>
+                      <p className="text-[10px] text-surface-500">Fat</p>
+                    </div>
+                  </div>
+                  <p className="text-center text-[11px] text-surface-400 mt-2">
+                    ~{Math.round(historyTotals.protein * 4 + historyTotals.carbs * 4 + historyTotals.fat * 9)} calories
+                  </p>
+                </div>
+              </Card>
+            )}
+          </>
+        )}
+      </div>
+    )
+  }
+
   return (
     <div className="space-y-5">
-      <div>
-        <h2 className="text-2xl font-bold text-surface-900 dark:text-surface-50">Food Log</h2>
-        <p className="text-sm text-surface-500 dark:text-surface-400 mt-1">Log what you eat, get suggestions for what's missing</p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="text-2xl font-bold text-surface-900 dark:text-surface-50">Food Log</h2>
+          <p className="text-sm text-surface-500 dark:text-surface-400 mt-1">Log what you eat, get suggestions for what's missing</p>
+        </div>
+        <button
+          onClick={() => setShowHistory(true)}
+          className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg bg-surface-200 dark:bg-surface-700 text-surface-700 dark:text-surface-300 hover:bg-surface-300 dark:hover:bg-surface-600 transition-colors"
+        >
+          <History size={14} />
+          History
+        </button>
       </div>
 
       {/* Search input */}
