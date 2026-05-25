@@ -219,27 +219,27 @@ export function calculateRecoveryScore({
   goalCheckinPercent = 0,
 }) {
   // Dynamic weights: redistribute fatigue weight when ACWR isn't reliable
-  // With ACWR:    Sleep 25 + Freshness 15 + Soreness 20 + Hydration 10 + Mindfulness 10 + Stretching 10 + Nutrition 5 + Goals 5 = 100
-  // Without ACWR: Sleep 25 + Soreness 30 + Hydration 10 + Mindfulness 10 + Stretching 10 + Nutrition 5 + Goals 10 = 100
+  // With ACWR:    Sleep 25 + Freshness 15 + Nutrition 15 + Hydration 15 + Soreness 10 + Stretching 8 + Mindfulness 7 + Goals 5 = 100
+  // Without ACWR: Sleep 25 + Nutrition 20 + Hydration 15 + Soreness 15 + Stretching 10 + Mindfulness 8 + Goals 7 = 100
   let wSleep, wFatigue, wHydration, wSoreness, wMindfulness, wStretching, wNutrition, wGoals;
   if (hasReliableACWR) {
     wSleep = 25;
     wFatigue = 15;
-    wHydration = 10;
-    wSoreness = 20;
-    wMindfulness = 10;
-    wStretching = 10;
-    wNutrition = 5;
+    wHydration = 15;
+    wSoreness = 10;
+    wMindfulness = 7;
+    wStretching = 8;
+    wNutrition = 15;
     wGoals = 5;
   } else {
     wSleep = 25;
     wFatigue = 0;
-    wHydration = 10;
-    wSoreness = 30;
-    wMindfulness = 10;
+    wHydration = 15;
+    wSoreness = 15;
+    wMindfulness = 8;
     wStretching = 10;
-    wNutrition = 5;
-    wGoals = 10;
+    wNutrition = 20;
+    wGoals = 7;
   }
 
   const sleepComponent = (sleepScore / 100) * wSleep;
