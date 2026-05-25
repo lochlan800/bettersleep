@@ -3,7 +3,7 @@ import { Activity, ChevronDown, ChevronUp, Pencil } from 'lucide-react'
 import { useApp } from '../../context/AppContext'
 import useRecoveryScore from '../../hooks/useRecoveryScore'
 import { calculateSleepScore } from '../../utils/scoring'
-import { getToday, getDaysAgo } from '../../utils/dateHelpers'
+import { getToday } from '../../utils/dateHelpers'
 import Card from '../ui/Card'
 
 function getAgeColor(age) {
@@ -37,7 +37,7 @@ const TIP_MAP = {
 }
 
 export default function FitnessAgeCard() {
-  const { sleepLogs, trainingLogs, settings, updateSettings } = useApp()
+  const { sleepLogs, trainingLogs, hydrationLogs, mindfulnessLogs, stretchingLogs, sorenessLogs, settings, updateSettings } = useApp()
   const {
     recoveryScore, sleepScore, hydrationPercent,
     stretchingPercent, sorenessLevel, mindfulnessCount,
@@ -47,31 +47,74 @@ export default function FitnessAgeCard() {
   const [ageInput, setAgeInput] = useState('')
 
   const { fitnessAge, factors } = useMemo(() => {
-    const last7Days = Array.from({ length: 7 }, (_, i) => getDaysAgo(i))
+    const today = getToday()
+
+    // ── Sleep: average ALL logged days ──
     const sortedSleep = [...sleepLogs].sort((a, b) => b.date.localeCompare(a.date))
-    const recentSleepScores = last7Days
-      .map(date => {
-        const log = sleepLogs.find(l => l.date === date)
-        return log ? calculateSleepScore(log, sortedSleep.slice(0, 7)) : null
-      })
-      .filter(s => s !== null)
-    const avgSleepScore = recentSleepScores.length > 0
-      ? recentSleepScores.reduce((a, b) => a + b, 0) / recentSleepScores.length
+    const allSleepScores = sleepLogs.map(log =>
+      calculateSleepScore(log, sortedSleep.slice(0, 7))
+    )
+    const avgSleepScore = allSleepScores.length > 0
+      ? allSleepScores.reduce((a, b) => a + b, 0) / allSleepScores.length
       : 0
 
-    const trainingDaysCount = last7Days.filter(date =>
-      trainingLogs.some(l => l.date === date)
-    ).length
-    const trainingConsistency = Math.min(100, (trainingDaysCount / 5) * 100)
-    const mindScore = Math.min(100, (mindfulnessCount / 3) * 100)
-    const sorenessScore = ((5 - sorenessLevel) / 4) * 100
+    // ── Training: consistency over all weeks logged ──
+    const allDates = new Set()
+    trainingLogs.forEach(l => allDates.add(l.date))
+    sleepLogs.forEach(l => allDates.add(l.date))
+    hydrationLogs.forEach(l => allDates.add(l.date))
+    const totalDaysTracked = Math.max(7, allDates.size)
+    const totalWeeks = Math.max(1, totalDaysTracked / 7)
+    const trainingDaysTotal = new Set(trainingLogs.map(l => l.date)).size
+    const trainingDaysPerWeek = trainingDaysTotal / totalWeeks
+    const trainingConsistency = Math.min(100, (trainingDaysPerWeek / 5) * 100)
+
+    // ── Hydration: average across all logged days ──
+    const hydrationScores = hydrationLogs.map(d => {
+      const ml = d.entries.reduce((sum, e) => sum + (e.amountMl ?? 0), 0)
+      return Math.min(100, Math.round((ml / 2000) * 100))
+    })
+    const todayHydration = hydrationPercent
+    const allHydration = hydrationScores.length > 0
+      ? [...hydrationScores.filter((_, i) => hydrationLogs[i].date !== today), todayHydration]
+      : [todayHydration]
+    const avgHydration = allHydration.reduce((a, b) => a + b, 0) / allHydration.length
+
+    // ── Stretching: average across all logged days ──
+    const stretchTotal = stretchingLogs.length > 0
+      ? stretchingLogs.reduce((sum, d) => sum + d.completed.length, 0) / stretchingLogs.length
+      : 0
+    const stretchTotalPercent = Math.round((stretchTotal / Math.max(1, stretchingPercent > 0 ? (stretchingLogs.find(d => d.date === today)?.completed.length || 1) / (stretchingPercent / 100) : 8)) * 100)
+    const avgStretching = stretchingLogs.length > 0
+      ? Math.min(100, stretchTotalPercent)
+      : stretchingPercent
+
+    // ── Mindfulness: average daily count across all logged days ──
+    const mindDays = mindfulnessLogs.filter(d => d.activities.length > 0)
+    const avgMindCount = mindDays.length > 0
+      ? mindDays.reduce((sum, d) => sum + d.activities.length, 0) / mindDays.length
+      : mindfulnessCount
+    const mindScore = Math.min(100, (avgMindCount / 3) * 100)
+
+    // ── Soreness: average across all soreness data ──
+    const allSoreness = []
+    sorenessLogs.forEach(d => { if (d.level) allSoreness.push(d.level) })
+    trainingLogs.forEach(l => { if (l.sorenessLevel) allSoreness.push(l.sorenessLevel) })
+    const avgSoreness = allSoreness.length > 0
+      ? allSoreness.reduce((a, b) => a + b, 0) / allSoreness.length
+      : sorenessLevel
+    const sorenessScore = ((5 - avgSoreness) / 4) * 100
+
+    // ── Recovery: blend today's live score with concept of all-time average ──
+    // We use the component averages below, so recovery weight uses today's live score
+    // as a proxy (it already incorporates today's data)
 
     const components = [
       { label: 'Recovery', score: recoveryScore, weight: 0.30 },
       { label: 'Sleep', score: avgSleepScore, weight: 0.20 },
       { label: 'Training', score: trainingConsistency, weight: 0.15 },
-      { label: 'Hydration', score: Math.min(100, hydrationPercent), weight: 0.10 },
-      { label: 'Stretching', score: stretchingPercent, weight: 0.10 },
+      { label: 'Hydration', score: Math.min(100, avgHydration), weight: 0.10 },
+      { label: 'Stretching', score: Math.min(100, avgStretching), weight: 0.10 },
       { label: 'Mindfulness', score: mindScore, weight: 0.10 },
       { label: 'Soreness', score: sorenessScore, weight: 0.05 },
     ]
@@ -95,7 +138,7 @@ export default function FitnessAgeCard() {
     }).sort((a, b) => a.score - b.score)
 
     return { fitnessAge: age, factors: factorList }
-  }, [sleepLogs, trainingLogs, recoveryScore, sleepScore, hydrationPercent, stretchingPercent, sorenessLevel, mindfulnessCount])
+  }, [sleepLogs, trainingLogs, hydrationLogs, mindfulnessLogs, stretchingLogs, sorenessLogs, recoveryScore, sleepScore, hydrationPercent, stretchingPercent, sorenessLevel, mindfulnessCount])
 
   const color = getAgeColor(fitnessAge)
   const message = getMessage(fitnessAge)
