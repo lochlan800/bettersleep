@@ -4,6 +4,7 @@ import SleepRecommendations from './SleepRecommendations';
 import SleepHistoryChart from './SleepHistoryChart';
 import SleepHistory from './SleepHistory';
 import SleepTips from './SleepTips';
+import MorningRoutine from './MorningRoutine';
 
 export default function SleepPage() {
   return (
@@ -20,6 +21,7 @@ export default function SleepPage() {
       <SleepRecommendations />
       <SleepHistoryChart />
       <SleepHistory />
+      <MorningRoutine />
       <SleepTips />
     </div>
   );
