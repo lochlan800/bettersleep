@@ -1,4 +1,4 @@
-import { Moon, Sun, Coffee, Smartphone, Thermometer, Clock, Zap, BedDouble } from 'lucide-react'
+import { Moon, Sun, Coffee, Smartphone, Thermometer, Clock, Zap, BedDouble, Activity } from 'lucide-react'
 import Card from '../ui/Card'
 
 const bedtimeTips = [
@@ -29,8 +29,13 @@ const bedtimeTips = [
   },
   {
     icon: Sun,
-    title: 'Morning sunlight',
-    text: 'Get 10-15 min of natural sunlight within an hour of waking. This sets your circadian clock and makes it easier to fall asleep that night.',
+    title: 'Sunlight in the first 30 min',
+    text: 'Get outside within 10-30 minutes of waking — even on a cloudy day. Natural light hits your eyes and locks in your circadian clock so melatonin releases on schedule that night.',
+  },
+  {
+    icon: Activity,
+    title: 'Stress your body early',
+    text: 'A morning workout — a run, weights, anything intense — pushes your cortisol peak to the start of the day. That leaves your afternoon and evening naturally calmer, so falling asleep is easier.',
   },
   {
     icon: BedDouble,
