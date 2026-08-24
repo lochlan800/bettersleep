@@ -205,41 +205,6 @@ Between them they cover calves, achilles, hamstrings, quads, hip flexors, groin,
 The swinging ones — Shooing the Geese and Leg Swings — are dynamic, so they also work as a warm-up before a run. The rest are better afterwards, when the muscle is already warm.`,
   },
   {
-    title: 'Recovery Tab — Strategies & "Recommended Today"',
-    content: `**This is the Recovery tab, not the Dashboard.** For the Dashboard's "Today's Recommendations" panel, see the separate section further down.
-
-The Recovery tab has a library of recovery methods, each with a tick box. Ticking them counts toward your Recovery Score — 1 action = 50% of the points, 2 = 80%, 3 or more = 100%. This is worth 8-9% of your total score.
-
-**The filter buttons — what each one means:**
-
-• **All** — Every strategy suitable for your age, in one list.
-
-• **After a run** — Do these in the first hour after finishing, while the window matters. Cool-down jog, refuelling with protein and carbs, and rehydrating with electrolytes.
-
-• **Same day** — Do these later on the same day as a hard session, usually in the evening. Legs up the wall, compression socks, contrast showers, cold water immersion, and Epsom salt baths.
-
-• **Rest day** — For days you are not training, or the day after something hard. Active recovery, complete rest, and self-massage.
-
-• **Ongoing** — Habits that work over weeks rather than one session. Down-regulation breathing, protecting your sleep, watching your iron intake, and deload weeks.
-
-**The "Recommended Today" card:**
-This appears above the library and picks up to 4 strategies based on what you have actually logged. It updates instantly — log a run or change your soreness level and it re-sorts straight away, no waiting or refreshing.
-
-**What it reads from your data:**
-• Whether you trained today, and that session's RPE and duration
-• Your soreness level (3+ counts as high, 4+ as very high)
-• How many days in a row you have trained
-• Your ACWR training load ratio (above 1.3 flags)
-• Your current recovery score (below 60 flags)
-• Your hydration percentage (below 70% flags)
-
-Each recommendation shows a "Based on:" line naming the exact figures that triggered it — for example "hard session today (RPE 8) · soreness 4/5" — so you can see why it was suggested rather than having to trust it.
-
-If nothing matches, the card hides itself instead of padding the list with irrelevant suggestions.
-
-**Age matters here.** Strategies unsuitable for your age are hidden entirely — cold water immersion does not appear for under-18s — and others carry age-specific cautions. Set your age on the Meals page to get this right.`,
-  },
-  {
     title: 'Mindfulness',
     content: `The Mindfulness tab helps you recover your mind as well as your body. It shows 12 activities across different categories — tick off the ones you've done today.
 
@@ -365,21 +330,47 @@ Once installed, it opens full-screen without the browser bar and has its own ico
 Just send them the website link. Each person's data is stored privately on their own device — nobody can see anyone else's logs. When you update the app, everyone gets the latest version automatically.`,
   },
   {
-    title: 'Dashboard Recommendations',
-    content: `**This is the Dashboard's panel, not the Recovery tab.** The Recovery tab has its own "Recommended Today" card that suggests recovery strategies — that is covered in the "Recovery Tab" section above.
+    title: 'Recovery Strategies',
+    content: `The Recovery tab has a library of recovery methods, each with a tick box. Ticking them counts toward your Recovery Score — 1 action = 50% of the points, 2 = 80%, 3 or more = 100%. That is worth 8-9% of your total score.
 
-The "Today's Recommendations" section on the Dashboard gives you personalised advice that changes every day based on your actual data.
+Every method expands to show how to do it and why it works. They are grouped by **when** you should do them, because timing changes how well most of them work.
 
-**What drives the recommendations:**
-• **Sleep** — Warns if you slept too little or too much last night, flags inconsistent bedtimes, suggests extra sleep after hard sessions.
-• **Water** — Shows your exact progress toward 2,000ml with how much you have left to drink.
-• **Training load** — Warns about consecutive training days, ACWR approaching danger zones, and suggests when to back off or when you can push.
-• **Soreness** — Gives specific recovery advice based on your logged soreness level (stretching, foam rolling, ice, rest).
-• **Mindfulness** — Nudges you if you haven't done any today, congratulates you when you've done 3+.
-• **Stretching** — Reminds you to tick off stretches after training, encourages you to do more if you've only done a few.
-• **Post-training nutrition** — Suggests meals based on your session intensity and how long ago you trained.
+**AFTER A RUN — the first hour**
+Cool-down jog, refuelling, rehydrating.
 
-Recommendations are colour-coded by priority: **red** (high — act on this now), **yellow** (medium — worth doing), **blue** (low — nice to know).`,
+**Why this window is good:** Your blood is still circulating fast through the muscles you just worked, so anything that keeps that going clears waste quicker than stopping dead. Muscle is also at its hungriest right now — it absorbs protein and restocks glycogen faster in the first hour than at any other point in the day. And the fluid you lost through sweat has not yet been replaced, so drinking now stops the deficit carrying into tomorrow. Do these late and you get a fraction of the benefit.
+
+**SAME DAY — that evening**
+Legs up the wall, compression, contrast showers, cold water immersion, Epsom baths.
+
+**Why this window is good:** Soreness does not peak straight after a run — it peaks 24 to 48 hours later. What you do this evening decides how bad tomorrow actually feels. Inflammation and fluid are still building in the muscle, so this is your chance to limit swelling before it settles in. Everything in this group works by moving blood and fluid — gravity, pressure, or temperature change — which is far easier to do before the tissue stiffens up overnight.
+
+**REST DAY — days you are not training**
+Active recovery, complete rest, self-massage.
+
+**Why this is good:** You do not get fitter during a session. Training is the stimulus — the actual rebuilding happens in the days after, and it only happens if you leave room for it. Skipping rest means fatigue stacks up faster than fitness, which is how most overuse injuries start. Light movement on these days beats lying still: it pushes blood through damaged tissue without adding meaningful load, and most runners report better legs the next day from an easy walk or swim than from doing nothing at all.
+
+**ONGOING — habits over weeks**
+Breathing, sleep, iron, deload weeks.
+
+**Why these matter most:** No single day of these does anything you would notice, which is exactly why they get skipped. But they compound. An extra hour of sleep every night for a month does more for your recovery than any ice bath ever will — deep sleep is when growth hormone is released and muscle actually repairs. Low iron creeps up over weeks and leaves your legs feeling heavy for no obvious reason. A planned easy week every month or so is when the fitness from the previous block finally surfaces. These are the boring ones, and they are the ones that matter.
+
+**The "Recommended Today" card:**
+This sits above the library and picks up to 4 strategies based on what you have actually logged. It updates instantly — log a run or change your soreness level and it re-sorts straight away, with no waiting or refreshing.
+
+**What it reads from your data:**
+• Whether you trained today, and that session's RPE and duration
+• Your soreness level (3+ counts as high, 4+ as very high)
+• How many days in a row you have trained
+• Your ACWR training load ratio (above 1.3 flags)
+• Your current recovery score (below 60 flags)
+• Your hydration percentage (below 70% flags)
+
+Each suggestion carries a "Based on:" line naming the exact figures that triggered it — for example "hard session today (RPE 8) · soreness 4/5" — so you can see why it was suggested instead of having to take it on trust. Matching strategies in the main library are tagged **Recommended** too.
+
+If nothing matches, the card hides itself rather than padding the list with suggestions you do not need.
+
+**Age matters here.** Strategies unsuitable for your age are hidden completely — cold water immersion does not appear for under-18s — and others carry age-specific cautions. Set your age on the Meals page to get this right.`,
   },
 ]
 
