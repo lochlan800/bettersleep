@@ -6,6 +6,7 @@ import IceHeatRecommendation from './IceHeatRecommendation'
 import RestDayPlanner from './RestDayPlanner'
 import StretchingRoutine from './StretchingRoutine'
 import FoamRollingProtocol from './FoamRollingProtocol'
+import RecoveryStrategies from './RecoveryStrategies'
 import Card from '../ui/Card'
 
 const getLabel = (s) => {
@@ -146,6 +147,8 @@ export default function RecoveryPage() {
         <IceHeatRecommendation />
         <RestDayPlanner />
       </div>
+
+      <RecoveryStrategies />
 
       <Card title="Stretching Routine" subtitle="Targeted for your recent training">
         <StretchingRoutine />
