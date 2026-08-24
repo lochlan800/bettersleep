@@ -4,6 +4,7 @@ import Card from '../ui/Card'
 import useLocalStorage from '../../hooks/useLocalStorage'
 import { useApp } from '../../context/AppContext'
 import { getSleepNeed } from '../../utils/ageGuidance'
+import { addMinutesToTime, formatTime12 } from '../../utils/timeOfDay'
 
 const STEPS = [
   { offset: 0,  icon: Sun,       task: 'Wake up + drink a glass of water',      why: 'Rehydrate from the night — grogginess is often mild dehydration.' },
@@ -18,22 +19,6 @@ const STEPS = [
 ]
 
 const ROUTINE_MINUTES = 100
-
-function addMinutesToTime(timeStr, mins) {
-  const [h, m] = timeStr.split(':').map(Number)
-  const total = h * 60 + m + mins
-  const wrapped = ((total % 1440) + 1440) % 1440
-  const th = Math.floor(wrapped / 60)
-  const tm = wrapped % 60
-  return `${String(th).padStart(2, '0')}:${String(tm).padStart(2, '0')}`
-}
-
-function formatTime12(timeStr) {
-  const [h, m] = timeStr.split(':').map(Number)
-  const period = h >= 12 ? 'pm' : 'am'
-  const h12 = h % 12 === 0 ? 12 : h % 12
-  return `${h12}:${String(m).padStart(2, '0')} ${period}`
-}
 
 export default function MorningRoutine() {
   const [leaveTime, setLeaveTime] = useLocalStorage('bs_leave_time', '07:40')

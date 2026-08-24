@@ -205,6 +205,34 @@ Between them they cover calves, achilles, hamstrings, quads, hip flexors, groin,
 The swinging ones — Shooing the Geese and Leg Swings — are dynamic, so they also work as a warm-up before a run. The rest are better afterwards, when the muscle is already warm.`,
   },
   {
+    title: 'Night & Morning Routines',
+    content: `The Sleep tab has two timed routines. Both are built backwards from a fixed anchor, so every step gets a real clock time rather than a vague instruction.
+
+**NIGHT ROUTINE — 90 minutes of winding down**
+
+Ten-minute blocks counting down to lights out. The aim is a steady drop in heart rate rather than any single trick:
+
+• **90 min** — Digital shutdown. Screens and overhead lights off, dim warm lamps on.
+• **80 min** — Brain dump. Write tomorrow's tasks and worries onto paper.
+• **70 min** — Warm bath or shower.
+• **60 min** — Cool down, teeth, hygiene in dim light.
+• **50 min** — Gentle static stretching for hips, hamstrings, neck.
+• **40 min** — Legs up the wall.
+• **30 min** — Low-stimulation reading, physical book or e-ink.
+• **20 min** — Extended exhale breathing (4-7-8, or physiological sighs).
+• **10 min** — Progressive muscle relaxation, lights out.
+
+**Why it works in that order:** the early steps remove what keeps you alert — blue light suppressing melatonin, and unwritten worries keeping your mind running. The middle steps use temperature: a warm bath widens the blood vessels near your skin so that when you step out into cooler air, core temperature drops fast, which is the signal that triggers sleepiness. The late steps work directly on the nervous system — legs up the wall triggers the baroreflex which slows your pulse automatically, and long exhales stimulate the vagus nerve, releasing acetylcholine that slows the heart's own pacemaker.
+
+**Your bedtime is worked out for you.** It comes from the leave-for-school time in the Morning Routine, minus the sleep your age actually needs. Set your age on the Meals page and the whole chain lines up. You can override the bedtime and switch back to the recommended one at any point.
+
+**MORNING ROUTINE — 100 minutes from waking to leaving**
+
+Built backwards from when you leave. Water, daylight, movement, shower, skincare, breakfast, packing, and buffer time.
+
+**Why the order matters here too:** getting outside in the first 10-30 minutes locks in your circadian clock so melatonin releases on schedule that night, and exercising early pushes your cortisol peak to the start of the day, leaving the evening naturally calmer. The two routines are two ends of the same system — the morning one is what makes the night one work.`,
+  },
+  {
     title: 'Mindfulness',
     content: `The Mindfulness tab helps you recover your mind as well as your body. It shows 12 activities across different categories — tick off the ones you've done today.
 
