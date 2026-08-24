@@ -67,6 +67,10 @@ export default function RecoveryStrategies() {
       highACWR: acwr > 1.3,
       lowRecovery: recoveryScore < 60,
       lowHydration: hydrationPercent < 70,
+      // Raw values, kept for the explanatory reason text
+      lastDuration: duration,
+      soreness: sorenessLevel,
+      acwr,
     }
   }, [trainingLogs, hydrationLogs, sorenessLevel, recoveryScore, hydrationPercent])
 
@@ -83,6 +87,25 @@ export default function RecoveryStrategies() {
     if (when.lowRecovery && !state.lowRecovery) return false
     if (when.lowHydration && !state.lowHydration) return false
     return true
+  }
+
+  // Spell out which of your logged data triggered a recommendation, so the
+  // suggestion is traceable rather than appearing from nowhere.
+  const matchReason = (when) => {
+    if (!when) return null
+    const bits = []
+    if (when.longRun && state.longRun) bits.push(`${state.lastDuration} min run today`)
+    else if (when.hardSession && state.hardSession) bits.push(`hard session today (RPE ${state.minIntensity})`)
+    else if (when.afterTraining && state.afterTraining) bits.push('you trained today')
+    if (when.veryHighSoreness && state.veryHighSoreness) bits.push(`soreness ${state.soreness}/5`)
+    else if (when.highSoreness && state.highSoreness) bits.push(`soreness ${state.soreness}/5`)
+    if (when.consecutiveTraining && state.consecutiveTraining >= when.consecutiveTraining) {
+      bits.push(`${state.consecutiveTraining} days in a row`)
+    }
+    if (when.highACWR && state.highACWR) bits.push(`training load high (ACWR ${state.acwr.toFixed(2)})`)
+    if (when.lowHydration && state.lowHydration) bits.push(`hydration ${Math.round(hydrationPercent)}%`)
+    if (when.lowRecovery && state.lowRecovery) bits.push(`recovery score ${Math.round(recoveryScore)}`)
+    return bits.length ? bits.join(' · ') : null
   }
 
   // Anything unsuitable for this age is dropped entirely rather than shown
@@ -104,6 +127,8 @@ export default function RecoveryStrategies() {
   const renderStrategy = (s, highlight = false) => {
     const Icon = ICONS[s.icon] || Sparkles
     const isOpen = expanded[s.id]
+    const isRecommended = matches(s.when)
+    const reason = isRecommended ? matchReason(s.when) : null
     const caution = strategyCaution(s, age)
     // The sleep entry quotes a figure that depends entirely on age, so it is
     // filled in here rather than hardcoded into the copy.
@@ -147,10 +172,22 @@ export default function RecoveryStrategies() {
               <Icon size={16} className={highlight ? 'text-primary-600 dark:text-primary-400' : 'text-accent-500'} />
             </div>
             <div className="flex-1 min-w-0">
-              <span className={`text-sm font-medium ${isDone ? 'text-emerald-700 dark:text-emerald-400 line-through' : 'text-surface-900 dark:text-surface-50'}`}>{s.name}</span>
+              <div className="flex items-center gap-1.5 flex-wrap">
+                <span className={`text-sm font-medium ${isDone ? 'text-emerald-700 dark:text-emerald-400 line-through' : 'text-surface-900 dark:text-surface-50'}`}>{s.name}</span>
+                {isRecommended && !highlight && (
+                  <span className="text-[9px] font-semibold px-1.5 py-0.5 rounded-full bg-primary-100 dark:bg-primary-900/40 text-primary-700 dark:text-primary-400 whitespace-nowrap">
+                    Recommended
+                  </span>
+                )}
+              </div>
               <p className="text-[11px] text-surface-500 dark:text-surface-400 mt-0.5">
                 {s.timing}{s.duration !== '—' ? ` · ${s.duration}` : ''}
               </p>
+              {reason && (
+                <p className="text-[10px] text-primary-600 dark:text-primary-400 mt-0.5">
+                  Based on: {reason}
+                </p>
+              )}
             </div>
             {isOpen
               ? <ChevronDown size={16} className="text-primary-500 shrink-0" />

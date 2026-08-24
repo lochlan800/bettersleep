@@ -205,6 +205,39 @@ Soreness peaking 24-48 hours after training (DOMS) is normal. Soreness that does
 • Rest days: both, focusing on tight areas`,
   },
   {
+    title: 'Recovery Strategies',
+    content: `The Recovery tab has a library of recovery methods, each with a tick box. Ticking them counts toward your Recovery Score — 1 action = 50% of the points, 2 = 80%, 3 or more = 100%. This is worth 8-9% of your total score.
+
+**The filter buttons — what each one means:**
+
+• **All** — Every strategy suitable for your age, in one list.
+
+• **After a run** — Do these in the first hour after finishing, while the window matters. Cool-down jog, refuelling with protein and carbs, and rehydrating with electrolytes.
+
+• **Same day** — Do these later on the same day as a hard session, usually in the evening. Legs up the wall, compression socks, contrast showers, cold water immersion, and Epsom salt baths.
+
+• **Rest day** — For days you are not training, or the day after something hard. Active recovery, complete rest, and self-massage.
+
+• **Ongoing** — Habits that work over weeks rather than one session. Down-regulation breathing, protecting your sleep, watching your iron intake, and deload weeks.
+
+**The "Recommended Today" card:**
+This appears above the library and picks up to 4 strategies based on what you have actually logged. It updates instantly — log a run or change your soreness level and it re-sorts straight away, no waiting or refreshing.
+
+**What it reads from your data:**
+• Whether you trained today, and that session's RPE and duration
+• Your soreness level (3+ counts as high, 4+ as very high)
+• How many days in a row you have trained
+• Your ACWR training load ratio (above 1.3 flags)
+• Your current recovery score (below 60 flags)
+• Your hydration percentage (below 70% flags)
+
+Each recommendation shows a "Based on:" line naming the exact figures that triggered it — for example "hard session today (RPE 8) · soreness 4/5" — so you can see why it was suggested rather than having to trust it.
+
+If nothing matches, the card hides itself instead of padding the list with irrelevant suggestions.
+
+**Age matters here.** Strategies unsuitable for your age are hidden entirely — cold water immersion does not appear for under-18s — and others carry age-specific cautions. Set your age on the Meals page to get this right.`,
+  },
+  {
     title: 'Mindfulness',
     content: `The Mindfulness tab helps you recover your mind as well as your body. It shows 12 activities across different categories — tick off the ones you've done today.
 
