@@ -27,7 +27,7 @@ import { getFreeSugar } from '../utils/freeSugar';
  * }}
  */
 export default function useRecoveryScore() {
-  const { sleepLogs, trainingLogs, hydrationLogs, mindfulnessLogs, stretchingLogs, mealCompletions, foodLog, goals, settings, sorenessLogs } = useApp();
+  const { sleepLogs, trainingLogs, hydrationLogs, mindfulnessLogs, stretchingLogs, mealCompletions, foodLog, goals, settings, sorenessLogs, recoveryActionLogs } = useApp();
 
   return useMemo(() => {
     // Sleep – only score today's log so it resets each morning
@@ -129,6 +129,10 @@ export default function useRecoveryScore() {
         ? Math.round((goalsCheckedToday / activeGoals.length) * 100)
         : 0;
 
+    // Recovery actions ticked off today
+    const todayActions = recoveryActionLogs.find((d) => d.date === today);
+    const recoveryActionsCount = todayActions ? todayActions.completed.length : 0;
+
     const recoveryScore = calculateRecoveryScore({
       sleepScore,
       fatigueScore,
@@ -140,6 +144,7 @@ export default function useRecoveryScore() {
       mealsEatenCount,
       nutritionPercent,
       goalCheckinPercent,
+      recoveryActionsCount,
     });
 
     return {
@@ -156,7 +161,8 @@ export default function useRecoveryScore() {
       mealsEatenCount,
       nutritionPercent: nutritionPercent >= 0 ? nutritionPercent : (mealsEatenCount >= 3 ? 100 : mealsEatenCount * 35),
       goalCheckinPercent,
+      recoveryActionsCount,
       hasReliableACWR,
     };
-  }, [sleepLogs, trainingLogs, hydrationLogs, mindfulnessLogs, stretchingLogs, mealCompletions, foodLog, goals, sorenessLogs, settings.bodyWeightKg, settings.realAge]);
+  }, [sleepLogs, trainingLogs, hydrationLogs, mindfulnessLogs, stretchingLogs, mealCompletions, foodLog, goals, sorenessLogs, settings.bodyWeightKg, settings.realAge, recoveryActionLogs]);
 }

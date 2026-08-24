@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Moon, Droplets, Utensils, Target, Brain, Activity, Flame, ChevronDown, ChevronUp } from 'lucide-react'
+import { Moon, Droplets, Utensils, Target, Brain, Activity, Flame, ListChecks, ChevronDown, ChevronUp } from 'lucide-react'
 import useRecoveryScore from '../../hooks/useRecoveryScore'
 import ScoreRing from '../ui/ScoreRing'
 import IceHeatRecommendation from './IceHeatRecommendation'
@@ -24,6 +24,7 @@ const METRIC_CONFIG = [
   { key: 'soreness', label: 'Soreness', icon: Flame, tip: 'Log a low soreness level below', color: '#f97316' },
   { key: 'stretching', label: 'Stretching', icon: Activity, tip: 'Complete your stretching routine below', color: '#ec4899' },
   { key: 'mindful', label: 'Mindfulness', icon: Brain, tip: 'Try a mindfulness activity today', color: '#a855f7' },
+  { key: 'actions', label: 'Recovery actions', icon: ListChecks, tip: 'Tick off recovery strategies below', color: '#06b6d4' },
   { key: 'goals', label: 'Goals', icon: Target, tip: 'Check in on your goals today', color: '#10b981' },
 ]
 
@@ -31,7 +32,7 @@ export default function RecoveryPage() {
   const {
     recoveryScore, sleepScore, fatigueScore, hydrationPercent,
     stretchingPercent, sorenessLevel, mindfulnessCount,
-    nutritionPercent, goalCheckinPercent, hasReliableACWR,
+    nutritionPercent, goalCheckinPercent, recoveryActionsCount, hasReliableACWR,
   } = useRecoveryScore()
   const [showBreakdown, setShowBreakdown] = useState(false)
   const { text, color } = getLabel(recoveryScore)
@@ -42,14 +43,15 @@ export default function RecoveryPage() {
       let value = 0
       let weight = 0
       switch (m.key) {
-        case 'sleep': value = Math.round(sleepScore); weight = 25; break
-        case 'freshness': value = Math.round(100 - fatigueScore); weight = 15; break
-        case 'nutrition': value = Math.round(nutritionPercent); weight = hasReliableACWR ? 15 : 20; break
-        case 'hydration': value = Math.round(hydrationPercent); weight = 15; break
-        case 'soreness': value = Math.round(((5 - sorenessLevel) / 4) * 100); weight = hasReliableACWR ? 10 : 15; break
-        case 'stretching': value = Math.round(stretchingPercent); weight = hasReliableACWR ? 8 : 10; break
-        case 'mindful': value = Math.min(100, Math.round((mindfulnessCount / 3) * 100)); weight = hasReliableACWR ? 7 : 8; break
-        case 'goals': value = Math.round(goalCheckinPercent); weight = hasReliableACWR ? 5 : 7; break
+        case 'sleep': value = Math.round(sleepScore); weight = 23; break
+        case 'freshness': value = Math.round(100 - fatigueScore); weight = 14; break
+        case 'nutrition': value = Math.round(nutritionPercent); weight = hasReliableACWR ? 14 : 18; break
+        case 'hydration': value = Math.round(hydrationPercent); weight = 14; break
+        case 'soreness': value = Math.round(((5 - sorenessLevel) / 4) * 100); weight = hasReliableACWR ? 10 : 14; break
+        case 'actions': value = Math.min(100, Math.round((recoveryActionsCount / 3) * 100)); weight = hasReliableACWR ? 8 : 9; break
+        case 'stretching': value = Math.round(stretchingPercent); weight = hasReliableACWR ? 7 : 9; break
+        case 'mindful': value = Math.min(100, Math.round((mindfulnessCount / 3) * 100)); weight = hasReliableACWR ? 6 : 7; break
+        case 'goals': value = Math.round(goalCheckinPercent); weight = hasReliableACWR ? 4 : 6; break
       }
       return { ...m, value, weight }
     })

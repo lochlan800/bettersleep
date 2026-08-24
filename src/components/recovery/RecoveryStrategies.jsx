@@ -2,9 +2,11 @@ import { useState, useMemo } from 'react'
 import {
   Snowflake, Waves, Wind, Bath, Footprints, Timer, Armchair,
   Sparkles, Heart, Zap, Utensils, Droplets, Moon, Compass,
-  ChevronDown, ChevronRight, AlertTriangle,
+  ChevronDown, ChevronRight, AlertTriangle, Check,
 } from 'lucide-react'
 import { useApp } from '../../context/AppContext'
+import { useCelebration } from '../../context/CelebrationContext'
+import { playSound } from '../../utils/playSound'
 import { calculateACWR } from '../../utils/scoring'
 import { getToday, getDaysAgo } from '../../utils/dateHelpers'
 import useRecoveryScore from '../../hooks/useRecoveryScore'
@@ -26,9 +28,11 @@ const CATEGORIES = [
 ]
 
 export default function RecoveryStrategies() {
-  const { trainingLogs, hydrationLogs, settings } = useApp()
+  const { trainingLogs, hydrationLogs, settings, toggleRecoveryAction, getTodayRecoveryActions } = useApp()
+  const { triggerCelebration } = useCelebration()
   const age = settings.realAge
-  const { recoveryScore, sorenessLevel, hydrationPercent } = useRecoveryScore()
+  const { recoveryScore, sorenessLevel, hydrationPercent, recoveryActionsCount } = useRecoveryScore()
+  const doneToday = getTodayRecoveryActions().completed
   const [expanded, setExpanded] = useState({})
   const [category, setCategory] = useState('all')
 
@@ -106,32 +110,53 @@ export default function RecoveryStrategies() {
     const how = s.sleepTargetPlaceholder
       ? `Aim for ${getSleepNeed(age).label} a night${age ? '' : ' (set your age for a personalised target)'}. ${s.how}`
       : s.how
+    const isDone = doneToday.includes(s.id)
     return (
       <div
         key={s.id}
         className={`border rounded-lg overflow-hidden ${
-          highlight
-            ? 'border-primary-300 dark:border-primary-700 bg-primary-50/50 dark:bg-primary-900/10'
-            : 'border-surface-200 dark:border-surface-700'
+          isDone
+            ? 'border-emerald-300 dark:border-emerald-800 bg-emerald-50/50 dark:bg-emerald-900/10'
+            : highlight
+              ? 'border-primary-300 dark:border-primary-700 bg-primary-50/50 dark:bg-primary-900/10'
+              : 'border-surface-200 dark:border-surface-700'
         }`}
       >
-        <button
-          onClick={() => toggle(s.id)}
-          className="w-full flex items-center gap-3 p-3 text-left hover:bg-surface-50 dark:hover:bg-surface-700/50 transition-colors"
-        >
-          <div className={`p-1.5 rounded-lg shrink-0 ${highlight ? 'bg-primary-500/15' : 'bg-accent-500/10'}`}>
-            <Icon size={16} className={highlight ? 'text-primary-600 dark:text-primary-400' : 'text-accent-500'} />
-          </div>
-          <div className="flex-1 min-w-0">
-            <span className="text-sm font-medium text-surface-900 dark:text-surface-50">{s.name}</span>
-            <p className="text-[11px] text-surface-500 dark:text-surface-400 mt-0.5">
-              {s.timing}{s.duration !== '—' ? ` · ${s.duration}` : ''}
-            </p>
-          </div>
-          {isOpen
-            ? <ChevronDown size={16} className="text-primary-500 shrink-0" />
-            : <ChevronRight size={16} className="text-surface-400 shrink-0" />}
-        </button>
+        <div className="flex items-center">
+          <button
+            onClick={() => {
+              if (!isDone) { playSound('twinkle'); triggerCelebration() }
+              toggleRecoveryAction(getToday(), s.id)
+            }}
+            className="flex items-center justify-center w-10 h-10 shrink-0 ml-1"
+            title={isDone ? 'Mark as not done' : 'Mark as done'}
+          >
+            <div className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-colors ${
+              isDone
+                ? 'bg-emerald-500 border-emerald-500'
+                : 'border-surface-300 dark:border-surface-600'
+            }`}>
+              {isDone && <Check size={12} className="text-white" />}
+            </div>
+          </button>
+          <button
+            onClick={() => toggle(s.id)}
+            className="flex-1 flex items-center gap-3 p-3 pl-1 text-left hover:bg-surface-50 dark:hover:bg-surface-700/50 transition-colors min-w-0"
+          >
+            <div className={`p-1.5 rounded-lg shrink-0 ${highlight ? 'bg-primary-500/15' : 'bg-accent-500/10'}`}>
+              <Icon size={16} className={highlight ? 'text-primary-600 dark:text-primary-400' : 'text-accent-500'} />
+            </div>
+            <div className="flex-1 min-w-0">
+              <span className={`text-sm font-medium ${isDone ? 'text-emerald-700 dark:text-emerald-400 line-through' : 'text-surface-900 dark:text-surface-50'}`}>{s.name}</span>
+              <p className="text-[11px] text-surface-500 dark:text-surface-400 mt-0.5">
+                {s.timing}{s.duration !== '—' ? ` · ${s.duration}` : ''}
+              </p>
+            </div>
+            {isOpen
+              ? <ChevronDown size={16} className="text-primary-500 shrink-0" />
+              : <ChevronRight size={16} className="text-surface-400 shrink-0" />}
+          </button>
+        </div>
         {isOpen && (
           <div className="px-3 pb-3 pl-11 space-y-2">
             <div>
@@ -165,6 +190,33 @@ export default function RecoveryStrategies() {
       )}
 
       <Card title="Recovery Strategies" subtitle={`${suitable.length} methods${age ? ` suited to ${getAgeBandLabel(age)}s` : ""}`}>
+        <div className="flex items-center gap-3 mb-3 p-2.5 rounded-lg bg-surface-50 dark:bg-surface-700/50">
+          <div className="flex-1">
+            <div className="flex justify-between items-center mb-1">
+              <span className="text-xs font-medium text-surface-700 dark:text-surface-300">
+                Today's recovery actions
+              </span>
+              <span className={`text-xs font-bold ${recoveryActionsCount >= 3 ? 'text-emerald-500' : 'text-surface-500'}`}>
+                {recoveryActionsCount}/3
+              </span>
+            </div>
+            <div className="w-full h-1.5 bg-surface-200 dark:bg-surface-600 rounded-full overflow-hidden">
+              <div
+                className="h-full rounded-full transition-all duration-500"
+                style={{
+                  width: `${Math.min(100, (recoveryActionsCount / 3) * 100)}%`,
+                  backgroundColor: recoveryActionsCount >= 3 ? '#10b981' : '#14b8a6',
+                }}
+              />
+            </div>
+            <p className="text-[10px] text-surface-400 mt-1">
+              {recoveryActionsCount >= 3
+                ? 'Full marks — this counts toward your recovery score.'
+                : 'Tick off 3 to max out this part of your recovery score.'}
+            </p>
+          </div>
+        </div>
+
         <div className="flex gap-1.5 mb-3 overflow-x-auto pb-1">
           {CATEGORIES.map(c => (
             <button

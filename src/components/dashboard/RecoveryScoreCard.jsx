@@ -15,7 +15,7 @@ export default function RecoveryScoreCard() {
   const {
     recoveryScore, sleepScore, fatigueScore, hydrationPercent,
     stretchingPercent, sorenessLevel, mindfulnessCount,
-    nutritionPercent, goalCheckinPercent, hasReliableACWR,
+    nutritionPercent, goalCheckinPercent, recoveryActionsCount, hasReliableACWR,
   } = useRecoveryScore()
   const { triggerConfetti } = useCelebration()
   const { text, color } = getLabel(recoveryScore)
@@ -36,6 +36,7 @@ export default function RecoveryScoreCard() {
     { label: 'Soreness', value: Math.round(((5 - sorenessLevel) / 4) * 100), color: '#f97316' },
     { label: 'Stretching', value: Math.round(stretchingPercent), color: '#ec4899' },
     { label: 'Mindful', value: Math.min(100, Math.round((mindfulnessCount / 3) * 100)), color: '#a855f7' },
+    { label: 'Actions', value: Math.min(100, Math.round((recoveryActionsCount / 3) * 100)), color: '#06b6d4' },
     { label: 'Goals', value: Math.round(goalCheckinPercent), color: '#10b981' },
   ]
 

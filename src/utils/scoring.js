@@ -235,29 +235,32 @@ export function calculateRecoveryScore({
   mealsEatenCount = 0,
   nutritionPercent = -1,
   goalCheckinPercent = 0,
+  recoveryActionsCount = 0,
 }) {
   // Dynamic weights: redistribute fatigue weight when ACWR isn't reliable
-  // With ACWR:    Sleep 25 + Freshness 15 + Nutrition 15 + Hydration 15 + Soreness 10 + Stretching 8 + Mindfulness 7 + Goals 5 = 100
-  // Without ACWR: Sleep 25 + Nutrition 20 + Hydration 15 + Soreness 15 + Stretching 10 + Mindfulness 8 + Goals 7 = 100
-  let wSleep, wFatigue, wHydration, wSoreness, wMindfulness, wStretching, wNutrition, wGoals;
+  // With ACWR:    Sleep 23 + Freshness 14 + Nutrition 14 + Hydration 14 + Soreness 10 + Actions 8 + Stretching 7 + Mindfulness 6 + Goals 4 = 100
+  // Without ACWR: Sleep 23 + Nutrition 18 + Hydration 14 + Soreness 14 + Actions 9 + Stretching 9 + Mindfulness 7 + Goals 6 = 100
+  let wSleep, wFatigue, wHydration, wSoreness, wMindfulness, wStretching, wNutrition, wGoals, wActions;
   if (hasReliableACWR) {
-    wSleep = 25;
-    wFatigue = 15;
-    wHydration = 15;
+    wSleep = 23;
+    wFatigue = 14;
+    wHydration = 14;
     wSoreness = 10;
-    wMindfulness = 7;
-    wStretching = 8;
-    wNutrition = 15;
-    wGoals = 5;
+    wMindfulness = 6;
+    wStretching = 7;
+    wNutrition = 14;
+    wGoals = 4;
+    wActions = 8;
   } else {
-    wSleep = 25;
+    wSleep = 23;
     wFatigue = 0;
-    wHydration = 15;
-    wSoreness = 15;
-    wMindfulness = 8;
-    wStretching = 10;
-    wNutrition = 20;
-    wGoals = 7;
+    wHydration = 14;
+    wSoreness = 14;
+    wMindfulness = 7;
+    wStretching = 9;
+    wNutrition = 18;
+    wGoals = 6;
+    wActions = 9;
   }
 
   const sleepComponent = (sleepScore / 100) * wSleep;
@@ -278,13 +281,20 @@ export function calculateRecoveryScore({
   const nutritionComponent = nutritionNormalized * wNutrition;
   // Goals: percentage of active goals checked in today
   const goalsComponent = (Math.min(100, goalCheckinPercent) / 100) * wGoals;
+  // Recovery actions: ticked-off strategies, following the same shape as
+  // mindfulness — three in a day is a full effort, more is not extra credit.
+  const actionsNormalized = recoveryActionsCount >= 3 ? 1
+    : recoveryActionsCount === 2 ? 0.8
+    : recoveryActionsCount === 1 ? 0.5
+    : 0;
+  const actionsComponent = actionsNormalized * wActions;
 
   return Math.round(
     Math.min(
       100,
       Math.max(
         0,
-        sleepComponent + fatigueComponent + hydrationComponent + sorenessComponent + mindfulnessComponent + stretchingComponent + nutritionComponent + goalsComponent
+        sleepComponent + fatigueComponent + hydrationComponent + sorenessComponent + mindfulnessComponent + stretchingComponent + nutritionComponent + goalsComponent + actionsComponent
       )
     )
   );
