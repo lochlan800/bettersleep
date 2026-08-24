@@ -205,8 +205,10 @@ Soreness peaking 24-48 hours after training (DOMS) is normal. Soreness that does
 • Rest days: both, focusing on tight areas`,
   },
   {
-    title: 'Recovery Strategies',
-    content: `The Recovery tab has a library of recovery methods, each with a tick box. Ticking them counts toward your Recovery Score — 1 action = 50% of the points, 2 = 80%, 3 or more = 100%. This is worth 8-9% of your total score.
+    title: 'Recovery Tab — Strategies & "Recommended Today"',
+    content: `**This is the Recovery tab, not the Dashboard.** For the Dashboard's "Today's Recommendations" panel, see the separate section further down.
+
+The Recovery tab has a library of recovery methods, each with a tick box. Ticking them counts toward your Recovery Score — 1 action = 50% of the points, 2 = 80%, 3 or more = 100%. This is worth 8-9% of your total score.
 
 **The filter buttons — what each one means:**
 
@@ -364,7 +366,9 @@ Just send them the website link. Each person's data is stored privately on their
   },
   {
     title: 'Dashboard Recommendations',
-    content: `The "Today's Recommendations" section on the Dashboard gives you personalised advice that changes every day based on your actual data.
+    content: `**This is the Dashboard's panel, not the Recovery tab.** The Recovery tab has its own "Recommended Today" card that suggests recovery strategies — that is covered in the "Recovery Tab" section above.
+
+The "Today's Recommendations" section on the Dashboard gives you personalised advice that changes every day based on your actual data.
 
 **What drives the recommendations:**
 • **Sleep** — Warns if you slept too little or too much last night, flags inconsistent bedtimes, suggests extra sleep after hard sessions.
