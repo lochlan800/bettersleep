@@ -193,3 +193,16 @@ export function gramsPerBowl(food) {
   if (!food) return DEFAULT_BOWL
   return BOWL_BY_NAME[food.name] || DEFAULT_BOWL
 }
+
+// Supplements are dosed per tablet rather than by weight. One tablet is
+// modelled as 1g so a single dose scales cleanly through the same
+// per-100g nutrient maths everything else uses.
+export const GRAMS_PER_TABLET = 1
+
+/**
+ * Grams representing one tablet of a supplement.
+ * @returns {number}
+ */
+export function gramsPerTablet() {
+  return GRAMS_PER_TABLET
+}

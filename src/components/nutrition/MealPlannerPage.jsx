@@ -5,7 +5,7 @@ import { Search, Plus, X, Camera, History, ChevronLeft, ChevronRight, PieChart a
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from 'recharts'
 import Card from '../ui/Card'
 import { getFreeSugar } from '../../utils/freeSugar'
-import { gramsPerTablespoon, gramsPerTeaspoon, gramsPerBowl } from '../../utils/portions'
+import { gramsPerTablespoon, gramsPerTeaspoon, gramsPerBowl, gramsPerTablet } from '../../utils/portions'
 
 const FOOD_DATABASE = [
   // ── Fruits ──
@@ -338,6 +338,10 @@ const FOOD_DATABASE = [
   { name: 'Salsa', groups: ['Vegetables'], nutrients: { carbs: 5, protein: 1, fat: 0, fibre: 1, iron: 0.2, calcium: 10, vitC: 5, sugar: 4 } },
   { name: 'Guacamole', groups: ['Vegetables', 'Fruit'], nutrients: { carbs: 8, protein: 2, fat: 12, fibre: 5, iron: 0.4, calcium: 10, vitC: 8, sugar: 1 } },
   { name: 'Tahini', groups: ['Protein'], nutrients: { carbs: 6, protein: 5, fat: 16, fibre: 3, iron: 2.7, calcium: 130, vitC: 0, sugar: 0 } },
+  // ── Supplements ──
+  // Supplements are dosed per tablet, not per 100g like everything else.
+  // One tablet is treated as 1g, so these values are 100x a single dose.
+  { name: 'IronRepair (Three Arrows)', groups: [], supplement: true, nutrients: { carbs: 0, protein: 0, fat: 0, fibre: 0, iron: 2000, calcium: 0, vitC: 0, sugar: 0 } },
 ]
 
 const FOOD_GROUP_BASE = [
@@ -428,7 +432,7 @@ function getPersonalizedTargets(age, weightKg, trainingDaysPerWeek) {
       carbs: { target: carbs, unit: 'g', label: 'Carbs' },
       fat: { target: fat, unit: 'g', label: 'Fat' },
       fibre: { target: fibre, unit: 'g', label: 'Fibre' },
-      iron: { target: iron, unit: 'mg', label: 'Iron' },
+      iron: { target: iron, unit: 'mg', label: 'Iron', upperLimit: isChild ? 40 : 45 },
       calcium: { target: calcium, unit: 'mg', label: 'Calcium' },
       vitC: { target: vitC, unit: 'mg', label: 'Vitamin C' },
       freeSugar: { target: 30, unit: 'g', label: 'Added Sugar', isLimit: true },
@@ -592,6 +596,7 @@ export default function MealPlannerPage() {
     if (u === 'tbsp') return Math.round(n * gramsPerTablespoon(food))
     if (u === 'tsp') return Math.round(n * gramsPerTeaspoon(food))
     if (u === 'bowl') return Math.round(n * gramsPerBowl(food))
+    if (u === 'tablet') return n * gramsPerTablet()
     return 0
   }
 
@@ -602,7 +607,7 @@ export default function MealPlannerPage() {
   const handleSelect = (food) => {
     setSelectedFood(food)
     setGrams('100')
-    setUnit(CEREAL_NAMES.has(food.name) ? 'bowl' : 'g')
+    setUnit(food.supplement ? 'tablet' : CEREAL_NAMES.has(food.name) ? 'bowl' : 'g')
     setUnitCount('1')
     setShowResults(false)
   }
@@ -1137,12 +1142,15 @@ export default function MealPlannerPage() {
               </div>
               {/* Unit picker — grams, spoons, or bowls for cereal */}
               <div className="flex gap-1.5 mb-2">
-                {[
-                  { key: 'g', label: 'Grams' },
-                  { key: 'tbsp', label: 'Tbsp' },
-                  { key: 'tsp', label: 'Tsp' },
-                  ...(CEREAL_NAMES.has(selectedFood.name) ? [{ key: 'bowl', label: '🥣 Bowl' }] : []),
-                ].map(u => (
+                {(selectedFood.supplement
+                  ? [{ key: 'tablet', label: '💊 Tablets' }]
+                  : [
+                      { key: 'g', label: 'Grams' },
+                      { key: 'tbsp', label: 'Tbsp' },
+                      { key: 'tsp', label: 'Tsp' },
+                      ...(CEREAL_NAMES.has(selectedFood.name) ? [{ key: 'bowl', label: '🥣 Bowl' }] : []),
+                    ]
+                ).map(u => (
                   <button
                     key={u.key}
                     onClick={() => setUnit(u.key)}
@@ -1187,8 +1195,11 @@ export default function MealPlannerPage() {
                       className="w-7 h-7 rounded-md bg-surface-200 dark:bg-surface-600 text-surface-700 dark:text-surface-200 text-sm font-bold"
                     >+</button>
                     <span className="text-xs text-surface-500">
-                      {unit === 'bowl' ? 'bowl' : unit}
-                      {(parseFloat(unitCount) || 1) !== 1 ? 's' : ''} = {effectiveGrams}g
+                      {unit === 'bowl' ? 'bowl' : unit === 'tablet' ? 'tablet' : unit}
+                      {(parseFloat(unitCount) || 1) !== 1 ? 's' : ''}
+                      {unit === 'tablet'
+                        ? ` = ${Math.round((selectedFood.nutrients.iron || 0) * effectiveGrams / 100 * 10) / 10}mg iron`
+                        : ` = ${effectiveGrams}g`}
                     </span>
                   </>
                 )}
@@ -1197,7 +1208,7 @@ export default function MealPlannerPage() {
                   className="ml-auto px-3 py-1.5 text-xs font-medium rounded-md bg-primary-500 text-white"
                 >Add</button>
               </div>
-              {unit !== 'g' && (
+              {unit !== 'g' && unit !== 'tablet' && (
                 <p className="text-[10px] text-surface-400 mt-1.5">
                   1 {unit === 'bowl' ? 'bowl' : unit} of {selectedFood.name.toLowerCase()} ≈{' '}
                   {unit === 'tbsp' ? gramsPerTablespoon(selectedFood)
@@ -1465,16 +1476,19 @@ export default function MealPlannerPage() {
       <Card>
         <h3 className="text-sm font-bold text-surface-800 dark:text-surface-200 mb-3">Nutrients</h3>
         <div className="grid grid-cols-2 gap-3">
-          {Object.entries(nutrientTargets).map(([key, { target, unit, label, isLimit }]) => {
+          {Object.entries(nutrientTargets).map(([key, { target, unit, label, isLimit, upperLimit }]) => {
             const current = Math.round(totals[key] || 0)
             const pct = Math.min(100, (current / target) * 100)
             const over = isLimit && current > target
             const nearLimit = isLimit && current > target * 0.8
             const low = !isLimit && pct < 50
-            const barColor = isLimit
+            // Some nutrients are good up to a point but harmful past it —
+            // iron especially, now that supplements can be logged.
+            const overUpper = upperLimit && current > upperLimit
+            const barColor = overUpper ? '#ef4444' : isLimit
               ? (over ? '#ef4444' : nearLimit ? '#f97316' : '#10b981')
               : (low ? '#ef4444' : '#10b981')
-            const textColor = isLimit
+            const textColor = overUpper ? 'text-red-500 font-bold' : isLimit
               ? (over ? 'text-red-500 font-bold' : nearLimit ? 'text-orange-500' : 'text-emerald-500')
               : (low ? 'text-red-500' : 'text-emerald-500')
             return (
@@ -1492,6 +1506,11 @@ export default function MealPlannerPage() {
                       style={{ width: `${isLimit ? Math.min(100, pct) : pct}%`, backgroundColor: barColor }}
                     />
                   </div>
+                  {overUpper && (
+                    <p className="text-[9px] text-red-500 font-medium mt-0.5">
+                      Above the {upperLimit}{unit} safe upper limit
+                    </p>
+                  )}
                 </div>
               </div>
             )
