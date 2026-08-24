@@ -6,6 +6,7 @@ import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from 'recha
 import Card from '../ui/Card'
 import { getFreeSugar } from '../../utils/freeSugar'
 import { gramsPerTablespoon, gramsPerTeaspoon, gramsPerBowl, gramsPerTablet } from '../../utils/portions'
+import { getCalories, getCalorieSplit } from '../../utils/calories'
 
 const FOOD_DATABASE = [
   // ── Fruits ──
@@ -892,7 +893,7 @@ export default function MealPlannerPage() {
                   </div>
                 </div>
                 <p className="text-center text-[11px] text-surface-400 mt-2">
-                  ~{Math.round(averageData.avgNutrients.protein * 4 + averageData.avgNutrients.carbs * 4 + averageData.avgNutrients.fat * 9)} cal/day avg
+                  ~{getCalories(averageData.avgNutrients)} cal/day avg
                 </p>
               </div>
             </Card>
@@ -1049,7 +1050,7 @@ export default function MealPlannerPage() {
                     </div>
                   </div>
                   <p className="text-center text-[11px] text-surface-400 mt-2">
-                    ~{Math.round(historyTotals.protein * 4 + historyTotals.carbs * 4 + historyTotals.fat * 9)} calories
+                    ~{getCalories(historyTotals)} calories
                   </p>
                 </div>
               </Card>
@@ -1235,9 +1236,14 @@ export default function MealPlannerPage() {
                 const g = effectiveGrams
                 if (g <= 0) return null
                 const s = (v) => Math.round((v || 0) * g / 100 * 10) / 10
+                const kcal = getCalories({
+                  protein: s(selectedFood.nutrients.protein),
+                  carbs: s(selectedFood.nutrients.carbs),
+                  fat: s(selectedFood.nutrients.fat),
+                })
                 return (
                   <p className="text-[10px] text-surface-400 mt-1.5">
-                    You'll get: {s(selectedFood.nutrients.protein)}g protein, {s(selectedFood.nutrients.carbs)}g carbs, {s(selectedFood.nutrients.fat)}g fat, {s(selectedFood.nutrients.sugar)}g sugar
+                    You'll get: <span className="font-medium text-surface-500 dark:text-surface-300">{kcal} kcal</span> · {s(selectedFood.nutrients.protein)}g protein, {s(selectedFood.nutrients.carbs)}g carbs, {s(selectedFood.nutrients.fat)}g fat, {s(selectedFood.nutrients.sugar)}g sugar
                   </p>
                 )
               })()}
@@ -1490,6 +1496,49 @@ export default function MealPlannerPage() {
       {/* Nutrient breakdown */}
       <Card>
         <h3 className="text-sm font-bold text-surface-800 dark:text-surface-200 mb-3">Nutrients</h3>
+
+        {/* Calories so far today */}
+        {(() => {
+          const split = getCalorieSplit(totals)
+          return (
+            <div className="mb-4 p-3 rounded-xl bg-surface-50 dark:bg-surface-700/50 border border-surface-200 dark:border-surface-600">
+              <div className="flex items-baseline justify-between mb-2">
+                <span className="text-xs font-medium text-surface-600 dark:text-surface-400">Calories eaten today</span>
+                <span className="text-2xl font-bold text-surface-900 dark:text-surface-50 tabular-nums">
+                  {split.total}
+                  <span className="text-xs font-normal text-surface-400 ml-1">kcal</span>
+                </span>
+              </div>
+              {split.total > 0 ? (
+                <>
+                  <div className="w-full h-2 rounded-full overflow-hidden flex bg-surface-200 dark:bg-surface-600">
+                    {split.parts.filter(p => p.pct > 0).map(p => (
+                      <div
+                        key={p.key}
+                        className="h-full transition-all duration-500"
+                        style={{ width: `${p.pct}%`, backgroundColor: p.color }}
+                        title={`${p.label}: ${p.kcal} kcal`}
+                      />
+                    ))}
+                  </div>
+                  <div className="flex flex-wrap gap-x-3 gap-y-1 mt-2">
+                    {split.parts.map(p => (
+                      <div key={p.key} className="flex items-center gap-1.5">
+                        <div className="w-2 h-2 rounded-full" style={{ backgroundColor: p.color }} />
+                        <span className="text-[10px] text-surface-500 dark:text-surface-400">
+                          {p.label} {p.kcal} kcal ({p.pct}%)
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </>
+              ) : (
+                <p className="text-[11px] text-surface-400">Log some food to see your calorie total.</p>
+              )}
+            </div>
+          )
+        })()}
+
         <div className="grid grid-cols-2 gap-3">
           {Object.entries(nutrientTargets).map(([key, { target, unit, label, isLimit, upperLimit }]) => {
             const current = Math.round(totals[key] || 0)
