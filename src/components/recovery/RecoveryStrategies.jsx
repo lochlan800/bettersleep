@@ -9,6 +9,7 @@ import { useCelebration } from '../../context/CelebrationContext'
 import { playSound } from '../../utils/playSound'
 import { calculateACWR } from '../../utils/scoring'
 import { getToday, getDaysAgo } from '../../utils/dateHelpers'
+import { getDomsForecast, describeDoms } from '../../utils/doms'
 import useRecoveryScore from '../../hooks/useRecoveryScore'
 import recoveryStrategies from '../../data/recoveryStrategies'
 import { strategyAppropriate, strategyCaution, getSleepNeed, getAgeBandLabel } from '../../utils/ageGuidance'
@@ -55,6 +56,9 @@ export default function RecoveryStrategies() {
     const acwr = calculateACWR(trainingLogs)
     const intensity = lastRun?.intensity ?? 0
     const duration = lastRun?.durationMinutes ?? 0
+    // Predicted soreness, which peaks ~48h after a session rather than on
+    // the day, so remedies can be suggested before the worst of it lands.
+    const doms = getDomsForecast(trainingLogs)
 
     return {
       afterTraining: trainedToday,
@@ -64,6 +68,7 @@ export default function RecoveryStrategies() {
       highSoreness: sorenessLevel >= 3,
       veryHighSoreness: sorenessLevel >= 4,
       consecutiveTraining: consecutive,
+      manyConsecutive: consecutive >= 2,
       highACWR: acwr > 1.3,
       lowRecovery: recoveryScore < 60,
       lowHydration: hydrationPercent < 70,
@@ -71,6 +76,9 @@ export default function RecoveryStrategies() {
       lastDuration: duration,
       soreness: sorenessLevel,
       acwr,
+      domsHigh: doms.today >= 55,
+      domsRising: doms.rising && doms.peakLevel >= 45,
+      doms,
     }
   }, [trainingLogs, hydrationLogs, sorenessLevel, recoveryScore, hydrationPercent])
 
@@ -86,6 +94,9 @@ export default function RecoveryStrategies() {
     if (when.highACWR && !state.highACWR) return false
     if (when.lowRecovery && !state.lowRecovery) return false
     if (when.lowHydration && !state.lowHydration) return false
+    // anyOf is an OR group: at least one must hold, while everything else
+    // in `when` still has to be true.
+    if (when.anyOf && !when.anyOf.some(k => state[k])) return false
     return true
   }
 
@@ -105,6 +116,22 @@ export default function RecoveryStrategies() {
     if (when.highACWR && state.highACWR) bits.push(`training load high (ACWR ${state.acwr.toFixed(2)})`)
     if (when.lowHydration && state.lowHydration) bits.push(`hydration ${Math.round(hydrationPercent)}%`)
     if (when.lowRecovery && state.lowRecovery) bits.push(`recovery score ${Math.round(recoveryScore)}`)
+    if (when.anyOf) {
+      if (when.anyOf.includes('manyConsecutive') && state.manyConsecutive) {
+        bits.push(`${state.consecutiveTraining} days in a row`)
+      }
+      if (when.anyOf.includes('highSoreness') && state.highSoreness) {
+        bits.push(`soreness ${state.soreness}/5`)
+      } else if (when.anyOf.includes('domsHigh') && state.domsHigh) {
+        bits.push(state.doms.daysSinceDriver === 2
+          ? 'peak soreness expected today (48h after your session)'
+          : 'soreness predicted high today')
+      } else if (when.anyOf.includes('domsRising') && state.domsRising) {
+        bits.push(state.doms.peakInDays === 1
+          ? 'soreness peaks tomorrow'
+          : `soreness peaks in ${state.doms.peakInDays} days`)
+      }
+    }
     return bits.length ? bits.join(' · ') : null
   }
 
@@ -216,8 +243,42 @@ export default function RecoveryStrategies() {
     )
   }
 
+  const domsNote = describeDoms(state.doms)
+
   return (
     <div className="space-y-4">
+      {state.doms.peakLevel >= 30 && (
+        <Card title="Soreness Forecast" subtitle="Muscle soreness peaks around 48 hours after a session">
+          <div className="flex gap-1.5 mb-2">
+            {state.doms.forecast.map(f => {
+              const isPeak = f.daysAhead === state.doms.peakInDays
+              const barColor = f.level >= 70 ? '#ef4444' : f.level >= 40 ? '#f97316' : '#10b981'
+              return (
+                <div key={f.daysAhead} className="flex-1 flex flex-col items-center gap-1">
+                  <div className="w-full h-16 bg-surface-100 dark:bg-surface-700 rounded-md flex items-end overflow-hidden">
+                    <div
+                      className="w-full rounded-md transition-all duration-700"
+                      style={{ height: `${Math.max(4, f.level)}%`, backgroundColor: barColor }}
+                    />
+                  </div>
+                  <span className={`text-[10px] ${isPeak ? 'font-bold text-surface-700 dark:text-surface-300' : 'text-surface-400'}`}>
+                    {f.daysAhead === 0 ? 'Today' : f.daysAhead === 1 ? 'Tmrw' : `+${f.daysAhead}d`}
+                  </span>
+                </div>
+              )
+            })}
+          </div>
+          {domsNote && (
+            <p className="text-xs text-surface-600 dark:text-surface-400 leading-relaxed">{domsNote}</p>
+          )}
+          {state.doms.rising && (
+            <p className="text-[11px] text-primary-600 dark:text-primary-400 mt-1.5">
+              Doing recovery work now blunts how bad that peak feels — it is far more effective before the soreness lands than after.
+            </p>
+          )}
+        </Card>
+      )}
+
       {recommended.length > 0 && (
         <Card title="Recommended Today" subtitle="Based on your training, soreness, and recovery score">
           <div className="space-y-2">

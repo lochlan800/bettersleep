@@ -50,7 +50,7 @@ const recoveryStrategies = [
     category: 'sameDay',
     how: 'Lie on your back with your legs resting straight up a wall, hips a few inches away from it. Relax your arms out to the sides and breathe slowly.',
     why: 'Inverting your legs uses gravity to drain pooled blood and fluid out of them. It is the least effortful thing on this list and one of the most noticeable for heavy, tired legs.',
-    when: { longRun: true, highSoreness: true },
+    when: { anyOf: ['longRun', 'highSoreness', 'domsHigh'] },
   },
   {
     id: 'compression',
@@ -61,7 +61,7 @@ const recoveryStrategies = [
     category: 'sameDay',
     how: 'Wear graduated compression socks or calf sleeves for a few hours after a hard session. They should feel firm but never numbing or painful.',
     why: 'Gentle external pressure supports venous return from the lower leg and limits swelling. The evidence is strongest for reduced soreness the next day rather than improved performance on the day.',
-    when: { longRun: true, highSoreness: true },
+    when: { anyOf: ['longRun', 'highSoreness', 'domsRising'] },
     cautionUnder: {
       age: 16,
       text: 'Use junior sizing — adult compression can be too tight on a smaller calf.',
@@ -76,7 +76,7 @@ const recoveryStrategies = [
     category: 'sameDay',
     how: 'Alternate 2 minutes of hot water with 1 minute of cold, repeated 3-4 times. Always finish on cold.',
     why: 'Alternating temperatures makes blood vessels widen and narrow repeatedly, which acts as a pump for circulation through sore tissue. Easier to stick to than a full ice bath and nearly as useful.',
-    when: { highSoreness: true, hardSession: true },
+    when: { anyOf: ['hardSession', 'highSoreness', 'domsHigh'] },
     cautionUnder: {
       age: 13,
       text: 'Keep the cold phase brief and comfortable — cool rather than freezing.',
@@ -91,7 +91,7 @@ const recoveryStrategies = [
     category: 'sameDay',
     how: 'Sit in cold water at 10-15°C up to your waist for 10-15 minutes. A cold bath is fine — you do not need ice for it to work.',
     why: 'Reduces inflammation and perceived soreness when you need to back up hard sessions or race again soon. Worth knowing: it also blunts some of the adaptation from strength work, so save it for congested race weeks rather than using it after every run.',
-    when: { highSoreness: true, hardSession: true },
+    when: { anyOf: ['hardSession', 'highSoreness', 'domsHigh'] },
     notFor: ['child', 'teen'],
     cautionUnder: {
       age: 18,
@@ -107,7 +107,7 @@ const recoveryStrategies = [
     category: 'sameDay',
     how: 'Dissolve 1-2 cups of Epsom salts in a warm bath and soak for 15-20 minutes. Keep the water warm rather than scalding.',
     why: 'The warmth relaxes tight muscle and the ritual itself shifts you into a parasympathetic state before bed. Magnesium absorption through skin is debated, but the relaxation effect on sleep is real.',
-    when: { highSoreness: true },
+    when: { anyOf: ['highSoreness', 'domsHigh'] },
     cautionUnder: {
       age: 13,
       text: 'Keep the water warm rather than hot, and check with a parent first.',
@@ -122,7 +122,7 @@ const recoveryStrategies = [
     category: 'restDay',
     how: 'Swim, cycle easily, or walk at a conversational effort. Keep it under 40 minutes and resist turning it into a session.',
     why: 'Light movement raises blood flow to damaged tissue without adding meaningful training load. Runners consistently report better next-day legs from this than from total rest.',
-    when: { consecutiveTraining: 2, highSoreness: true },
+    when: { anyOf: ['manyConsecutive', 'highSoreness', 'domsHigh'] },
   },
   {
     id: 'full-rest',
@@ -144,7 +144,7 @@ const recoveryStrategies = [
     category: 'restDay',
     how: 'Work along calves, quads, and hamstrings with your thumbs, a massage gun, or a ball. Spend longer on tender spots, using moderate pressure — uncomfortable, never sharp.',
     why: 'Mechanical pressure reduces muscle tone and increases local blood flow. Most of the benefit is a genuine reduction in perceived soreness, which makes the next session feel easier to start.',
-    when: { highSoreness: true },
+    when: { anyOf: ['highSoreness', 'domsHigh'] },
   },
   {
     id: 'breathing',

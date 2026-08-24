@@ -355,12 +355,20 @@ Breathing, sleep, iron, deload weeks.
 
 **Why these matter most:** No single day of these does anything you would notice, which is exactly why they get skipped. But they compound. An extra hour of sleep every night for a month does more for your recovery than any ice bath ever will — deep sleep is when growth hormone is released and muscle actually repairs. Low iron creeps up over weeks and leaves your legs feeling heavy for no obvious reason. A planned easy week every month or so is when the fitness from the previous block finally surfaces. These are the boring ones, and they are the ones that matter.
 
+**The Soreness Forecast:**
+Muscle soreness does not peak when you finish a run — it builds overnight and peaks around **48 hours** later, then fades over the following few days. The forecast chart projects that curve forward from your recent sessions so you can see the worst day coming before it arrives.
+
+The prediction weighs three things: how hard the session was (RPE), how long it lasted, and what type it was. Sprints, hill and strength work cause noticeably more delayed soreness than steady running at the same effort, because eccentric loading does more muscle damage. Cycling causes very little.
+
+**Why this matters:** recovery work is far more effective before soreness lands than after. Because the app projects the curve, it recommends the right strategies at the 24-48 hour mark even if you have not logged feeling sore yet — which is exactly when you otherwise would not think to do anything.
+
 **The "Recommended Today" card:**
 This sits above the library and picks up to 4 strategies based on what you have actually logged. It updates instantly — log a run or change your soreness level and it re-sorts straight away, with no waiting or refreshing.
 
 **What it reads from your data:**
 • Whether you trained today, and that session's RPE and duration
 • Your soreness level (3+ counts as high, 4+ as very high)
+• Predicted soreness from the 48-hour DOMS curve, even when none is logged
 • How many days in a row you have trained
 • Your ACWR training load ratio (above 1.3 flags)
 • Your current recovery score (below 60 flags)
