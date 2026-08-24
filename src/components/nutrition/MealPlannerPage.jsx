@@ -5,6 +5,7 @@ import { Search, Plus, X, Camera, History, ChevronLeft, ChevronRight, PieChart a
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from 'recharts'
 import Card from '../ui/Card'
 import { getFreeSugar } from '../../utils/freeSugar'
+import { gramsPerTablespoon, gramsPerTeaspoon, gramsPerBowl } from '../../utils/portions'
 
 const FOOD_DATABASE = [
   // ── Fruits ──
@@ -530,6 +531,8 @@ export default function MealPlannerPage() {
   const [showResults, setShowResults] = useState(false)
   const [selectedFood, setSelectedFood] = useState(null)
   const [grams, setGrams] = useState('100')
+  const [unit, setUnit] = useState('g')
+  const [unitCount, setUnitCount] = useState('1')
   const [customFood, setCustomFood] = useState(null)
   const [customNutrients, setCustomNutrients] = useState({ protein: '', carbs: '', fat: '', fibre: '', iron: '', calcium: '', vitC: '', sugar: '' })
   const [customGrams, setCustomGrams] = useState('100')
@@ -581,15 +584,41 @@ export default function MealPlannerPage() {
     return allFoods.filter(f => f.name.toLowerCase().includes(q)).slice(0, 8)
   }, [search, allFoods])
 
+  // Resolve whatever unit the user picked down to grams, which is what the
+  // nutrient scaling and every downstream total works in.
+  const resolveGrams = (food, u, count, gramsValue) => {
+    if (u === 'g') return parseInt(gramsValue, 10) || 0
+    const n = parseFloat(count) || 0
+    if (u === 'tbsp') return Math.round(n * gramsPerTablespoon(food))
+    if (u === 'tsp') return Math.round(n * gramsPerTeaspoon(food))
+    if (u === 'bowl') return Math.round(n * gramsPerBowl(food))
+    return 0
+  }
+
+  const effectiveGrams = selectedFood
+    ? resolveGrams(selectedFood, unit, unitCount, grams)
+    : 0
+
   const handleSelect = (food) => {
     setSelectedFood(food)
     setGrams('100')
+    setUnit(CEREAL_NAMES.has(food.name) ? 'bowl' : 'g')
+    setUnitCount('1')
     setShowResults(false)
+  }
+
+  const resetAddForm = () => {
+    setSelectedFood(null)
+    setSearch('')
+    setGrams('100')
+    setUnit('g')
+    setUnitCount('1')
   }
 
   const handleConfirmAdd = () => {
     if (!selectedFood) return
-    const g = parseInt(grams, 10) || 100
+    const g = effectiveGrams
+    if (g <= 0) return
     const scaled = scaleNutrients(selectedFood.nutrients, g)
     addFoodEntry({ name: selectedFood.name, groups: selectedFood.groups, nutrients: scaled, grams: g })
     if (CEREAL_NAMES.has(selectedFood.name)) {
@@ -597,9 +626,7 @@ export default function MealPlannerPage() {
       const milkNutrients = scaleNutrients(MILK_PER_100ML, milkMl)
       addFoodEntry({ name: `Milk (with ${selectedFood.name})`, groups: ['Dairy'], nutrients: milkNutrients, grams: milkMl })
     }
-    setSelectedFood(null)
-    setSearch('')
-    setGrams('100')
+    resetAddForm()
   }
 
   const handleStartCustom = () => {
@@ -1104,28 +1131,92 @@ export default function MealPlannerPage() {
             <div className="mt-2 p-3 border border-surface-200 dark:border-surface-700 rounded-lg bg-surface-50 dark:bg-surface-700/50">
               <div className="flex items-center justify-between mb-2">
                 <span className="text-sm font-medium text-surface-900 dark:text-surface-50">{selectedFood.name}</span>
-                <button onClick={() => setSelectedFood(null)} className="text-surface-400 hover:text-red-500">
+                <button onClick={resetAddForm} className="text-surface-400 hover:text-red-500">
                   <X size={14} />
                 </button>
               </div>
+              {/* Unit picker — grams, spoons, or bowls for cereal */}
+              <div className="flex gap-1.5 mb-2">
+                {[
+                  { key: 'g', label: 'Grams' },
+                  { key: 'tbsp', label: 'Tbsp' },
+                  { key: 'tsp', label: 'Tsp' },
+                  ...(CEREAL_NAMES.has(selectedFood.name) ? [{ key: 'bowl', label: '🥣 Bowl' }] : []),
+                ].map(u => (
+                  <button
+                    key={u.key}
+                    onClick={() => setUnit(u.key)}
+                    className={`px-2.5 py-1 text-xs font-medium rounded-md transition-colors ${
+                      unit === u.key
+                        ? 'bg-primary-500 text-white'
+                        : 'bg-surface-200 dark:bg-surface-600 text-surface-600 dark:text-surface-300'
+                    }`}
+                  >{u.label}</button>
+                ))}
+              </div>
+
               <div className="flex items-center gap-2">
-                <input
-                  type="number"
-                  value={grams}
-                  onChange={(e) => setGrams(e.target.value)}
-                  min="1"
-                  className="w-20 px-2 py-1.5 text-sm rounded-md border border-surface-300 dark:border-surface-600 bg-white dark:bg-surface-700 text-surface-900 dark:text-surface-50 text-center"
-                  autoFocus
-                />
-                <span className="text-xs text-surface-500">grams</span>
+                {unit === 'g' ? (
+                  <>
+                    <input
+                      type="number"
+                      value={grams}
+                      onChange={(e) => setGrams(e.target.value)}
+                      min="1"
+                      className="w-20 px-2 py-1.5 text-sm rounded-md border border-surface-300 dark:border-surface-600 bg-white dark:bg-surface-700 text-surface-900 dark:text-surface-50 text-center"
+                      autoFocus
+                    />
+                    <span className="text-xs text-surface-500">grams</span>
+                  </>
+                ) : (
+                  <>
+                    <button
+                      onClick={() => setUnitCount(c => String(Math.max(0.5, (parseFloat(c) || 1) - 0.5)))}
+                      className="w-7 h-7 rounded-md bg-surface-200 dark:bg-surface-600 text-surface-700 dark:text-surface-200 text-sm font-bold"
+                    >−</button>
+                    <input
+                      type="number"
+                      value={unitCount}
+                      onChange={(e) => setUnitCount(e.target.value)}
+                      min="0.5"
+                      step="0.5"
+                      className="w-14 px-2 py-1.5 text-sm rounded-md border border-surface-300 dark:border-surface-600 bg-white dark:bg-surface-700 text-surface-900 dark:text-surface-50 text-center"
+                    />
+                    <button
+                      onClick={() => setUnitCount(c => String((parseFloat(c) || 1) + 0.5))}
+                      className="w-7 h-7 rounded-md bg-surface-200 dark:bg-surface-600 text-surface-700 dark:text-surface-200 text-sm font-bold"
+                    >+</button>
+                    <span className="text-xs text-surface-500">
+                      {unit === 'bowl' ? 'bowl' : unit}
+                      {(parseFloat(unitCount) || 1) !== 1 ? 's' : ''} = {effectiveGrams}g
+                    </span>
+                  </>
+                )}
                 <button
                   onClick={handleConfirmAdd}
                   className="ml-auto px-3 py-1.5 text-xs font-medium rounded-md bg-primary-500 text-white"
                 >Add</button>
               </div>
-              <p className="text-[10px] text-surface-400 mt-1.5">Nutrients per 100g: {selectedFood.nutrients.protein}g protein, {selectedFood.nutrients.carbs}g carbs, {selectedFood.nutrients.fat}g fat, {selectedFood.nutrients.sugar || 0}g sugar</p>
+              {unit !== 'g' && (
+                <p className="text-[10px] text-surface-400 mt-1.5">
+                  1 {unit === 'bowl' ? 'bowl' : unit} of {selectedFood.name.toLowerCase()} ≈{' '}
+                  {unit === 'tbsp' ? gramsPerTablespoon(selectedFood)
+                    : unit === 'tsp' ? gramsPerTeaspoon(selectedFood)
+                    : gramsPerBowl(selectedFood)}g
+                </p>
+              )}
               {(() => {
-                const g = parseInt(grams, 10) || 100
+                const g = effectiveGrams
+                if (g <= 0) return null
+                const s = (v) => Math.round((v || 0) * g / 100 * 10) / 10
+                return (
+                  <p className="text-[10px] text-surface-400 mt-1.5">
+                    You'll get: {s(selectedFood.nutrients.protein)}g protein, {s(selectedFood.nutrients.carbs)}g carbs, {s(selectedFood.nutrients.fat)}g fat, {s(selectedFood.nutrients.sugar)}g sugar
+                  </p>
+                )
+              })()}
+              {(() => {
+                const g = effectiveGrams
                 const foodFreeSugar = getFreeSugar(selectedFood)
                 const addingFreeSugar = Math.round(foodFreeSugar * g / 100 * 10) / 10
                 const currentFreeSugar = Math.round(totals.freeSugar || 0)
@@ -1150,7 +1241,7 @@ export default function MealPlannerPage() {
               {CEREAL_NAMES.has(selectedFood.name) && (
                 <div className="mt-1.5 px-2 py-1.5 bg-blue-50 dark:bg-blue-900/30 rounded-md border border-blue-200 dark:border-blue-800">
                   <p className="text-[11px] font-medium text-blue-600 dark:text-blue-400">
-                    + {Math.round((parseInt(grams, 10) || 100) * (125 / 30))}ml milk will be added automatically
+                    + {Math.round(effectiveGrams * (125 / 30))}ml milk will be added automatically
                   </p>
                 </div>
               )}
@@ -1420,6 +1511,8 @@ export default function MealPlannerPage() {
                 onClick={() => {
                   setSelectedFood(s)
                   setGrams(String(s.suggestedGrams || 100))
+                  setUnit('g')
+                  setUnitCount('1')
                 }}
                 className="w-full flex items-center justify-between p-3 rounded-xl bg-surface-50 dark:bg-surface-700/50 hover:bg-surface-100 dark:hover:bg-surface-700 transition-colors border border-surface-200 dark:border-surface-600"
               >
