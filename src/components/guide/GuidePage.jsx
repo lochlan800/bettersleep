@@ -190,19 +190,19 @@ Soreness peaking 24-48 hours after training (DOMS) is normal. Soreness that does
 **The 80/20 rule:** Most coaches recommend roughly 80% of training at easy/moderate intensity and 20% at high intensity. If your charts show the opposite, you might be going too hard too often.`,
   },
   {
-    title: 'Stretching & Foam Rolling',
+    title: 'Stretching',
     content: `The Recovery tab shows stretching routines targeted to your most recent training type. Each stretch has a checkbox — tick it off when you've done it.
 
 **Stretching contributes to your recovery score.** The more stretches you complete, the higher your score. You can see your progress (e.g. "4/10 done") at the top of the stretching section.
 
-**Stretching:** Best done after training or in the evening. Hold each stretch for 30-60 seconds. Never bounce. The app shows stretches covering calves, hamstrings, quads, hip flexors, IT band, glutes, piriformis, achilles, plantar fascia, and lower back.
+**The 10 stretches:**
+Shooing the Geese, Leg Swings, Calf Stairs Stretch, Calf Couch Stretch, Toe Touches (Standing), Toe Touches (Sitting), Butterflies, Sprinter Stretch, Glute Stretch (Bum One), and Standing Quad Stretch.
 
-**Foam rolling:** Apply moderate pressure and roll slowly (about 1 inch per second). When you find a tender spot, hold for 20-30 seconds.
+Between them they cover calves, achilles, hamstrings, quads, hip flexors, groin, glutes, hips, and lower back. Tap any stretch to see how to do it and which muscles it targets.
 
-**When to foam roll vs stretch:**
-• Before a run: foam roll only (dynamic warm-up)
-• After a run: foam roll first, then stretch
-• Rest days: both, focusing on tight areas`,
+**How to stretch well:** Best done after training or in the evening. Hold each stretch for 30-60 seconds. Never bounce.
+
+The swinging ones — Shooing the Geese and Leg Swings — are dynamic, so they also work as a warm-up before a run. The rest are better afterwards, when the muscle is already warm.`,
   },
   {
     title: 'Recovery Tab — Strategies & "Recommended Today"',

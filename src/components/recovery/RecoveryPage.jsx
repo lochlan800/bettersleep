@@ -5,7 +5,6 @@ import ScoreRing from '../ui/ScoreRing'
 import IceHeatRecommendation from './IceHeatRecommendation'
 import RestDayPlanner from './RestDayPlanner'
 import StretchingRoutine from './StretchingRoutine'
-import FoamRollingProtocol from './FoamRollingProtocol'
 import RecoveryStrategies from './RecoveryStrategies'
 import Card from '../ui/Card'
 
@@ -154,10 +153,6 @@ export default function RecoveryPage() {
 
       <Card title="Stretching Routine" subtitle="Targeted for your recent training">
         <StretchingRoutine />
-      </Card>
-
-      <Card title="Foam Rolling" subtitle="Release muscle tension">
-        <FoamRollingProtocol />
       </Card>
 
       <style>{`
