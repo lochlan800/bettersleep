@@ -1,7 +1,7 @@
 import { useState, useMemo, useRef } from 'react'
 import { useApp } from '../../context/AppContext'
 import { getDaysAgo } from '../../utils/dateHelpers'
-import { Search, Plus, X, Camera, History, ChevronLeft, ChevronRight, PieChart as PieChartIcon } from 'lucide-react'
+import { Search, Plus, X, Camera, History, ChevronLeft, ChevronRight, ChevronDown, PieChart as PieChartIcon } from 'lucide-react'
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from 'recharts'
 import Card from '../ui/Card'
 import { getFreeSugar } from '../../utils/freeSugar'
@@ -477,13 +477,13 @@ function getSuggestions(todayFoods, foodGroups, nutrientTargets, allFoodsDb) {
     if (suggestions.length >= 8) return
     const pctHave = Math.round((current / target) * 100)
     const options = db.filter(f =>
-      !f.unhealthy && f.nutrients[key] > 0 && !eatenNames.has(f.name) && !usedNames.has(f.name)
+      !f.unhealthy && !f.supplement && f.nutrients[key] > 0 && !eatenNames.has(f.name) && !usedNames.has(f.name)
     ).map(f => {
       const per100 = f.nutrients[key]
       const gramsNeeded = Math.min(300, Math.max(30, Math.round((gap / per100) * 100)))
       const wouldAdd = Math.round(per100 * gramsNeeded / 100 * 10) / 10
       return { ...f, suggestedGrams: gramsNeeded, wouldAdd, nutrientKey: key }
-    }).sort((a, b) => {
+    }).filter(f => f.wouldAdd >= gap * 0.6).sort((a, b) => {
       const aServing = a.suggestedGrams >= 50 && a.suggestedGrams <= 200 ? 1 : 0
       const bServing = b.suggestedGrams >= 50 && b.suggestedGrams <= 200 ? 1 : 0
       if (aServing !== bServing) return bServing - aServing
@@ -496,6 +496,12 @@ function getSuggestions(todayFoods, foodGroups, nutrientTargets, allFoodsDb) {
       suggestions.push({
         ...pick,
         reason: `${pick.suggestedGrams}g → +${pick.wouldAdd}${unit} ${label.toLowerCase()} (${pctHave}% of daily target)`,
+        // Keep the runners-up so you can swap to whatever you actually
+        // have in, rather than being shown one food and nothing else.
+        alternatives: options.slice(1, 7).map(o => ({
+          ...o,
+          altReason: `${o.suggestedGrams}g → +${o.wouldAdd}${unit} ${label.toLowerCase()}`,
+        })),
       })
     }
   })
@@ -505,7 +511,7 @@ function getSuggestions(todayFoods, foodGroups, nutrientTargets, allFoodsDb) {
     const gramGap = (group.gramTarget || 200) - (groupGrams[group.name] || 0)
     if (gramGap <= 0) return
     const options = db.filter(f =>
-      !f.unhealthy && f.groups.includes(group.name) && !eatenNames.has(f.name) && !usedNames.has(f.name)
+      !f.unhealthy && !f.supplement && f.groups.includes(group.name) && !eatenNames.has(f.name) && !usedNames.has(f.name)
     )
     if (options.length > 0) {
       const pick = options[Math.floor(Math.random() * Math.min(5, options.length))]
@@ -515,6 +521,14 @@ function getSuggestions(todayFoods, foodGroups, nutrientTargets, allFoodsDb) {
         ...pick,
         suggestedGrams: servingGrams,
         reason: `Need ${gramGap}g more ${group.name.toLowerCase()} today`,
+        alternatives: options
+          .filter(o => o.name !== pick.name)
+          .slice(0, 6)
+          .map(o => ({
+            ...o,
+            suggestedGrams: servingGrams,
+            altReason: `${servingGrams}g of ${group.name.toLowerCase()}`,
+          })),
       })
     }
   })
@@ -537,6 +551,7 @@ export default function MealPlannerPage() {
   const [grams, setGrams] = useState('100')
   const [unit, setUnit] = useState('g')
   const [unitCount, setUnitCount] = useState('1')
+  const [openAlternatives, setOpenAlternatives] = useState({})
   const [customFood, setCustomFood] = useState(null)
   const [customNutrients, setCustomNutrients] = useState({ protein: '', carbs: '', fat: '', fibre: '', iron: '', calcium: '', vitC: '', sugar: '' })
   const [customGrams, setCustomGrams] = useState('100')
@@ -1524,31 +1539,77 @@ export default function MealPlannerPage() {
           <h3 className="text-sm font-bold text-surface-800 dark:text-surface-200 mb-1">Suggested for you</h3>
           <p className="text-xs text-surface-500 dark:text-surface-400 mb-3">Foods to fill your nutrient gaps today</p>
           <div className="space-y-2">
-            {suggestions.map(s => (
-              <button
-                key={s.name}
-                onClick={() => {
-                  setSelectedFood(s)
-                  setGrams(String(s.suggestedGrams || 100))
-                  setUnit('g')
-                  setUnitCount('1')
-                }}
-                className="w-full flex items-center justify-between p-3 rounded-xl bg-surface-50 dark:bg-surface-700/50 hover:bg-surface-100 dark:hover:bg-surface-700 transition-colors border border-surface-200 dark:border-surface-600"
-              >
-                <div className="text-left flex-1 min-w-0">
-                  <span className="text-sm font-semibold text-surface-800 dark:text-surface-200">{s.name}</span>
-                  <p className="text-[11px] text-emerald-600 dark:text-emerald-400 mt-0.5">{s.reason}</p>
-                </div>
-                <div className="flex items-center gap-1.5 shrink-0 ml-2">
-                  {s.suggestedGrams && (
-                    <span className="text-[11px] font-medium bg-primary-100 dark:bg-primary-900/40 text-primary-700 dark:text-primary-300 px-2 py-0.5 rounded-full">
-                      {s.suggestedGrams}g
-                    </span>
+            {suggestions.map(s => {
+              const altCount = s.alternatives?.length || 0
+              const showAlts = !!openAlternatives[s.name]
+              const choose = (food) => {
+                setSelectedFood(food)
+                setGrams(String(food.suggestedGrams || 100))
+                setUnit('g')
+                setUnitCount('1')
+              }
+              return (
+                <div
+                  key={s.name}
+                  className="rounded-xl bg-surface-50 dark:bg-surface-700/50 border border-surface-200 dark:border-surface-600 overflow-hidden"
+                >
+                  <button
+                    onClick={() => choose(s)}
+                    className="w-full flex items-center justify-between p-3 hover:bg-surface-100 dark:hover:bg-surface-700 transition-colors"
+                  >
+                    <div className="text-left flex-1 min-w-0">
+                      <span className="text-sm font-semibold text-surface-800 dark:text-surface-200">{s.name}</span>
+                      <p className="text-[11px] text-emerald-600 dark:text-emerald-400 mt-0.5">{s.reason}</p>
+                    </div>
+                    <div className="flex items-center gap-1.5 shrink-0 ml-2">
+                      {s.suggestedGrams && (
+                        <span className="text-[11px] font-medium bg-primary-100 dark:bg-primary-900/40 text-primary-700 dark:text-primary-300 px-2 py-0.5 rounded-full">
+                          {s.suggestedGrams}g
+                        </span>
+                      )}
+                      <Plus size={16} className="text-primary-500" />
+                    </div>
+                  </button>
+
+                  {altCount > 0 && (
+                    <button
+                      onClick={() => setOpenAlternatives(prev => ({ ...prev, [s.name]: !prev[s.name] }))}
+                      className="w-full flex items-center gap-1.5 px-3 py-1.5 border-t border-surface-200 dark:border-surface-600 text-left hover:bg-surface-100 dark:hover:bg-surface-700 transition-colors"
+                    >
+                      {showAlts
+                        ? <ChevronDown size={13} className="text-primary-500 shrink-0" />
+                        : <ChevronRight size={13} className="text-surface-400 shrink-0" />}
+                      <span className="text-[11px] text-surface-500 dark:text-surface-400">
+                        {showAlts ? 'Hide other options' : `Don't have this? ${altCount} other option${altCount !== 1 ? 's' : ''}`}
+                      </span>
+                    </button>
                   )}
-                  <Plus size={16} className="text-primary-500" />
+
+                  {showAlts && (
+                    <div className="px-2 pb-2 pt-1 space-y-1 bg-surface-100/60 dark:bg-surface-800/40">
+                      {s.alternatives.map(alt => (
+                        <button
+                          key={alt.name}
+                          onClick={() => choose(alt)}
+                          className="w-full flex items-center justify-between px-2.5 py-2 rounded-lg bg-white dark:bg-surface-700 hover:bg-surface-50 dark:hover:bg-surface-600 transition-colors border border-surface-200 dark:border-surface-600"
+                        >
+                          <div className="text-left flex-1 min-w-0">
+                            <span className="text-xs font-medium text-surface-800 dark:text-surface-200">{alt.name}</span>
+                            <p className="text-[10px] text-surface-500 dark:text-surface-400 mt-0.5">{alt.altReason}</p>
+                          </div>
+                          <div className="flex items-center gap-1.5 shrink-0 ml-2">
+                            <span className="text-[10px] font-medium bg-surface-200 dark:bg-surface-600 text-surface-600 dark:text-surface-300 px-1.5 py-0.5 rounded-full">
+                              {alt.suggestedGrams}g
+                            </span>
+                            <Plus size={13} className="text-primary-500" />
+                          </div>
+                        </button>
+                      ))}
+                    </div>
+                  )}
                 </div>
-              </button>
-            ))}
+              )
+            })}
           </div>
         </Card>
       )}
