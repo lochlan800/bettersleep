@@ -3,9 +3,11 @@ import { calculateACWR } from '../../utils/scoring'
 import { parseISO, format } from 'date-fns'
 import { getDaysAgo } from '../../utils/dateHelpers'
 import Card from '../ui/Card'
+import { getTrainingGuidance } from '../../utils/ageGuidance'
 
 export default function RestDayPlanner() {
-  const { trainingLogs } = useApp()
+  const { trainingLogs, settings } = useApp()
+  const guidance = getTrainingGuidance(settings.realAge)
   const acwr = calculateACWR(trainingLogs)
 
   const days = Array.from({ length: 7 }, (_, i) => {
@@ -17,7 +19,9 @@ export default function RestDayPlanner() {
   const consecutive = [...days].reverse().findIndex(d => !d.hasTraining)
   const consecutiveCount = consecutive === -1 ? 7 : consecutive
 
-  const needsRest = consecutiveCount >= 3 || acwr > 1.5
+  // Growing athletes hit their limit sooner than adults, so the threshold
+  // for flagging comes from age rather than a fixed 3 days.
+  const needsRest = consecutiveCount >= guidance.maxConsecutive || acwr > 1.5
 
   return (
     <Card title="Rest Day Planner">
@@ -42,7 +46,7 @@ export default function RestDayPlanner() {
       {needsRest ? (
         <div className="bg-orange-50 dark:bg-orange-900/20 rounded-lg p-3">
           <p className="text-sm font-medium text-orange-700 dark:text-orange-400">
-            {consecutiveCount >= 3
+            {consecutiveCount >= guidance.maxConsecutive
               ? `${consecutiveCount} consecutive training days. Schedule a rest day soon.`
               : `ACWR is ${acwr.toFixed(2)} — high training load. Consider a rest or easy day.`}
           </p>
@@ -54,6 +58,7 @@ export default function RestDayPlanner() {
           </p>
         </div>
       )}
+      <p className="text-[11px] text-surface-400 mt-3">{guidance.note}</p>
     </Card>
   )
 }

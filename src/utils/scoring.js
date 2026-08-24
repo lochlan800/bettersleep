@@ -1,4 +1,5 @@
 import { differenceInCalendarDays, parseISO } from 'date-fns';
+import { getSleepNeed } from './ageGuidance';
 
 /**
  * Parse "HH:mm" time string into hours and minutes.
@@ -35,18 +36,21 @@ export function getSleepDurationHours(bedtime, wakeTime) {
  * @param {Array} recentLogs - last 7 sleep logs for consistency calculation
  * @returns {number} score 0-100
  */
-export function calculateSleepScore(sleepLog, recentLogs = []) {
+export function calculateSleepScore(sleepLog, recentLogs = [], age = null) {
   const duration = getSleepDurationHours(sleepLog.bedtime, sleepLog.wakeTime);
 
-  // Duration score (0-40)
+  // Duration score (0-40), scored against what this age actually needs.
+  // A teenager on 7 hours is under-slept even though that is fine for an
+  // adult, so a fixed 7-9 window would wrongly award them full marks.
+  const { min, max } = getSleepNeed(age);
   let durationScore = 0;
-  if (duration >= 7 && duration <= 9) {
+  if (duration >= min && duration <= max) {
     durationScore = 40;
-  } else if (duration >= 6 && duration < 7) {
+  } else if (duration >= min - 1 && duration < min) {
     durationScore = 25;
-  } else if (duration >= 5 && duration < 6) {
+  } else if (duration >= min - 2 && duration < min - 1) {
     durationScore = 15;
-  } else if (duration > 9) {
+  } else if (duration > max) {
     // Oversleeping still counts but slightly less
     durationScore = 30;
   } else {

@@ -2,13 +2,14 @@ import { useState, useMemo } from 'react'
 import {
   Snowflake, Waves, Wind, Bath, Footprints, Timer, Armchair,
   Sparkles, Heart, Zap, Utensils, Droplets, Moon, Compass,
-  ChevronDown, ChevronRight,
+  ChevronDown, ChevronRight, AlertTriangle,
 } from 'lucide-react'
 import { useApp } from '../../context/AppContext'
 import { calculateACWR } from '../../utils/scoring'
 import { getToday, getDaysAgo } from '../../utils/dateHelpers'
 import useRecoveryScore from '../../hooks/useRecoveryScore'
 import recoveryStrategies from '../../data/recoveryStrategies'
+import { strategyAppropriate, strategyCaution, getSleepNeed, getAgeBandLabel } from '../../utils/ageGuidance'
 import Card from '../ui/Card'
 
 const ICONS = {
@@ -25,7 +26,8 @@ const CATEGORIES = [
 ]
 
 export default function RecoveryStrategies() {
-  const { trainingLogs, hydrationLogs } = useApp()
+  const { trainingLogs, hydrationLogs, settings } = useApp()
+  const age = settings.realAge
   const { recoveryScore, sorenessLevel, hydrationPercent } = useRecoveryScore()
   const [expanded, setExpanded] = useState({})
   const [category, setCategory] = useState('all')
@@ -79,18 +81,31 @@ export default function RecoveryStrategies() {
     return true
   }
 
+  // Anything unsuitable for this age is dropped entirely rather than shown
+  // with a warning — cold immersion has no place in a 12-year-old's list.
+  const suitable = useMemo(
+    () => recoveryStrategies.filter(s => strategyAppropriate(s, age)),
+    [age],
+  )
+
   const recommended = useMemo(
-    () => recoveryStrategies.filter(s => matches(s.when)).slice(0, 4),
-    [state],
+    () => suitable.filter(s => matches(s.when)).slice(0, 4),
+    [suitable, state],
   )
 
   const visible = category === 'all'
-    ? recoveryStrategies
-    : recoveryStrategies.filter(s => s.category === category)
+    ? suitable
+    : suitable.filter(s => s.category === category)
 
   const renderStrategy = (s, highlight = false) => {
     const Icon = ICONS[s.icon] || Sparkles
     const isOpen = expanded[s.id]
+    const caution = strategyCaution(s, age)
+    // The sleep entry quotes a figure that depends entirely on age, so it is
+    // filled in here rather than hardcoded into the copy.
+    const how = s.sleepTargetPlaceholder
+      ? `Aim for ${getSleepNeed(age).label} a night${age ? '' : ' (set your age for a personalised target)'}. ${s.how}`
+      : s.how
     return (
       <div
         key={s.id}
@@ -121,12 +136,18 @@ export default function RecoveryStrategies() {
           <div className="px-3 pb-3 pl-11 space-y-2">
             <div>
               <p className="text-[11px] font-semibold text-surface-700 dark:text-surface-300 mb-0.5">How</p>
-              <p className="text-xs text-surface-600 dark:text-surface-400 leading-relaxed">{s.how}</p>
+              <p className="text-xs text-surface-600 dark:text-surface-400 leading-relaxed">{how}</p>
             </div>
             <div>
               <p className="text-[11px] font-semibold text-surface-700 dark:text-surface-300 mb-0.5">Why it works</p>
               <p className="text-xs text-surface-500 dark:text-surface-400 leading-relaxed">{s.why}</p>
             </div>
+            {caution && (
+              <div className="flex items-start gap-2 px-2.5 py-2 rounded-md bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800">
+                <AlertTriangle size={13} className="text-amber-600 dark:text-amber-500 mt-0.5 shrink-0" />
+                <p className="text-[11px] text-amber-700 dark:text-amber-400 leading-relaxed">{caution}</p>
+              </div>
+            )}
           </div>
         )}
       </div>
@@ -143,7 +164,7 @@ export default function RecoveryStrategies() {
         </Card>
       )}
 
-      <Card title="Recovery Strategies" subtitle={`${recoveryStrategies.length} evidence-based methods`}>
+      <Card title="Recovery Strategies" subtitle={`${suitable.length} methods${age ? ` suited to ${getAgeBandLabel(age)}s` : ""}`}>
         <div className="flex gap-1.5 mb-3 overflow-x-auto pb-1">
           {CATEGORIES.map(c => (
             <button

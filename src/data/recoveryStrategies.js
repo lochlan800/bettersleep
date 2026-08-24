@@ -62,6 +62,10 @@ const recoveryStrategies = [
     how: 'Wear graduated compression socks or calf sleeves for a few hours after a hard session. They should feel firm but never numbing or painful.',
     why: 'Gentle external pressure supports venous return from the lower leg and limits swelling. The evidence is strongest for reduced soreness the next day rather than improved performance on the day.',
     when: { longRun: true, highSoreness: true },
+    cautionUnder: {
+      age: 16,
+      text: 'Use junior sizing — adult compression can be too tight on a smaller calf.',
+    },
   },
   {
     id: 'contrast-shower',
@@ -73,6 +77,10 @@ const recoveryStrategies = [
     how: 'Alternate 2 minutes of hot water with 1 minute of cold, repeated 3-4 times. Always finish on cold.',
     why: 'Alternating temperatures makes blood vessels widen and narrow repeatedly, which acts as a pump for circulation through sore tissue. Easier to stick to than a full ice bath and nearly as useful.',
     when: { highSoreness: true, hardSession: true },
+    cautionUnder: {
+      age: 13,
+      text: 'Keep the cold phase brief and comfortable — cool rather than freezing.',
+    },
   },
   {
     id: 'cold-immersion',
@@ -84,6 +92,11 @@ const recoveryStrategies = [
     how: 'Sit in cold water at 10-15°C up to your waist for 10-15 minutes. A cold bath is fine — you do not need ice for it to work.',
     why: 'Reduces inflammation and perceived soreness when you need to back up hard sessions or race again soon. Worth knowing: it also blunts some of the adaptation from strength work, so save it for congested race weeks rather than using it after every run.',
     when: { highSoreness: true, hardSession: true },
+    notFor: ['child', 'teen'],
+    cautionUnder: {
+      age: 18,
+      text: 'Not recommended for under-18s. Young bodies lose heat faster and the evidence for benefit in youth athletes is thin. Use a contrast or cool shower instead.',
+    },
   },
   {
     id: 'epsom-bath',
@@ -95,6 +108,10 @@ const recoveryStrategies = [
     how: 'Dissolve 1-2 cups of Epsom salts in a warm bath and soak for 15-20 minutes. Keep the water warm rather than scalding.',
     why: 'The warmth relaxes tight muscle and the ritual itself shifts you into a parasympathetic state before bed. Magnesium absorption through skin is debated, but the relaxation effect on sleep is real.',
     when: { highSoreness: true },
+    cautionUnder: {
+      age: 13,
+      text: 'Keep the water warm rather than hot, and check with a parent first.',
+    },
   },
   {
     id: 'active-recovery',
@@ -147,7 +164,8 @@ const recoveryStrategies = [
     timing: 'Every night',
     duration: '8-10 hours',
     category: 'ongoing',
-    how: 'Aim for 8-10 hours after hard training days. Keep the room cool and dark, and hold a consistent bedtime — see the Sleep tab for the full routine.',
+    how: 'Hit your nightly target, and lean towards the top of it after hard training days. Keep the room cool and dark, and hold a consistent bedtime — see the Sleep tab for the full routine.',
+    sleepTargetPlaceholder: true,
     why: 'Growth hormone release peaks during deep sleep, which is when muscle actually repairs. No other recovery strategy on this list comes close to the effect of an extra hour of sleep.',
     when: { always: true },
   },
@@ -172,6 +190,10 @@ const recoveryStrategies = [
     how: 'Cut your weekly volume by 30-40% while keeping some intensity. Fewer or shorter sessions, same paces.',
     why: 'Fitness is built when accumulated fatigue lifts. A planned easy week lets the adaptation from the previous block actually surface, and usually produces a jump in performance rather than a loss.',
     when: { highACWR: true },
+    cautionUnder: {
+      age: 18,
+      text: 'Especially important while still growing — take these more often, not less.',
+    },
   },
 ]
 

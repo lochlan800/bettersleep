@@ -20,7 +20,7 @@ export default function QuickLogWidgets() {
   const today = getToday()
   const sortedSleep = [...sleepLogs].sort((a, b) => b.date.localeCompare(a.date))
   const todaySleep = sleepLogs.find(l => l.date === today)
-  const sleepScore = todaySleep ? Math.round(calculateSleepScore(todaySleep, sortedSleep.slice(0, 7))) : null
+  const sleepScore = todaySleep ? Math.round(calculateSleepScore(todaySleep, sortedSleep.slice(0, 7), settings.realAge)) : null
   const todayTraining = trainingLogs.find(l => l.date === today)
   const todayHydration = getTodayHydration()
   const hydrationTarget = calculateHydrationTarget(settings.bodyWeightKg, todayTraining?.durationMinutes ?? 0)

@@ -38,7 +38,7 @@ export default function useRecoveryScore() {
     const recentSleep = sortedSleep.slice(0, 7);
     const todaySleep = sleepLogs.find((l) => l.date === today);
     const sleepScore = todaySleep
-      ? calculateSleepScore(todaySleep, recentSleep)
+      ? calculateSleepScore(todaySleep, recentSleep, settings.realAge)
       : 0;
 
     // Training load metrics
@@ -158,5 +158,5 @@ export default function useRecoveryScore() {
       goalCheckinPercent,
       hasReliableACWR,
     };
-  }, [sleepLogs, trainingLogs, hydrationLogs, mindfulnessLogs, stretchingLogs, mealCompletions, foodLog, goals, sorenessLogs, settings.bodyWeightKg]);
+  }, [sleepLogs, trainingLogs, hydrationLogs, mindfulnessLogs, stretchingLogs, mealCompletions, foodLog, goals, sorenessLogs, settings.bodyWeightKg, settings.realAge]);
 }

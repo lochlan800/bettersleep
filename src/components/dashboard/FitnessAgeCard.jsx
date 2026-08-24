@@ -52,7 +52,7 @@ export default function FitnessAgeCard() {
     // ── Sleep: average ALL logged days ──
     const sortedSleep = [...sleepLogs].sort((a, b) => b.date.localeCompare(a.date))
     const allSleepScores = sleepLogs.map(log =>
-      calculateSleepScore(log, sortedSleep.slice(0, 7))
+      calculateSleepScore(log, sortedSleep.slice(0, 7), settings.realAge)
     )
     const avgSleepScore = allSleepScores.length > 0
       ? allSleepScores.reduce((a, b) => a + b, 0) / allSleepScores.length

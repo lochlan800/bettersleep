@@ -21,7 +21,7 @@ function getBarColor(score) {
 }
 
 export default function SleepHistoryChart() {
-  const { sleepLogs } = useApp();
+  const { sleepLogs, settings } = useApp();
 
   const chartData = useMemo(() => {
     // Build a map of date -> most recent log for that date
@@ -38,7 +38,7 @@ export default function SleepHistoryChart() {
       let score = 0;
       if (log) {
         const recentLogs = sleepLogs.filter((l) => l.date <= dateStr).slice(-7);
-        score = calculateSleepScore(log, recentLogs);
+        score = calculateSleepScore(log, recentLogs, settings.realAge);
       }
       data.push({
         date: dateStr,

@@ -7,7 +7,7 @@ import Card from '../ui/Card';
 import ScoreRing from '../ui/ScoreRing';
 
 export default function SleepScoreDisplay() {
-  const { sleepLogs } = useApp();
+  const { sleepLogs, settings } = useApp();
 
   const latest = useMemo(() => {
     if (sleepLogs.length === 0) return null;
@@ -20,7 +20,7 @@ export default function SleepScoreDisplay() {
   const score = useMemo(() => {
     if (!latest) return 0;
     const recentLogs = sleepLogs.slice(-7);
-    return calculateSleepScore(latest, recentLogs);
+    return calculateSleepScore(latest, recentLogs, settings.realAge);
   }, [latest, sleepLogs]);
 
   const duration = useMemo(() => {

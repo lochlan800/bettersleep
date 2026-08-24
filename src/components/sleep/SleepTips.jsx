@@ -1,5 +1,7 @@
 import { Moon, Sun, Coffee, Smartphone, Thermometer, Clock, Zap, BedDouble, Activity } from 'lucide-react'
 import Card from '../ui/Card'
+import { useApp } from '../../context/AppContext'
+import { caffeineAppropriate, getSleepNeed, getAgeBandLabel } from '../../utils/ageGuidance'
 
 const bedtimeTips = [
   {
@@ -19,6 +21,7 @@ const bedtimeTips = [
   },
   {
     icon: Coffee,
+    caffeine: true,
     title: 'Cut caffeine by 2pm',
     text: 'Caffeine has a half-life of 5-6 hours. An afternoon coffee can still be in your system at midnight, reducing deep sleep by up to 20%.',
   },
@@ -40,7 +43,7 @@ const bedtimeTips = [
   {
     icon: BedDouble,
     title: 'Post-training sleep',
-    text: 'After hard sessions (RPE 7+), aim for 8-9 hours. Growth hormone release peaks during deep sleep — this is when your muscles actually rebuild.',
+    text: 'After hard sessions (RPE 7+), lean towards the top of your nightly range. Growth hormone release peaks during deep sleep — this is when your muscles actually rebuild.',
   },
 ]
 
@@ -52,6 +55,7 @@ const napTips = [
   },
   {
     icon: Zap,
+    caffeine: true,
     title: 'The coffee nap trick',
     text: 'Drink a coffee then immediately nap for 20 min. Caffeine kicks in as you wake, giving you a double boost. Great before an afternoon session.',
   },
@@ -73,11 +77,36 @@ const napTips = [
 ]
 
 export default function SleepTips() {
+  const { settings } = useApp()
+  const age = settings.realAge
+  const need = getSleepNeed(age)
+
+  // Under-18s are advised to limit caffeine, so telling them to time their
+  // coffee or use a "coffee nap" is the wrong message entirely.
+  const showCaffeine = caffeineAppropriate(age)
+  const bedtime = bedtimeTips.filter(t => showCaffeine || !t.caffeine)
+  const naps = napTips.filter(t => showCaffeine || !t.caffeine)
+
   return (
     <div className="space-y-6">
+      <Card>
+        <div className="flex items-center justify-between gap-3">
+          <div>
+            <p className="text-sm font-semibold text-surface-900 dark:text-surface-50">
+              Your nightly target: {need.label}
+            </p>
+            <p className="text-xs text-surface-500 dark:text-surface-400 mt-0.5">
+              {age
+                ? `Based on your age (${age}) — ${getAgeBandLabel(age)} guidance.`
+                : 'Showing adult guidance. Set your age on the Meals page for a personalised target.'}
+            </p>
+          </div>
+        </div>
+      </Card>
+
       <Card title="Bedtime Tips for Recovery" subtitle="Optimise your sleep to recover faster">
         <div className="space-y-4">
-          {bedtimeTips.map((tip) => (
+          {bedtime.map((tip) => (
             <div key={tip.title} className="flex items-start gap-3">
               <div className="mt-0.5 p-1.5 rounded-lg bg-accent-500/10 shrink-0">
                 <tip.icon size={16} className="text-accent-500" />
@@ -93,7 +122,7 @@ export default function SleepTips() {
 
       <Card title="Nap Strategy for Runners" subtitle="Use naps to boost recovery between sessions">
         <div className="space-y-4">
-          {napTips.map((tip) => (
+          {naps.map((tip) => (
             <div key={tip.title} className="flex items-start gap-3">
               <div className="mt-0.5 p-1.5 rounded-lg bg-primary-500/10 shrink-0">
                 <tip.icon size={16} className="text-primary-500" />

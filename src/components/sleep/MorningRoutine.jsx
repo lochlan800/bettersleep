@@ -2,6 +2,8 @@ import { useState } from 'react'
 import { Sun, Activity, Droplets, Sparkles, Utensils, Backpack, Clock, LogOut, Moon, Info } from 'lucide-react'
 import Card from '../ui/Card'
 import useLocalStorage from '../../hooks/useLocalStorage'
+import { useApp } from '../../context/AppContext'
+import { getSleepNeed } from '../../utils/ageGuidance'
 
 const STEPS = [
   { offset: 0,  icon: Sun,       task: 'Wake up + drink a glass of water',      why: 'Rehydrate from the night — grogginess is often mild dehydration.' },
@@ -36,10 +38,15 @@ function formatTime12(timeStr) {
 export default function MorningRoutine() {
   const [leaveTime, setLeaveTime] = useLocalStorage('bs_leave_time', '07:40')
   const [showWhy, setShowWhy] = useState(true)
+  const { settings } = useApp()
+  const age = settings.realAge
+  const need = getSleepNeed(age)
 
   const wakeTime = addMinutesToTime(leaveTime, -ROUTINE_MINUTES)
-  const bedTimeEarly = addMinutesToTime(wakeTime, -10 * 60)
-  const bedTimeLate = addMinutesToTime(wakeTime, -9 * 60)
+  // Bedtime window is driven by what this age actually needs, so a 13-year-old
+  // is told to get to bed earlier than an adult waking at the same time.
+  const bedTimeEarly = addMinutesToTime(wakeTime, -need.max * 60)
+  const bedTimeLate = addMinutesToTime(wakeTime, -need.min * 60)
 
   const steps = STEPS.map(s => ({
     ...s,
@@ -72,8 +79,12 @@ export default function MorningRoutine() {
       <div className="p-3 mb-4 rounded-lg bg-primary-50 dark:bg-primary-900/20 flex items-start gap-2.5">
         <Moon size={16} className="text-primary-600 dark:text-primary-400 mt-0.5 shrink-0" />
         <div className="text-xs text-primary-700 dark:text-primary-300">
-          <p className="font-semibold">To wake up naturally at {formatTime12(wakeTime)}, get to bed between {formatTime12(bedTimeLate)} and {formatTime12(bedTimeEarly)}.</p>
-          <p className="mt-1 opacity-80">Teens (13-18) need 8-10 hours of sleep — 9 hours is the sweet spot for recovery and focus at school.</p>
+          <p className="font-semibold">To wake up naturally at {formatTime12(wakeTime)}, get to bed between {formatTime12(bedTimeEarly)} and {formatTime12(bedTimeLate)}.</p>
+          <p className="mt-1 opacity-80">
+            {age
+              ? `At ${age} you need ${need.label} a night — around ${need.ideal} is the sweet spot for recovery and focus.`
+              : `Showing adult guidance (${need.label}). Set your age on the Meals page for a personalised window.`}
+          </p>
         </div>
       </div>
 
