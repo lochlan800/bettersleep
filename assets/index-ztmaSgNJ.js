@@ -330,7 +330,9 @@ Soreness peaking 24-48 hours after training (DOMS) is normal. Soreness that does
 **When to foam roll vs stretch:**
 • Before a run: foam roll only (dynamic warm-up)
 • After a run: foam roll first, then stretch
-• Rest days: both, focusing on tight areas`},{title:`Recovery Strategies`,content:`The Recovery tab has a library of recovery methods, each with a tick box. Ticking them counts toward your Recovery Score — 1 action = 50% of the points, 2 = 80%, 3 or more = 100%. This is worth 8-9% of your total score.
+• Rest days: both, focusing on tight areas`},{title:`Recovery Tab — Strategies & "Recommended Today"`,content:`**This is the Recovery tab, not the Dashboard.** For the Dashboard's "Today's Recommendations" panel, see the separate section further down.
+
+The Recovery tab has a library of recovery methods, each with a tick box. Ticking them counts toward your Recovery Score — 1 action = 50% of the points, 2 = 80%, 3 or more = 100%. This is worth 8-9% of your total score.
 
 **The filter buttons — what each one means:**
 
@@ -460,7 +462,9 @@ When you open the app, a runner emoji swooshes in with the app name, then transi
 Once installed, it opens full-screen without the browser bar and has its own icon on your home screen.
 
 **Sharing with friends:**
-Just send them the website link. Each person's data is stored privately on their own device — nobody can see anyone else's logs. When you update the app, everyone gets the latest version automatically.`},{title:`Dashboard Recommendations`,content:`The "Today's Recommendations" section on the Dashboard gives you personalised advice that changes every day based on your actual data.
+Just send them the website link. Each person's data is stored privately on their own device — nobody can see anyone else's logs. When you update the app, everyone gets the latest version automatically.`},{title:`Dashboard Recommendations`,content:`**This is the Dashboard's panel, not the Recovery tab.** The Recovery tab has its own "Recommended Today" card that suggests recovery strategies — that is covered in the "Recovery Tab" section above.
+
+The "Today's Recommendations" section on the Dashboard gives you personalised advice that changes every day based on your actual data.
 
 **What drives the recommendations:**
 • **Sleep** — Warns if you slept too little or too much last night, flags inconsistent bedtimes, suggests extra sleep after hard sessions.
