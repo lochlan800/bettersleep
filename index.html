@@ -41,7 +41,24 @@
     <script>
       // Register service worker for PWA support
       if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('/bettersleep/sw.js').catch(err => {
+        // When a new service worker takes control the cached assets it holds
+        // have changed, so reload once to pick up the new build. Without this
+        // an installed app can sit on an old version until it is uninstalled.
+        var swRefreshing = false
+        navigator.serviceWorker.addEventListener('controllerchange', function () {
+          if (swRefreshing) return
+          swRefreshing = true
+          window.location.reload()
+        })
+
+        navigator.serviceWorker.register('/bettersleep/sw.js').then(function (reg) {
+          // Check on load and when the tab is reopened, so a returning user
+          // gets the current version without needing a hard refresh.
+          reg.update()
+          document.addEventListener('visibilitychange', function () {
+            if (document.visibilityState === 'visible') reg.update()
+          })
+        }).catch(function (err) {
           console.log('Service worker registration failed:', err)
         })
       }
