@@ -275,46 +275,6 @@ On today's tab (highlighted in teal), each meal has an "I ate this" button. Tap 
 • **Shopping list** aggregates all ingredients across the week by category, with checkboxes to tick off what you've bought`,
   },
   {
-    title: 'Vitamins & Minerals — What Each One Does',
-    content: `The Meals page tracks 18 nutrients, grouped into Macros, Vitamins, and Minerals. Targets adjust to your age, and for some also to how much you train. Here is what each one actually does, and why it matters more if you run.
-
-**VITAMINS**
-
-**Vitamin A** — Vision (especially in low light), immune defence, and skin repair. Runners training outdoors in winter lean on immune function more than most. Best sources: liver, carrots, sweet potato, butternut squash, kale, spinach, red peppers.
-
-**Vitamin C** — Builds collagen, which is the raw material of tendons, ligaments and cartilage. It also helps you absorb iron from plant foods, which is why pairing beans with peppers works. Heavy training raises the amount you get through. Best sources: peppers, guava, kiwi, broccoli, oranges, strawberries.
-
-**Vitamin D** — Bone strength, muscle function, and immune defence. This is the one most likely to be low, because your body makes it from sunlight and there is little of it in food. In the UK, between October and March the sun is too weak to make any at all, and the NHS advises everyone consider a supplement over winter. Low vitamin D shows up as stress fractures and repeated infections. Best sources: oily fish (salmon, mackerel, trout, sardines), eggs, fortified cereals.
-
-**Vitamin E** — An antioxidant that protects cell membranes from the oxidative stress hard training produces. Best sources: sunflower seeds, almonds, hazelnuts, peanut butter, olive oil, avocado.
-
-**Vitamin K** — Blood clotting and, less obviously, bone health — it activates the proteins that bind calcium into bone. Best sources: leafy greens by a huge margin. Spinach, kale, watercress, spring onion, and Brussels sprouts dwarf everything else.
-
-**Vitamin B6** — Helps you break down protein and build haemoglobin, the molecule that carries oxygen in your blood. The more protein you eat, the more B6 you need to use it. Best sources: tuna, turkey, chicken, bananas, potatoes, pistachios, sunflower seeds, fortified cereals.
-
-**Folate (B9)** — Makes red blood cells and new tissue. Works alongside B12, and a shortage of either causes the same kind of anaemia — tired, heavy legs with no obvious cause. Best sources: edamame, liver, spinach, asparagus, lentils, chickpeas, black beans, fortified cereals.
-
-**Vitamin B12** — Red blood cells and nerve function. **This one only occurs naturally in animal foods.** There is genuinely none in any plant — no fruit, vegetable, grain, nut or bean contains it, which is why those all read zero in the app rather than the data being incomplete. If you eat little or no animal food you need fortified foods or a supplement. Deficiency builds slowly over years and causes fatigue and nerve problems. Best sources: liver, mussels, sardines, mackerel, salmon, beef, eggs, dairy, fortified cereals and plant milks.
-
-**MINERALS**
-
-**Iron** — Carries oxygen in your blood. Running is unusually hard on iron: repeated foot strike destroys red blood cells, and you lose iron through sweat. Low iron is one of the most common reasons a runner's legs feel heavy for weeks. Pair plant sources with vitamin C to absorb far more of it. Best sources: liver, mussels, red meat, lentils, tofu, fortified cereals, spinach. Note the app caps this — see below.
-
-**Calcium** — Bone density and muscle contraction. Teenagers need more than adults do, because most of the bone you will ever have is laid down before about 20. Best sources: dairy, sardines with bones, tofu, fortified plant milks, kale.
-
-**Magnesium** — Muscle relaxation, energy production, and sleep quality. A muscle needs magnesium to relax after contracting, so a shortage shows up as cramp and twitching. It is lost in sweat. Best sources: pumpkin seeds, hemp seeds, dark chocolate, almonds, oats, spinach, black beans.
-
-**Zinc** — Immune function, wound healing, and testosterone production. Hard training blocks lower it, and it is lost in sweat. Best sources: oysters, beef, lamb, pumpkin seeds, cashews, cheese, lentils.
-
-**Potassium** — An electrolyte that works against sodium to control fluid balance and muscle contraction. You lose it through sweat, and low levels cause cramp. Best sources: dried apricots, potatoes, avocado, spinach, bananas, beans, salmon.
-
-**A NOTE ON UPPER LIMITS**
-
-More is not always better. Iron and vitamin D both have a safe upper limit, and the app warns you in red if a day goes past it — 45mg for iron (40mg under 14), and 100 micrograms for vitamin D (50 under 14). These matter mainly if you take supplements, since it is very hard to exceed either from food alone. Iron in particular is genuinely dangerous in excess.
-
-The water-soluble vitamins — C and the B group — are far more forgiving, because your body flushes what it does not use.`,
-  },
-  {
     title: 'Competitions',
     content: `The Competitions tab lets you log race results and reflect on your performance.
 
