@@ -275,6 +275,30 @@ On today's tab (highlighted in teal), each meal has an "I ate this" button. Tap 
 • **Shopping list** aggregates all ingredients across the week by category, with checkboxes to tick off what you've bought`,
   },
   {
+    title: 'Nutrients — What Each One Does',
+    content: `The Meals page tracks eight nutrients. Targets adjust to your age, weight, and how much you train. Here is what each does and why it matters more if you run.
+
+**Protein** — Repairs the muscle damage training causes. Runners need more than sedentary people, and the target here scales with your training days. Best sources: chicken, fish, eggs, dairy, beans, lentils, tofu.
+
+**Carbs** — Your main fuel. Stored as glycogen in muscle, and running on empty is what "hitting the wall" is. The target rises sharply the more you train. Best sources: rice, pasta, bread, oats, potatoes, fruit.
+
+**Fat** — Hormone production and absorbing vitamins A, D, E and K. Also the fuel for long, easy running. Best sources: olive oil, nuts, seeds, avocado, oily fish.
+
+**Fibre** — Digestion and steady blood sugar. Worth timing away from a run, since a large amount shortly beforehand tends to cause trouble. Best sources: wholegrains, beans, vegetables, fruit with skin on.
+
+**Added Sugar** — This one is a **limit, not a target** — 30g a day. Only added and free sugars count: sweets, biscuits, fizzy drinks, juice, honey, syrups. The natural sugar in whole fruit, vegetables and plain dairy does not count against it, which is why a banana never triggers a warning.
+
+**Vitamin C** — Builds collagen, the raw material of tendons, ligaments and cartilage. It also helps you absorb iron from plant foods, which is why beans with peppers works better than beans alone. Hard training raises how much you get through. Best sources: peppers, guava, kiwi, broccoli, oranges, strawberries.
+
+**Iron** — Carries oxygen in your blood. Running is unusually hard on it: repeated foot strike destroys red blood cells and you lose iron through sweat. Low iron is one of the most common reasons a runner's legs feel heavy for weeks with no obvious cause. Pair plant sources with vitamin C to absorb far more. Best sources: liver, red meat, mussels, lentils, tofu, fortified cereal, spinach.
+
+**Calcium** — Bone density and muscle contraction. Teenagers need more than adults, because most of the bone you will ever have is laid down before about 20 — and runners put repeated impact through it. Best sources: dairy, sardines with bones, tofu, fortified plant milks, kale.
+
+**A note on upper limits:** more is not always better. Iron has a safe upper limit — 45mg a day, or 40mg under 14 — and the app warns you in red if you go past it. This matters mainly if you take a supplement, since it is very hard to exceed from food alone. Iron is genuinely dangerous in excess.
+
+**Calories** are shown at the top of the Nutrients card, with a bar splitting them by macro so you can see where the energy came from. These are estimates from protein, carbs and fat rather than exact figures.`,
+  },
+  {
     title: 'Competitions',
     content: `The Competitions tab lets you log race results and reflect on your performance.
 
