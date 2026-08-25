@@ -2,7 +2,7 @@
 // This has to change whenever the app changes: the activate handler below
 // deletes every cache whose name differs, so a fixed name meant old bundles
 // were never purged and returning users could stay pinned to a stale build.
-const CACHE_NAME = 'myrunningdiary-BJzRbRb-'
+const CACHE_NAME = 'myrunningdiary-DhnkUO_Q'
 const STATIC_ASSETS = [
   '/bettersleep/',
   '/bettersleep/index.html',
