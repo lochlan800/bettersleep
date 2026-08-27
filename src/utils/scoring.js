@@ -160,11 +160,40 @@ export function calculateChronicLoad(trainingLogs) {
 }
 
 /**
+ * Days between the first and last training log, within the 28-day window.
+ * @param {Array} trainingLogs
+ * @returns {number}
+ */
+export function getTrainingSpanDays(trainingLogs) {
+  const today = new Date();
+  const recent = (trainingLogs || []).filter((log) => {
+    if (!log?.date) return false;
+    const daysAgo = differenceInCalendarDays(today, parseISO(log.date));
+    return daysAgo >= 0 && daysAgo < 28;
+  });
+  if (recent.length < 2) return 0;
+  const days = recent.map((l) => differenceInCalendarDays(today, parseISO(l.date)));
+  return Math.max(...days) - Math.min(...days);
+}
+
+// ACWR compares this week against your longer-term baseline. With only a
+// week or so of history there is no baseline to compare against — acute and
+// chronic are computed from the same sessions, so the ratio is pinned at
+// exactly 1.00 and tells you nothing. Below this many days we report 0,
+// which callers already treat as "no data" rather than a real reading.
+export const MIN_ACWR_SPAN_DAYS = 14;
+
+/**
  * Calculate Acute:Chronic Workload Ratio.
+ * Returns 0 when there is not yet enough history for the ratio to mean
+ * anything — see MIN_ACWR_SPAN_DAYS.
  * @param {Array} trainingLogs
  * @returns {number}
  */
 export function calculateACWR(trainingLogs) {
+  if (getTrainingSpanDays(trainingLogs) < MIN_ACWR_SPAN_DAYS) {
+    return 0;
+  }
   const chronic = calculateChronicLoad(trainingLogs);
   if (chronic === 0) {
     return 0;
